@@ -556,7 +556,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 	  	// file = File(hub.appPath++"/samples/_samples.scd","r");
 
 		// RUNNING TS AS CLASSES IN SC
-		file = File(Platform.userAppSupportDir++"/downloaded-quarks/threnoscopeSC/threnoscope/samples/_samples.scd","r");
+		file = File(hub.appPath ++ "/threnoscope/samples/_samples.scd", "r");
 
 
 

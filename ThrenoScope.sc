@@ -81,6 +81,7 @@ ThrenoScope {
 	}
 
 	initThrenoScope { | channels, mode, key, appPath |
+		
 		var fundamental;
 		var speakers, interpreter, machines, states;
 		var tuning = \et12;
@@ -93,6 +94,24 @@ ThrenoScope {
 		//GUI.cocoa; // use this if on SC3.6-
 		//GUI.qt; // use this if on SC3.7+
 
+		
+		if(appPath.isNil) {
+			// Opzione A: Usa il sistema Quarks (Più sicuro se il quark è installato correttamente)
+			var q = Quarks.all.detect { |q| q.name.asString == "voicescopeSC" }; // Assicurati che "voicescopeSC" sia il nome esatto della cartella/quark
+			if(q.notNil) {
+				appPath = q.localPath;
+			} {
+				// Opzione B: Fallback basato sulla posizione del file
+				// Tenta di risalire finché non trova la cartella "voicescopeSC"
+				appPath = this.class.filenameSymbol.asString.dirname;
+                // Se il file è dentro una cartella 'Classes' o 'voicescope', risaliamo ancora
+                if(appPath.endsWith("Classes")) { appPath = appPath.dirname };
+                // Aggiungi altri controlli se necessario, ma di solito basta questo
+			};
+			
+			"App path auto-detected: %".format(appPath).postln;
+		};
+		
 		if((Main.scVersionMajor<=3) && (Main.scVersionMinor<=6) && (thisProcess.platform.name == \osx), {
 			"USING COCOA GUI on old versions of SuperCollider".postln;
 			GUI.cocoa;

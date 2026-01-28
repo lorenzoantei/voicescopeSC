@@ -48,8 +48,8 @@ DroneHub {
 		//pathtouserscalafiles = appPath++"/scl_user/";
 
 		// FOR RUNNING Threnoscope in SC as classes_______________
-		pathtoscalafiles = Platform.userAppSupportDir++"/downloaded-quarks/threnoscopeSC/threnoscope/scl/";
-		pathtouserscalafiles = Platform.userAppSupportDir++"/downloaded-quarks/threnoscopeSC/threnoscope/scl_user/";
+		pathtoscalafiles = Platform.userAppSupportDir++"/downloaded-quarks/voicescopeSC/voicescope/scl/";
+		pathtouserscalafiles = Platform.userAppSupportDir++"/downloaded-quarks/voicescopeSC/voicescope/scl_user/";
 
 
 		"_______________".postln;
