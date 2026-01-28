@@ -92,12 +92,12 @@ ThrenoScope {
 
 		//GUI.cocoa; // use this if on SC3.6-
 		//GUI.qt; // use this if on SC3.7+
-		
+
 		if((Main.scVersionMajor<=3) && (Main.scVersionMinor<=6) && (thisProcess.platform.name == \osx), {
 			"USING COCOA GUI on old versions of SuperCollider".postln;
 			GUI.cocoa;
 		});
-		
+
 
 		screendimension = Window.screenBounds.height;
 
@@ -105,17 +105,17 @@ ThrenoScope {
 			{\perform} { // regular perform mode with terminal and console
 				border = false;
 				fullScreen = true;
-				bgcolor = Color.white;
+				bgcolor = Color.black;
 				}
 			{\performWin} { // regular perform mode with terminal and console but in a Window
 				border = true;
 				fullScreen = false;
-				bgcolor = Color.white;
+				bgcolor = Color.black;
 				}
 			{\dev} { // development mode
 				border = true;
 				fullScreen = false;
-				bgcolor = Color.white;
+				bgcolor = Color.black;
 				}
 			{\displayFS} { // full screen for display (for non-interactive performance)
 				border = false;
@@ -128,13 +128,13 @@ ThrenoScope {
 				bgcolor = Color.black;
 			};
 
-		window = Window("ThrenoScope", Rect(0, 0, screendimension, screendimension), resizable:false, border:border).front;
+		window = Window("ThrenoScope", Rect(0, 0, screendimension, screendimension), resizable:true, border:border).front;
 
 		if(fullScreen, { window.fullScreen });
 
 		window.view.background = bgcolor;
-		threnoscopeColor = Color.white;
-		
+		threnoscopeColor = Color.black; // sfondo quadrante grafico
+
 		if(key.isNumber,{
 			fundamental = key;
 		},{
@@ -152,7 +152,7 @@ ThrenoScope {
 	 	// fundamental = 54; // this is if A = 432 Hz. A popular 19th century tuning.
 		// fundamental = 30.midicps; // in F# (with Adriana Sa)
 		// fundamental = 28.midicps;
-		
+
 		//fundamental = 55;
 
 
@@ -165,7 +165,7 @@ ThrenoScope {
 
 		hub = DroneHub.new( window, mode, scale, fundamental, threnoscopeColor, key, channels, appPath ); // - all key data accessible to other classes
 		~singlehub = hub;
-		
+
 		DroneSynths.new(false, hub);
 
 		states = DroneStates.new( hub ); // - storing states and recording/playing scores

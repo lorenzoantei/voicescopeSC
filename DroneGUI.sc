@@ -1,8 +1,8 @@
 DroneGUI {
-	
+
 	var hub, controller, mainwin, guiwin, intRect;
 var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, speedgui, lengthgui, anglegui, tuninggui, envgui, spreadgui, numbergui, freqgui;
-	
+
 	*new { arg hub;
 		^super.new.initDroneGUI(hub);
 	}
@@ -12,14 +12,14 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 		var params = ().add('type' -> \saw).add('tonic' -> 1).add('harmonics' -> 3).add('amp' -> 0.2).add('speed' -> 1).add('length' -> 30).add('angle' -> 0).add('chord' -> \minor).add('ratio' -> 1).add('env' -> 1).add('freq' -> 55).add('spread' -> 1).add('number' -> 5);
 		var selected = 0;
 		var val = 0;
-		hub = ahub;		
+		hub = ahub;
 
 		mainwin = hub.interpreter.mainwin;
 		intRect = hub.interpreter.rect;
 	//	guiwin = Window("drone", Rect(mainwin.bounds.width+100, 0, 400, 800), resizable:true, border:true).front;
-	
+
 		guiwin = CompositeView(mainwin, Rect(intRect.left, 0, 400, 400));
-		
+
 	// -------- DRONES
 
 		modegui = PopUpMenu(guiwin, Rect(300, 50, 80, 20))
@@ -28,7 +28,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					params.add('mode' -> menu.item);
 Ê Ê 					[menu.value, menu.item].postln;
 				});
-	
+
 		typegui = PopUpMenu(guiwin, Rect(300, 75, 80, 20))
 				.items_([\saw, \pulse, \tri, \sine])
 				.action_({ arg menu;
@@ -45,23 +45,23 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 
 
 		chordgui = PopUpMenu(guiwin, Rect(300, 125, 80, 20))
-				.items_(~drones.getChordDict.keys.asArray.deepCopy) // 
+				.items_(~drones.getChordDict.keys.asArray.deepCopy) //
 				.action_({ arg menu;
 					params.add('chord' -> menu.item.asSymbol);
 Ê Ê 					[menu.value, menu.item].postln;
 				});
 
 		namegui = PopUpMenu(guiwin, Rect(300, 150, 80, 20))
-				.items_([" - new - "] 
+				.items_([" - new - "]
 						++ ~drones.chordDict.keys.asArray.deepCopy
-						++ ~drones.satellitesDict.keys.asArray.deepCopy 
-						++ ~drones.interDict.keys.asArray.deepCopy 
+						++ ~drones.satellitesDict.keys.asArray.deepCopy
+						++ ~drones.interDict.keys.asArray.deepCopy
 						++ ~drones.droneDict.keys.asArray.deepCopy)
-				.mouseDownAction_({arg menu; 
-					menu.items_([" - new - "] 
-						++ ~drones.chordDict.keys.asArray.deepCopy 
-						++ ~drones.satellitesDict.keys.asArray.deepCopy 
-						++ ~drones.interDict.keys.asArray.deepCopy 
+				.mouseDownAction_({arg menu;
+					menu.items_([" - new - "]
+						++ ~drones.chordDict.keys.asArray.deepCopy
+						++ ~drones.satellitesDict.keys.asArray.deepCopy
+						++ ~drones.interDict.keys.asArray.deepCopy
 						++ ~drones.droneDict.keys.asArray.deepCopy)})
 				.action_({ arg menu;
 					// get the params from the drone and update GUI
@@ -80,17 +80,17 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 				if(modegui.value == 0, { // drone
 					~drones.createDrone(params.type, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env, params.octave);
 				});
-				
+
 				if(modegui.value == 1, { // chord
 					"chord".postln;
 					~drones.createChord(params.type, params.chord, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env);
 				});
-				
+
 				if(modegui.value == 2, { // satellites
 					"sat".postln;
 					~drones.createSatellites(params.type, params.scale, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, params.number, params.spread, params.env);
 				});
-				
+
 			});
 
 		Button(guiwin, Rect(300, 200, 80, 20))
@@ -118,16 +118,16 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 		Button(guiwin, Rect(300, 240, 80, 20))
 			.states_([["debug"]])
 			.action_({
-				
-				namegui.items_([" - new - "] 
-						++ ~drones.chordDict.keys.asArray.deepCopy 
-						++ ~drones.satellitesDict.keys.asArray.deepCopy 
-						++ ~drones.interDict.keys.asArray.deepCopy 
+
+				namegui.items_([" - new - "]
+						++ ~drones.chordDict.keys.asArray.deepCopy
+						++ ~drones.satellitesDict.keys.asArray.deepCopy
+						++ ~drones.interDict.keys.asArray.deepCopy
 						++ ~drones.droneDict.keys.asArray.deepCopy);
-	
+
 			//	modegui.value.postln;
 			});
-		
+
 		tonicgui = EZSlider(guiwin, Rect(10, 50, 280, 20), "tonic ", ControlSpec(1, 20, step:1), initVal: params[\tonic])
 				.action_({ arg sl;
 					var command = "~"++namegui.item++".tonic_("++sl.value.asString++")";
@@ -266,9 +266,9 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 Ê Ê 					"number = ".post; sl.value.postln;
 				});
 
-		
+
 	}
-	
+
 	remove {
 		"REMOVING +_____ IN DRONEGUI ________".postln;
 

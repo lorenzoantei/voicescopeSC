@@ -98,7 +98,6 @@ DroneHub {
 
 	postDroneState {arg selectedName, selected;
 		var string;
-		Document.listener.string = ""; // clear post window
 		string = "~"++selectedName++"\n"++
 		"~"++selectedName++".type = \\"++drones.droneArray[selected].type++"\n"++
 		"~"++selectedName++".tonic = "++drones.droneArray[selected].tonic++"\n"++
@@ -113,7 +112,10 @@ DroneHub {
 		"~"++selectedName++".env = "++drones.droneArray[selected].env++"\n"++
 		"~"++selectedName++".octave = "++drones.droneArray[selected].octave++"\n"
 		"~"++selectedName++".note = "++drones.droneArray[selected].note++"\n";
-		Document.listener.string = string; // add info
-		if(post, { {interpreter.postview.string_(string)}.defer });
+		if (interpreter.isNil.not and: {post}) {
+			{interpreter.postview.string_(string)}.defer;
+		} {
+			string.postln;
+		};
 	}
 }

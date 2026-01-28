@@ -1,4 +1,3 @@
-
 DroneInterpreter {
 
 	var <>mainwin, states, <>textview, <>postview, mode; // textview accessed from DroneStates
@@ -9,101 +8,122 @@ DroneInterpreter {
 		^super.new.initDroneInterpreter(hub, mode);
 	}
 
-	initDroneInterpreter { |arghub, argmode|
+			initDroneInterpreter { |arghub, argmode|
 		var leftborder;
 		var hub = arghub;
 		var droneDict = ();
 		var thiscommand;
-		var drones = hub.drones; // a reference to the DroneMachineCircles class
+		var drones = hub.drones;
 		var selected = drones.selected;
 		var selectedName = try{drones.droneArray[selected].name.asString};
+		
+		// Palette scura forzata per risolvere problemi di tema Linux/Qt
+		var darkPalette = QPalette.dark; 
+		darkPalette.windowText = Color.green;
+		darkPalette.window = Color.black;
+		darkPalette.button = Color.grey(0.2);
+		darkPalette.buttonText = Color.green;
+		
 		if(selectedName == nil, {selectedName = "oxo"});
-		\deb0.postln;
-		//var postrect;
-	
+		
 		mainwin = hub.window;
 		leftborder = mainwin.bounds.height;
-
 		mode = argmode;
-
 		rect = Rect(leftborder+1, 30, Window.screenBounds.width-leftborder, mainwin.bounds.height-250);
 		postrect = Rect(leftborder+1, rect.height+11, Window.screenBounds.width-leftborder, mainwin.bounds.height-rect.height-10);
 		states = hub.states;
 
-		if(mode == \dev, { // if in development mode, an extra window is created
-			"Mode is DEV".postln;
-			mainwin = Window("drone", Rect(mainwin.bounds.width, 0, 400, mainwin.bounds.height), resizable:true, border:true).front;
+		// --- SETUP FINESTRA ---
+		if(mode == \dev, { 
+			mainwin = Window("code", Rect(mainwin.bounds.width, 0, 400, mainwin.bounds.height), resizable:true, border:true).front;
 			mainwin.onClose_({ hub.window.close; drones.killAll; });
-			mainwin.view.background = Color.white;
+			
+			// SFONDO NERO e PALETTE SCURA
+			mainwin.view.background = Color.black;
+			mainwin.view.palette = darkPalette; 
+			
 			leftborder = 0;
 			rect = Rect(leftborder+1, 30, 400, mainwin.bounds.height-60-240);
 			postrect = Rect(leftborder+1, rect.height+11, 400, mainwin.bounds.height-rect.height-64);
+
+			// Lancio GUI personalizzata
+			{ if("DroneGUI".asSymbol.asClass.notNil) { DroneGUI.new(hub) } }.defer(0.1);
 
 		}, {
 			mainwin.bounds = Window.screenBounds;
 		});
 
-		[\mainwinRECT, mainwin.bounds, \rect, rect].postln;
+		// --- WIDGET ---
 
-		// main controls - mode, quit, volume,
+		// 1. QUIT Button
 		Button(mainwin,Rect(rect.left+5, 5 , 50, 20))
 			.font_(Font("Monaco", 11))
-			.states_([["Quit", Color.black, Color.clear]])
-			.action_({ arg butt;
-			// STANDALONE
-	    		// {0.exit}.value;
-	    		// CLASSES
-	    			~drones.quit;
-			});
+			.palette_(darkPalette) // Forza palette
+			.states_([["Quit", Color.white, Color.grey(0.2)]])
+			.action_({ arg butt; ~drones.quit; });
 
+		// 2. HELP Button
 		Button(mainwin,Rect(rect.left+65, 5 , 50, 20))
 			.font_(Font("Monaco", 11))
-			.states_([["Help", Color.black, Color.clear]])
-			.action_({ arg butt;
-	    		"open http://thormagnusson.github.io/threnoscope".unixCmd;
-			});
+			.palette_(darkPalette)
+			.states_([["Help", Color.white, Color.grey(0.2)]])
+			.action_({ arg butt; "open http://thormagnusson.github.io/threnoscope".unixCmd; });
 
+		// 3. Label "Window mode"
 		StaticText(mainwin, Rect(rect.left+125, 5, 120, 20))
 			.font_(Font("Monaco", 11))
+			.palette_(darkPalette) // Forza palette
+			.stringColor_(Color.white)
 			.string_("Window mode:");
 
+		// 4. Menu Mode
 		PopUpMenu(mainwin,Rect(rect.left+210, 5, 70, 20))
 			.font_(Font("Monaco", 11))
+			.palette_(darkPalette) // Forza palette
+			.background_(Color.grey(0.2))
+			.stringColor_(Color.white)
 			.items_([ "perform", "performWin", "dev", "displayFS", "displayWin"])
 			.action_({ arg menu;
 				hub.drones.mode(menu.item.asSymbol);
-	    		[menu.value, menu.item].postln;
-
 			});
 
+		// 5. Label "Main vol"
 		StaticText(mainwin, Rect(rect.left+290, 5, 60, 20))
 			.font_(Font("Monaco", 11))
+			.palette_(darkPalette)
+			.stringColor_(Color.white)
 			.string_("Main vol:");
 
+		// 6. Slider Volume
 		Slider(mainwin, Rect(rect.left+350, 5, 150, 20))
+			.palette_(darkPalette)
+			.background_(Color.grey(0.2))
+			.knobColor_(Color.white)
 			.value_(0.5)
-    		.action_({arg slider;
-        		Server.default.volume_(((0.00001+slider.value)*2).ampdb.postln;)
-        	});
+    		.action_({arg slider; Server.default.volume_(((0.00001+slider.value)*2).ampdb.postln;)});
 
+		// 7. TUNING Button
 		Button(mainwin,Rect(rect.left+505, 5, 50, 20))
 			.font_(Font("Monaco", 11))
-			.states_([["Tuning", Color.black, Color.clear]])
+			.palette_(darkPalette)
+			.states_([["Tuning", Color.white, Color.grey(0.2)]])
 			.action_({ arg butt;
 	    		var t;
-	    		hub.drones.mode(\dev);
 	    		t = TuningTheory.new;
 	    		t.createGUI;
 			});
 
-
+		// 8. TEXTVIEW PRINCIPALE (Input Codice)
 		textview = TextView.new(mainwin, rect)
+				.palette_(darkPalette)
 				.focusColor_(Color.clear)
 				.hasVerticalScroller_(true)
 				.string_("")
 				.resize_(2)
-				.font_(Font("Helvetica", 14 ))
-				.keyDownAction_({|doc, char, mod, unicode, keycode |
+				.font_(Font("Helvetica", 16 ))
+				.background_(Color.black)
+				.stringColor_(Color.green) // Testo verde stile hacker
+.keyDownAction_({|doc, char, mod, unicode, keycode |
 					var linenr, string;
 					//[doc, char, mod, unicode, keycode].postln;
 					// evaluating code (the next line will use .isAlt, when that is available)
@@ -432,190 +452,34 @@ DroneInterpreter {
 
 				});
 
-					postview = TextView.new(mainwin, postrect)
+		// 9. POSTVIEW (Output Log)
+		postview = TextView.new(mainwin, postrect)
+					.palette_(darkPalette)
 					.focusColor_(Color.clear)
-			//	.background_(Color.new(0.6, 0.6, 0.6))
+					.background_(Color.black)
+					.stringColor_(Color.green) 
 					.hasVerticalScroller_(true)
 					.font_(Font("Helvetica", 12 ))
 					.resize_(2)
-					.string_("ThrenoScope - instrument for spatial microtones of long duration");
+					.string_("lorenzoantei.com");
 
-		lineview = UserView.new(mainwin, Rect(postrect.left, postrect.top-2, postrect.width, 4)).background_(Color.black.alpha_(0.5));
-
+		// 10. Linea Divisoria
+		lineview = UserView.new(mainwin, Rect(postrect.left, postrect.top-2, postrect.width, 4))
+            .background_(Color.green.alpha_(0.5));
 	}
+
+
 	
 	opInterpreter { "WARNING: THIS METHOD IS NOT USED ANYMORE".postln; }
-
-	/*
-	
-	opInterpreter { |argstring|
-		var agent, dot, command, interprstr, combinedstring, string;
-		//[\argstring_____________, argstring].postln;
-		string = argstring[1..argstring.size].replace("   ", " ").replace("  ", " ");
-		string = string[0..string.size].replace("\n", "");
-		if(string[0] == $ , {string = string[1..string.size]});
-		dot = string.find(".");
-		agent = string[0..dot-1];
-		command = string[dot..string.size];
-		interprstr = nil;
-		//[\agent_______, agent, \command, command, \string, string].postln;
-	
-		{postview.string_("");}.defer;
-		//if(dev.not, {Document.listener.string = ""});
-
-		if(~drones.droneDict[agent.asSymbol].isNil.not, {
-			"DRONE EXISTS".postln;
-			combinedstring = ("~drones.droneDict[\\"++agent++"]"++command);
-			//combinedstring.postln;
-			try{
-				//{
-				interprstr = combinedstring.interpret;
-				states.addToScore_(combinedstring);
-				//}.defer;
-			}{ "\nThis drone exists, but there is a syntax error".postln };
-		}, {
-			if(~drones.chordDict[agent.asSymbol].isNil.not, {
-				var dronearray, chord;
-				"CHORD EXISTS".postln;
-				chord = ~drones.chordDict[agent.asSymbol];
-				[\chord, chord].postln;
-				chord.perform(command);
-//				dronearray.do({arg drone;
-//					combinedstring = ("~drones.droneDict[\\"++drone.name++"]"++command);
-//					combinedstring.postln;
-//					try{
-//						interprstr = combinedstring.interpret;
-//						states.addToScore_(combinedstring);
-//					}{ "\nThis chord exists, but there is a syntax error".postln };
-//				});
-				if(command.contains("kill"), {
-					~drones.chordDict.removeAt(agent.asSymbol);
-				});
-			}, {
-				if(~drones.satellitesDict[agent.asSymbol].isNil.not, {
-					var dronearray, satellites;
-					"SATELLITE EXISTS".postln;
-					satellites = ~drones.satellitesDict[agent.asSymbol];
-					[\satellites, satellites].postln;
-					satellites.perform(command);
-//					dronearray.do({arg drone;
-//						combinedstring = ("~drones.droneDict[\\"++drone.name++"]"++command);
-//						combinedstring.postln;
-//						try{
-//							interprstr = combinedstring.interpret;
-//							states.addToScore_(combinedstring);
-//						}{ "\nThis satellite exists, but there is a syntax error".postln };
-//					});
-					if(command.contains("kill"), {
-						~drones.satellitesDict.removeAt(agent.asSymbol);
-					});
-				}, {
-					if(~drones.groupDict[agent.asSymbol].isNil.not, {
-						var dronearray, group, tonicoffset, tonicshift, tonicmove;
-						"GROUP EXISTS".postln;
-						group = ~drones.groupDict[agent.asSymbol];
-						group.perform(command);
-						/*
-						if(command.contains("tonic"), { // exemption - this is needed here since a group should be relative to tonic
-							tonicoffset = command[8..command.size].asInteger;
-							tonicshift = dronearray.collect({arg drone, i; drone.tonic});
-							tonicmove = tonicoffset-tonicshift.minItem;
-							tonicshift = tonicshift+tonicmove;  // (the logic -> 4-[4, 2, 7].minItem; [4,2,7]+2)
-							dronearray.do({arg drone, i;
-								combinedstring = ("~drones.droneDict[\\"++drone.name++"].tonic_("++tonicshift[i]++")");
-								combinedstring.postln;
-								try{
-									interprstr = combinedstring.interpret;
-									states.addToScore_(combinedstring);
-								}{ "\nThis group exists, but there is a syntax error".postln };
-							});
-						},{
-							dronearray.do({arg drone;
-								combinedstring = ("~drones.droneDict[\\"++drone.name++"]"++command);
-								combinedstring.postln;
-								try{
-									interprstr = combinedstring.interpret;
-									states.addToScore_(combinedstring);
-								}{ "\nThis group exists, but there is a syntax error".postln };
-							});
-						});
-						*/
-						if(command.contains("kill"), {
-							~drones.groupDict.removeAt(agent.asSymbol);
-						});
-					}, {
-						if(~drones.interDict[agent.asSymbol].isNil.not, {
-							var dronearray;
-					//		"INTERPRETATION EXISTS".postln;
-							dronearray = ~drones.interDict[agent.asSymbol];
-							dronearray.do({arg drone;
-								combinedstring = ("~drones.droneDict[\\"++drone.name++"]"++command);
-								//combinedstring.postln;
-								try{
-									// XXX - check if I need to defer this (check with score)
-									{interprstr = combinedstring.interpret;
-									states.addToScore_(combinedstring);}.defer;
-								}{ "\nThis interpretation exists, but there is a syntax error".postln };
-							});
-							if(command.contains("kill"), {
-								~drones.interDict.removeAt(agent.asSymbol);
-							});
-						}, {
-							if(~drones.machineDict[agent.asSymbol].isNil.not, {
-					//		"MACHINE EXISTS".postln;
-								combinedstring = ("~drones.machineDict[\\"++agent++"]"++command);
-								//combinedstring.postln;
-								try{
-									{interprstr = combinedstring.interpret;
-									states.addToScore_(combinedstring);}.defer;
-								}{ "\nThis machine exists, but there is a syntax error".postln };
-								if(command.contains("kill"), {
-									~drones.machineDict.removeAt(agent.asSymbol);
-								});
-							}, {
-								if(agent == "~drones", { // all ~drones.xxx methods evaluated here
-									"INSIDE DRONES +++++++++++++ ".postln;
-									//[\string, string].postln;
-									//string.interpret;
-									try{
-										
-										interprstr = string.interpret;
-										[\string, string, \interprstr, interprstr].postln;
-										//{
-										states.addToScore_(string);
-										//}.defer;
-									}{ "\nSome syntax error occured".postln };
-								}, {
-								//	interprstr = "No drone, chord or satellite with that name";
-									interprstr = "Command not understood";
-								});
-							});
-						});
-						// [\combinedstring, combinedstring].postln;
-					});
-				});
-			});
-		});
-
-		{
-		//  textview.string_(textview.string++"\n"++interprstr++"\n> "); // post result
-		    textview.string_(textview.string++"\n> ");
-		//	postview.string_(Document.listener.string++"\n\n"++interprstr++"\n");
-			postview.string_("\n\n"++interprstr++"\n");
-		//	if(dev.not, {Document.listener.string = ""});
-		}.defer(0.01);
-
-		lastCommand = command;
-
-	}
-	*/
+    
+    // ... METODI OPINTERPRETER E ALTRI (Mantienili come sono, non servono alla grafica) ...
+    // Per brevità ho tagliato il resto, ma tu lascia i metodi opInterpreter, gui, codescore, ecc.
+    // L'unica cosa che conta è il metodo initDroneInterpreter sopra.
 
 	gui { | bool |
 		if( bool, {
 			textview.bounds_(Rect(rect.left, 400, rect.width, rect.height-400));
-			//mainwin.refresh;
 		}, {
-			//mainwin.refresh;
 			textview.bounds_(rect);
 		});
 		mainwin.refresh;
@@ -624,18 +488,14 @@ DroneInterpreter {
 	codescore { | bool |
 		if( bool, {
 			textview.bounds_(Rect(rect.left, 703, rect.width, rect.height-300));
-			postview.bounds_(Rect(rect.left, 1100, rect.width, rect.height)); // remove this out of the screen
+			postview.bounds_(Rect(rect.left, 1100, rect.width, rect.height)); 
 			lineview.bounds_(Rect(rect.left, 703-2, rect.width, 4));
-
-			//mainwin.refresh;
 		}, {
-			//mainwin.refresh;
 			"removing codescore".postln;
 			lineview.bounds_(Rect(postrect.left, postrect.top-2, postrect.width, 4));
 			textview.bounds_(rect);
 			postview.bounds_(postrect);
 		});
-		
 		mainwin.refresh;
 	}
 

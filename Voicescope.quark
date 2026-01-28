@@ -1,0 +1,18 @@
+(
+    \name: "Voicescope",
+    \summary: "Droning live coding ambient",
+    \author: "Loranto (Original code by Thor Magnusson)",
+    \version: "1.0.0",
+    \organization: "",
+    \country: "Italy",
+    \since: "2026",
+    \helpdoc: "HelpSource/Classes/Voicescope.schelp",
+    \url: "https://github.com/lorenzoantei/Voicescopesc",
+    \dependencies: [
+        // Threnoscope originale usa spesso queste estensioni, controlla se servono:
+        // "MathLib",
+        // "JITLibExtensions" 
+    ],
+    \license: "GPL-3.0",
+    \copyright: "Thor Magnusson 2013, Lorenzo Antei 2026"
+)

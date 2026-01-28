@@ -38,7 +38,7 @@ Drone {
 		freq = 55; // temp
 	}
 
-	createDrone { | argtype=\saw, argtonic=1, argharmonics=2, argamp=0.2, argspeed=100, arglength=6, argangle=0, argdegree=1, argratio=1, argenv, argoctave, argnote |
+	createDrone { | argtype=\saw, argtonic=1, argharmonics=2, argamp=0.2, argspeed=100, arglength=100, argangle=0, argdegree=1, argratio=1, argenv, argoctave, argnote |
 		var step = 0.05/argenv[0];
 		if(argenv[0] < 0.5, {
 			ampMult = 1; // no need to make the colour appear slowly
@@ -46,7 +46,7 @@ Drone {
 			ampMult = 0;
 			Task({((argenv[0]/0.05).round).do({ ampMult = ampMult + step; 0.05.wait; })}).start; // slow appearance of drone colour
 		});
-		\deb0.postln;
+
 		type = argtype;
 		tonic = argtonic.max(1);
 		harmonics = argharmonics.max(1);
@@ -68,7 +68,7 @@ Drone {
 			//ratio = scaledegrees.indexOf((ratio-0.2).nearestInList(scaledegrees)); // if no degree has been passed, I force the degree to be the nearest in scale
 		});
 
-		\deb1.postln;
+
 
 		if(note.isNil.not, {
 			[\hubkey, hub.key].postln;
@@ -92,6 +92,7 @@ Drone {
 		speed = argspeed/1000;
 		length = arglength.max(6) / (360 / (2*pi) ); // arglength
 		rotation =  (argangle / (360 / (2*pi) )) - length;
+		angle = argangle; // Initialize angle here
 		rotation = (rotation + speed)%(2*pi); // added later
 		strokeColor = if( hub.threnoscopeColor == Color.white, { Color.black }, { Color.white });
 
@@ -116,7 +117,7 @@ Drone {
 
 		fillColor = Color.rand(0.1, 0.7);
 
-		\deb2.postln;
+
 
 	}
 
@@ -558,7 +559,7 @@ Drone {
 	tuning_ { | argtuning, dur |
 		var temptuningratios, tuningratios, localfreq;
 		tuning = argtuning;
-		[\NEWTUNING, tuning].postln;
+
 
 		if(tuning.isArray, {
 			if(tuning[0] == 0, { // the tuning array is in cents (cents start with 0)
@@ -566,24 +567,24 @@ Drone {
 			}, {	// the array is in rational numbers (or floating point ratios)
 				tuningratios = tuning;
 			});
-			[\TUNING_IS_ARRAY, tuningratios].postln;
+
 
 		}, {
-			[\TUNING_IS_NOT_ARRAY, tuningratios].postln;
+
 			temptuningratios = Tuning.newFromKey(argtuning.asSymbol);
-			[\temptuningratios, temptuningratios].postln;
+
 			if(temptuningratios.isNil, { "IN HERE \n ++ \n".postln;temptuningratios = DroneScale.new(argtuning) }); // support of the Scala scales / tunings
-						[\temptuningratios22, temptuningratios].postln;
+
 			if(temptuningratios.isKindOf(Scale), {
 				tuningratios = temptuningratios.ratios;
 				octaveRatio = temptuningratios.octaveRatio;
 			}, {
 				tuningratios = temptuningratios.ratios;
 			});
-						[\temptuningratios33, temptuningratios].postln;
+
 		});
-		[\____tuningratios, tuningratios].postln;
-		[\____octaveRatio, octaveRatio].postln;
+
+
 		tuningsize = tuningratios.size; // needed to know how many ratios there are in the tuning system
 		ratios = Array.fill(10, {|i| tuningratios*octaveRatio.pow(i) }).flatten;
 		ratios = ratios.insert(0, 0); // put a zero at the beginning so I can index from 1 (and get at it as well)
@@ -597,32 +598,32 @@ Drone {
 		var scl, semitones;
 		scala = false; // by default expecting an SC scale, not Scala (Fokker) - see DroneScales class
 		scale = argscale; // set the variable for the Drone instance (don't delete)
-		\deb00.postln;
+
 		if(scale.isArray, {
 			semitones = scale;
 
 		}, {
-					\deb000.postln;
+
 
 			scl = Scale.newFromKey(scale.asSymbol); // this will post a warning if it's a Scala scale
-					\deb111.postln;
+
 
 			if(scl.isNil, { // support of the Scala scales
-									\deb222.postln;
+
 
 				scala = true;
 				scl = DroneScale.new(scale);
-					\deb333.postln;
+	
 				"This is a Scala scale".postln;
-				[\scl, scl].postln;
+
 				this.tuning_(scale); // the Scala scales are also tunings
-				\deb444.postln;
+
 
 			});
 			octaveRatio = scl.tuning.octaveRatio; // this is for non-octave repeating scales such as Bohlen Pierce 3:1 'tritave' scale
 			semitones = scl.semitones;
 		});
-		\deb11.postln;
+
 		scalesize = semitones.size; // needed from DroneMachines
 		scaledegrees = Array.fill(5, {|i| semitones+(i*12)+1 }).flatten; // add 1 because of indexing from 1
 		scaledegrees = scaledegrees.insert(0, 0); // put a zero at the beginning so I can index from 1

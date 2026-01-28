@@ -219,7 +219,7 @@ DroneMachine {
 					{drawNow = false}.defer(0.3);
 					if(0.5.coin, {
 						if(ready, {
-							{ drone.relAmp_(newamp.range(0, 2), transtime) }.defer(0.1);
+							{ drone.relAmp_(newamp.clip(0, 2), transtime) }.defer(0.1);
 							ready = false;
 							{ ready = true }.defer(transtime); // make sure two commands are not on the same drone (it jumps)
 						});
@@ -371,6 +371,8 @@ DroneMachine {
 				}
 			}
 			{\scale} {
+				colarray = [[0.2, rrand(0.15, 0.5)]] ++ ({[rrand(0.15, 0.5), rrand(0.1, 0.4)]}!5);
+				locarray = {[(2pi).rand, (2pi).rand]}!4;
 				^{
 				if(drawNow, {
 					activedrones.do({ arg drone;
@@ -423,6 +425,8 @@ DroneMachine {
 				}
 			}
 			{\amp} {
+				colarray = [[0.2, rrand(0.15, 0.5)]] ++ ({[rrand(0.15, 0.5), rrand(0.1, 0.4)]}!5);
+				locarray = {[(2pi).rand, (2pi).rand]}!4;
 				^{
 				if(drawNow, {
 					activedrones.do({ arg drone;
@@ -647,15 +651,15 @@ DroneMachine {
 //				Pen.width = 0.5;
 				
 				points = Array.fill(8, { Point((sd/2)+30.rand2, (sd/2)+30.rand2) });
-			Ê Ê Pen.strokeColor = Color.green(0.3);
-			Ê Ê Pen.moveTo(points[0]);
+			ï¿½ ï¿½ Pen.strokeColor = Color.green(0.3);
+			ï¿½ ï¿½ Pen.moveTo(points[0]);
 				points.do({arg point;
 					Pen.lineTo(point);
 				});
-			Ê Ê Pen.stroke;
-			Ê Ê Pen.strokeColor = Color.green(0.3);
+			ï¿½ ï¿½ Pen.stroke;
+			ï¿½ ï¿½ Pen.strokeColor = Color.green(0.3);
 				points.do({arg point;
-				Ê Ê Pen.addArc(point, 2+(4.0.rand), 2pi, 2pi);
+				ï¿½ ï¿½ Pen.addArc(point, 2+(4.0.rand), 2pi, 2pi);
 				});
 				Pen.stroke;
 

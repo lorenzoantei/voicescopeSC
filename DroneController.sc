@@ -92,7 +92,7 @@ DroneController {
 //				[\selectedName, selectedName].postln;
 
 
-				if(hub.post && seldrone.isNil.not, {
+				if((hub.post || (hub.mode == \displayFS)) && seldrone.isNil.not, {
 					hub.postDroneState(selectedName, selected);
 
 //					Document.listener.string = ""; // clear post window
@@ -531,7 +531,7 @@ DroneController {
 	}
 
 
-	createDrone { | type=\saw, tonic=1, harmonics=3, amp=0.3, speed, length, angle, degree=1, ratio=1, name, env, octave, note |
+	createDrone { | type=\saw, tonic=1, harmonics=3, amp=0.3, speed=100, length=90, angle=0, degree=1, ratio=1, name, env, octave=1, note |
 		var envelopearr, string;
 //		Document.listener.string_("");
 //		hub.interpreter.postview.string_("");
@@ -570,26 +570,8 @@ DroneController {
 		//interDroneArray = interDroneArray.add(drone);
 		selectedName = drone.name.asString; // draw the latest drone name in the bottom left corner
 		if(drawTask.isPlaying.not, { drawTask.play }); // if cmd + period, then start the drawtask again
-		if(hub.post, {
-//			hub.postDroneState(drone.name, droneArray.size-1);
-			"------- New Drone Created: ".postln;
-			string = "~"++name++"\n"++
-			"~"++name++".type = "++drone.type++"\n"++
-			"~"++name++".tonic = "++drone.tonic++"\n"++
-			"~"++name++".freq = "++drone.freq++"\n"++
-			"~"++name++".harmonics = "++drone.harmonics++"\n"++
-			"~"++name++".amp = "++drone.amp++"\n"++
-			"~"++name++".speed = "++speed++"\n"++
-			"~"++name++".length = "++length++"\n"++
-			"~"++name++".angle = "++angle++"\n"++
-			"~"++name++".degree = "++drone.degree++"\n"++
-			"~"++name++".ratio = "++drone.ratio++"\n"++
-			"~"++name++".env = "++drone.env++"\n"++
-			"~"++name++".octave = "++drone.octave++"\n" ++
-			"~"++name++".note = "++drone.note++"\n";
-			//string.postln;
-			{hub.interpreter.postview.string_(string)}.defer;
-		});
+		"------- New Drone Created: ".postln; // This will always print to the main SC post window
+		hub.postDroneState(drone.name, droneArray.size-1);
 		^drone;
 	}
 
