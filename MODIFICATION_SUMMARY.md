@@ -111,3 +111,55 @@ Sono stati sistemati i problemi legati ai sample e aggiunta documentazione per s
 
 *   **Modifica 5: Documentazione per sample custom**
     *   **Soluzione**: Aggiunto `threnoscope/samples/README.md` con istruzioni per creare strumenti basati su sample.
+
+---
+
+### 7. File: `DroneController.sc`
+
+È stato reso più graduale il kill dei droni per evitare interruzioni brusche.
+
+*   **Modifica 1: Kill con fade di default**
+    *   **Problema**: `kill` e `killAll` potevano passare un `releasetime` pari a 0, causando un'interruzione immediata dei suoni.
+    *   **Soluzione**: Se `releasetime` è nullo o <= 0, viene ora sostituito con `drone.env[1]` o `globalenv[1]` (minimo 0.1), così il kill usa sempre un fade out.
+
+---
+
+### 8. File: `DroneDocumentation.rtf`, `DroneMain.rtf`
+
+Documentazione aggiornata per riflettere il nuovo comportamento del kill con fade.
+
+*   **Modifica 1: Note su killAll**
+    *   **Soluzione**: Specificato che `killAll` usa un tempo di rilascio e che valori 0 o <= 0 vengono convertiti in un fade breve.
+
+---
+
+### 9. File: `Drone.sc`, `DroneDocumentation.rtf`, `DroneMain.rtf`
+
+Il kill con tempo esplicito ora forza davvero il fade richiesto.
+
+*   **Modifica 1: Kill con releasetime applica l'env**
+    *   **Problema**: `~drone.kill(10)` rilasciava subito perché il tempo di release usato dal synth rimaneva quello già impostato nell'env.
+    *   **Soluzione**: `killSynths` imposta `\env` con il release richiesto prima del `release`, così il fade dura quanto previsto.
+
+---
+
+### 10. File: `Drone.sc`, `DroneDocumentation.rtf`, `DroneMain.rtf`
+
+Il kill con tempo esplicito ora forza davvero il gate e l'alias `kill_` è disponibile.
+
+*   **Modifica 1: Kill con gate esplicito**
+    *   **Problema**: Il `release` del gruppo non garantiva sempre un fade percepibile; l'audio restava costante e si fermava improvvisamente.
+    *   **Soluzione**: Quando viene passato un tempo di kill, `killSynths` imposta `\env` e porta `\gate` a 0, assicurando il fade-out.
+
+*   **Modifica 2: Alias `kill_`**
+    *   **Soluzione**: Aggiunto `kill_` come alias di `kill` per compatibilità con la sintassi setter-style.
+
+---
+
+### 11. File: `Drone.sc`
+
+Corretto il colore dei droni sample-based (es. `\piano`).
+
+*   **Modifica 1: Colore random solo se non già assegnato**
+    *   **Problema**: I droni sample-based potevano risultare neri invece che colorati.
+    *   **Soluzione**: Il colore random viene applicato solo se `fillColor` non è già stato assegnato.

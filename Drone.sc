@@ -116,7 +116,7 @@ Drone {
 				buffer = Buffer.readChannel(Server.default, DroneSynths.bufferPath(type, freq), channels:[0], action:{ this.startSynth() }) ; // samples
 			};
 
-		fillColor = Color.rand(0.1, 0.7);
+		if(fillColor.isNil, { fillColor = Color.rand(0.1, 0.7) });
 
 
 
@@ -687,8 +687,14 @@ Drone {
 		"synths : ".post; synths.postln;
 
 		synthgroup.set(\doneAction, 14); // change doneAction to 14 so the synths will free the group as well
+		// Force the release time when the user passes a specific kill time.
+		if(releasetime.isNil.not && (releasetime > 0), {
+			synthgroup.set(\env, [env[0], releasetime]);
+			synthgroup.set(\gate, 0);
+		}, {
+			synthgroup.release(releasetime);
+		});
 		if(synths.occurrencesOf(666) == synths.size, { synthgroup.free }); // if there is no synth playing, we still need to free the group
-		synthgroup.release(releasetime); // free the synths in the group (and with doneAction 14, they'll kill the group)
 
 		//synths.do({arg synth; synth.release(releasetime)});
 		//{tempsynthgroup.free}.defer(releasetime+0.5); // remove the group itself from the server
@@ -715,6 +721,11 @@ Drone {
 		//this.killDrone();
 		if(atomcount > -1, { oscresp.remove });
 		hub.drones.killDrone(this.name, releasetime);
+	}
+
+	// Setter-style alias to avoid nil errors when users write ~drone.kill_(time)
+	kill_ { | releasetime |
+		this.kill(releasetime);
 	}
 
 	// this method is private for the DroneController class - not used by user

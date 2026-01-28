@@ -610,6 +610,7 @@ DroneController {
 				if(drone.name == name, {
 					if(drone.dying == false, { // if it's alive
 						releasetime = releasetime ? drone.env[1]; // if no arg, use drone env
+						if(releasetime <= 0, { releasetime = (drone.env[1] ? globalenv[1]).max(0.1) });
 						droneArray[i].killSynths(releasetime); // specific method created for the deathArray fadeout
 						drone.dying = true;
 
@@ -879,9 +880,11 @@ DroneController {
 	}
 
 	killAll { | releasetime |
-//		var rt;
-//		rt = if(releasetime.isNil, { globalenv[1] }, { releasetime })
-		droneArray.copy.do({arg drone; this.killDrone( drone.name, releasetime ) });
+		var rt;
+		rt = releasetime ? globalenv[1];
+		if(rt.isNil, { rt = 3 });
+		if(rt <= 0, { rt = 3 });
+		droneArray.copy.do({arg drone; this.killDrone( drone.name, rt ) });
 		machineArray.do({arg machine; machine.kill });
 		// I should not need the below as all drones remove themselves from arrays and dicts
 //		droneArray = [];

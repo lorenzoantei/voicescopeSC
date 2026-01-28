@@ -109,7 +109,10 @@ The Drone is the core musical element of the system. It is a musical note, but i
 7) Interfacing (MIDI, OSC, Twitter)\
 \
 \cf6 /*\
-~drones.killAll\
+~drones.killAll // uses env/globalenv release time\
+~drones.killAll(2) // explicit fade time in seconds (0 or <=0 clamps to a small fade)\
+~drones.droneDict[\\name].kill(10) // force 10s fade, then free\
+~drones.droneDict[\\name].kill_(10) // alias of kill (setter-style)\
 \
 \pard\pardeftab560
 

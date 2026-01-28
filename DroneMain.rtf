@@ -177,7 +177,7 @@ hub.registerInterpreter( interpreter );\
 ~drones.droneDict.at(\\oso).ratios.size\
 \
 ~drones.killAll // using the release time of the envelope\
-~drones.killAll(0) // forcing the synths to stop in 0 secs (or any other time)\
+~drones.killAll(0.1) // force a short fade (0 or <=0 now clamps to a small fade)\
 \
 \pard\pardeftab560\partightenfactor0
 
@@ -254,8 +254,9 @@ xxx.interpret(\{| ixi | ixi.harmonics_(rrand(2, 8))\})\
 xxx.env_([0, 1]) // backwards envelope\
 xxx.addMIDI(transp:0, time)\
 xxx.removeMIDI()\
-xxx.kill // kill it\
+xxx.kill // kill it using env/globalenv release\
 xxx.kill(10) // force 10 sec release time\
+xxx.kill_(10) // alias of kill (setter-style)\
 \
 keys 1-9 play indices of the drone's scale\
 \
