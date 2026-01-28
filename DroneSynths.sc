@@ -80,7 +80,7 @@ DroneSynths {
 		//		rate.poll;
 
 			// sample playback mechanism
-			att = PlayBuf.ar(1, buffer, rate, 1, loop:0)*EnvGen.ar(Env.perc(0.0000001, 2, 1, -4))*attack; // attack
+			att = PlayBuf.ar(1, buffer, rate, 1, loop:0) * EnvGen.ar(Env.perc(0.0000001, 2, 1, -4)) * attack; // attack
 			//tr = TDelay.kr(Impulse.kr(looplength.reciprocal), looplength-(trianglelength/2)).poll;
 			tr = TDelay.kr(TDuty.kr(looplength, (changetr-1).abs), looplength-(trianglelength/2));
 
@@ -509,37 +509,42 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 	}
 
 	*bufferPath{arg instr, freq;
-		var nearestFreq, path;
+		var nearestFreq, nearestKey, path, keys;
 		/*
 		The Logic:
 		1) The sampleDict contains the list of samples, their actual frequencies (might be detuned instrument), path and good loopStart and loopEnd.
 		2) The sample with the nearest frequency is found for the actual frequency to be played. That frequency (item in the dict) has an associated sample.
 		3) When the actual freq is passed to the synth, this is referenced to the desired frequency, and the correct frequency/rate calculated (play rate of the LoopBuf).
 		*/
-		[\freq, freq, \sampledictfreqs, sampleDict[instr].keys.asArray.asFloat.sort].postln;
-		nearestFreq = freq.nearestInList(sampleDict[instr].keys.asArray.asFloat.sort);
+		keys = sampleDict[instr].keys.asArray;
+		[\freq, freq, \sampledictfreqs, keys.asFloat.sort].postln;
+		nearestFreq = freq.nearestInList(keys.asFloat.sort);
+		nearestKey = keys.detect({ |k| k.asFloat == nearestFreq });
 	//	path = sampleDict[instr][nearestFreq.asSymbol][\path];
-		// STANDALONE
-		path = hub.appPath ++"/samples/"++ sampleDict[instr][nearestFreq.asSymbol][\path];
-		// CLASSES
-		path = Platform.userAppSupportDir ++"/downloaded/quarks/threnoscopeSC/threnoscope/samples/"++ sampleDict[instr][nearestFreq.asSymbol][\path];
+		// Use the appPath base so the quark location determines the samples folder.
+		path = hub.appPath ++"/threnoscope/samples/"++ sampleDict[instr][nearestKey][\path];
 
 		[\nearestFreq, nearestFreq, \sample, path].postln;
 		^path;
 	}
 
 	*noteData {arg instr, freq;
-		var thisNote, startLoop, endLoop;
-		thisNote = freq.nearestInList(sampleDict[instr].keys.asArray.asFloat.sort);
-		startLoop = sampleDict[instr][thisNote.asSymbol][\startPos];
-		endLoop = sampleDict[instr][thisNote.asSymbol][\endPos];
+		var thisNote, thisKey, startLoop, endLoop, keys;
+		keys = sampleDict[instr].keys.asArray;
+		thisNote = freq.nearestInList(keys.asFloat.sort);
+		thisKey = keys.detect({ |k| k.asFloat == thisNote });
+		startLoop = sampleDict[instr][thisKey][\startPos];
+		endLoop = sampleDict[instr][thisKey][\endPos];
 	//	[\thisNote, thisNote, \startLoop, startLoop, \endLoop, endLoop].postln;
 		^[thisNote, startLoop, endLoop];
 	}
 
 
 	*nearestFreq {arg instr, freq;
-		^freq.nearestInList(sampleDict[instr].keys.asArray.asFloat.sort);
+		var keys, nearest;
+		keys = sampleDict[instr].keys.asArray;
+		nearest = freq.nearestInList(keys.asFloat.sort);
+		^nearest;
 	}
 
 

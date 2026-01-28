@@ -112,7 +112,8 @@ Drone {
 		   /* {\padw} 		{ fillColor = Color.new( rrand(0.1, 0.7), rrand(0.1, 0.7), rrand(0.1, 0.2) ); this.startSynth() }*/
 			{\atom}		{ this.initAtom; {this.startSynth()}.defer; }
 			{
-				buffer = Buffer.read(Server.default, DroneSynths.bufferPath(type, freq), action:{ this.startSynth() }) ; // samples
+				// Force mono buffers even if the sample file is stereo.
+				buffer = Buffer.readChannel(Server.default, DroneSynths.bufferPath(type, freq), channels:[0], action:{ this.startSynth() }) ; // samples
 			};
 
 		fillColor = Color.rand(0.1, 0.7);

@@ -86,3 +86,28 @@ Questa modifica ha risolto il problema principale che impediva il caricamento de
 *   **Modifica 1: Correzione del percorso di caricamento dei campioni audio**
     *   **Problema**: Il codice utilizzava un percorso file statico e non corretto (`Platform.userAppSupportDir++"/downloaded-quarks/voicescopeSC/voicescope/samples/_samples.scd"`) per caricare il file `_samples.scd`, causando un errore `Primitive '_FileLength' failed` perché il file non veniva trovato.
     *   **Soluzione**: Sostituito il percorso statico con uno dinamico basato sulla variabile `hub.appPath`: `hub.appPath ++ "/threnoscope/samples/_samples.scd"`. Questo garantisce che il file venga localizzato correttamente, indipendentemente dalla posizione di installazione del quark.
+
+---
+
+### 6. File: `DroneSynths.sc`, `Drone.sc`, `threnoscope/samples/_samples.scd`, `threnoscope/samples/README.md`
+
+Sono stati sistemati i problemi legati ai sample e aggiunta documentazione per sample personalizzati.
+
+*   **Modifica 1: Correzione lookup delle chiavi nei sample**
+    *   **Problema**: Le chiavi del dizionario sample erano numeriche (es. `55`) ma venivano indicizzate con un `Float` (`55.0`), causando `nil` e l'errore `Message 'at' not understood`.
+    *   **Soluzione**: Trovata la chiave originale corrispondente alla frequenza più vicina e usata quella per l'indicizzazione.
+
+*   **Modifica 2: Percorso dei sample**
+    *   **Problema**: Il percorso costruito per i file audio non puntava alla cartella reale dei sample.
+    *   **Soluzione**: Il path ora usa `hub.appPath ++ "/threnoscope/samples/"` come base.
+
+*   **Modifica 3: Buffer mono per file stereo**
+    *   **Problema**: I WAV sono stereo mentre il synth leggeva 1 canale, generando `Buffer UGen channel mismatch`.
+    *   **Soluzione**: I buffer vengono caricati in mono con `Buffer.readChannel(..., channels:[0])`.
+
+*   **Modifica 4: Ripristino `_samples.scd` e dati di loop**
+    *   **Problema**: Il file `_samples.scd` conteneva testo di errore e mancavano `startPos`/`endPos`.
+    *   **Soluzione**: Rimosso il testo errato e aggiunti `startPos`/`endPos` per ogni sample piano.
+
+*   **Modifica 5: Documentazione per sample custom**
+    *   **Soluzione**: Aggiunto `threnoscope/samples/README.md` con istruzioni per creare strumenti basati su sample.
