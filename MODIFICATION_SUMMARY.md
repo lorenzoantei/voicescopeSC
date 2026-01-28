@@ -66,3 +66,23 @@ Questa modifica ha risolto il problema principale che impediva il caricamento de
     *   **Problema**: Il codice usava l'operatore `??` (`scala = scala ?? {XiiScala.new};`), introdotto solo in SuperCollider 3.7. Su versioni precedenti, questo causava un errore di compilazione silenzioso, risultando nell'errore `Class 'TuningTheory' not found`.
     *   **Soluzione**: Sostituito l'operatore `??` con un blocco `if` equivalente (`if (scala.isNil) { scala = XiiScala.new };`), che è compatibile con tutte le versioni di SuperCollider.
     *   **Nota**: Questa modifica è stata eseguita manualmente da te, poiché il file si trovava al di fuori della mia area di lavoro.
+
+---
+
+### 4. File: `ThrenoScope.sc`
+
+È stato corretto un errore che impediva l'avvio del programma.
+
+*   **Modifica 1: Correzione del metodo di ricerca dei Quark**
+    *   **Problema**: Il codice utilizzava `Quarks.find("voicescopeSC")`, un metodo non esistente che causava un errore `Message 'find' not understood` all'avvio.
+    *   **Soluzione**: Sostituito `Quarks.find(...)` con `Quarks.all.detect { |q| q.name.asString == "voicescopeSC" }`. Questa è la sintassi corretta per cercare un Quark installato per nome, risolvendo l'errore di avvio.
+
+---
+
+### 5. File: `DroneSynths.sc`
+
+È stato corretto un errore che si verificava dopo il primo fix, relativo al caricamento dei sample.
+
+*   **Modifica 1: Correzione del percorso di caricamento dei campioni audio**
+    *   **Problema**: Il codice utilizzava un percorso file statico e non corretto (`Platform.userAppSupportDir++"/downloaded-quarks/voicescopeSC/voicescope/samples/_samples.scd"`) per caricare il file `_samples.scd`, causando un errore `Primitive '_FileLength' failed` perché il file non veniva trovato.
+    *   **Soluzione**: Sostituito il percorso statico con uno dinamico basato sulla variabile `hub.appPath`: `hub.appPath ++ "/threnoscope/samples/_samples.scd"`. Questo garantisce che il file venga localizzato correttamente, indipendentemente dalla posizione di installazione del quark.
