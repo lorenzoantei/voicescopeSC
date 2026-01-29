@@ -1223,6 +1223,8 @@ Drone {
 
 	draw {
 	     ^{
+			var fillAlpha, glitchAlpha, glitchColor;
+			var center, rMid, rOut, a1, a2, p1, p2, p3, p4, tickLen, triLen, triWidth;
 			if(selected, {
 				Pen.width = 1.5;
 				strokeColor.alpha_(amp+0.5).set;
@@ -1239,6 +1241,53 @@ Drone {
 				length
 			);
 			Pen.perform(\stroke);
+
+			// Glitch overlay: faint offset arc without flicker.
+			glitchAlpha = (amp * 0.35).clip(0.05, 0.5);
+			glitchColor = Color.new(0.1, 1.0, 0.4).alpha_(glitchAlpha);
+			Pen.width = 0.5;
+			glitchColor.set;
+			Pen.addAnnularWedge(
+				point+0.5,
+				(innersize + 1.5).max(0.5),
+				(outersize + 1.5).max(1),
+				rotation + 0.01,
+				length
+			);
+			Pen.perform(\stroke);
+
+			// Mystical runes: halo + radial sigils at arc endpoints.
+			center = point + 0.5;
+			rMid = (innersize + outersize) * 0.5;
+			rOut = outersize + 6;
+			a1 = rotation;
+			a2 = rotation + length;
+			tickLen = 7;
+			triLen = 10;
+			triWidth = 4;
+			glitchColor.alpha_(glitchAlpha * 0.9).set;
+			// Halo circles at endpoints
+			p1 = Point(cos(a1), sin(a1)) * rOut + center;
+			Pen.strokeOval(Rect(p1.x-4, p1.y-4, 8, 8));
+			p1 = Point(cos(a2), sin(a2)) * rOut + center;
+			Pen.strokeOval(Rect(p1.x-4, p1.y-4, 8, 8));
+			// Radial sigils (three short rays) at start
+			p1 = Point(cos(a1), sin(a1)) * rOut + center;
+			p2 = Point(cos(a1 + 0.35), sin(a1 + 0.35)) * (rOut + tickLen) + center;
+			p3 = Point(cos(a1 - 0.35), sin(a1 - 0.35)) * (rOut + tickLen) + center;
+			Pen.line(p1, p2);
+			Pen.line(p1, p3);
+			Pen.line(p1, Point(cos(a1 + 0.7), sin(a1 + 0.7)) * (rOut + tickLen - 2) + center);
+			Pen.stroke;
+			// Radial sigils (three short rays) at end
+			p1 = Point(cos(a2), sin(a2)) * rOut + center;
+			p2 = Point(cos(a2 + 0.35), sin(a2 + 0.35)) * (rOut + tickLen) + center;
+			p3 = Point(cos(a2 - 0.35), sin(a2 - 0.35)) * (rOut + tickLen) + center;
+			Pen.line(p1, p2);
+			Pen.line(p1, p3);
+			Pen.line(p1, Point(cos(a2 + 0.7), sin(a2 + 0.7)) * (rOut + tickLen - 2) + center);
+			Pen.stroke;
+
 
 	/// TESTING RESONANCE REPRESENTATION
 			if(showResonance, { // if the resonance strip is visible/audible
@@ -1265,7 +1314,8 @@ Drone {
 
 			Pen.width = 1;
 			//alpha = amp / 2;
-			fillColor.alpha_((ampMult*amp)+Env.new([0,0.2,0.1,0], [0.1,0.1, 0.6],[-3,0,3]).at(amp)).set;
+			fillAlpha = ((ampMult*amp)+Env.new([0,0.2,0.1,0], [0.1,0.1, 0.6],[-3,0,3]).at(amp)).clip(0, 1);
+			fillColor.alpha_(fillAlpha).set;
 			Pen.addAnnularWedge(
 				point+0.5,
 				innersize,

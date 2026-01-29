@@ -27,11 +27,12 @@ DroneSpeakers {
 		fundamental = argfundamental;
 		scale = Scale.minor; // xxx get this from the hub
 		scScale = true; // it's a SuperCollider scale, vs. Scala (different in terms of idea of tuning)
-		harmonicsColor = if(backgroundColor == Color.white, { Color.black }, { Color.white });
-		scaleOctaveColor = Color.red;
-		octaveColor = Color.green;
-		speakerColor = if(backgroundColor == Color.white, { Color.black }, { Color.white });
-		degreeColor = if(backgroundColor == Color.white, { Color.black }, { Color.white });
+			// Hacker/glitch palette: neon greens/cyans over dark background.
+	harmonicsColor = Color.new(0.1, 1.0, 0.4);
+	scaleOctaveColor = Color.new(0.0, 0.8, 0.7);
+	octaveColor = Color.new(0.0, 0.6, 0.9);
+	speakerColor = Color.new(0.2, 1.0, 0.2);
+	degreeColor = Color.new(0.2, 0.9, 1.0);
 	}
 
 	drawImg { |argtuning|
@@ -45,6 +46,26 @@ DroneSpeakers {
 			Color.black.alpha_(0.25).set;
 			Pen.line(Point(sd-0.5, 0), Point(sd-0.5, sd));
 			Pen.stroke;
+
+			// Subtle scanlines for a hacker/glitch look.
+			Pen.width = 1;
+			Color.new(0.1, 1.0, 0.4).alpha_(0.06).set;
+			(0, 6 .. sd.asInteger).do({ |y|
+				Pen.line(Point(0, y), Point(sd, y));
+			});
+			Pen.stroke;
+
+			// Pixel noise layer.
+			Color.new(0.2, 0.9, 1.0).alpha_(0.18).set;
+			120.do({
+				Pen.addRect(Rect(rrand(0, sd-1), rrand(0, sd-1), 1, 1));
+			});
+			Pen.fill;
+			Color.new(0.1, 1.0, 0.4).alpha_(0.12).set;
+			60.do({
+				Pen.addRect(Rect(rrand(0, sd-1), rrand(0, sd-1), 2, 1));
+			});
+			Pen.fill;
 			this.drawSpeakers.value;
 			this.drawCircles.value;
 		});
