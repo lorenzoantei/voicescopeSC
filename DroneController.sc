@@ -996,9 +996,14 @@ DroneController {
 		})}.defer;
 		^chordsstring
 	}
+
+	amp_ { |argamp, dur|
+		droneArray.do({ |drone| drone.amp_(argamp, dur) });
+		^("All drones -> amp set to : " ++ argamp);
+	}
 		
 	relativeAmp_ {|change=0, dur=2| // change amp relative to current amp of each drone
-		droneArray.do({arg drone; drone.relativeAmp_(change, dur) });
+		droneArray.do({ |drone| drone.relAmp_(change, dur) });
 		^("All drones -> amp altered by : " ++ (change*100) ++ " %");
 	}
 
