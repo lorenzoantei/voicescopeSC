@@ -529,6 +529,11 @@ DroneController {
 	env {
 		^("Env time is : " ++ globalenv);
 	}
+	
+	putInEnvironment { |key, value|
+		var env = hub.env ? currentEnvironment;
+		env.put(key, value);
+	}
 
 
 	createDrone { | type=\saw, tonic=1, harmonics=3, amp=0.3, speed=100, length=90, angle=0, degree=1, ratio=1, name, env, octave=1, note |
@@ -565,7 +570,7 @@ DroneController {
 					).name_(name);
 		droneArray = droneArray.add(drone); // an array that takes care of drawing
 		droneDict[drone.name] = drone; // for accessing individual drones (not indexed in an array but a dict)
-		currentEnvironment.put(drone.name, drone); // this allows me to access drones through ~
+		this.putInEnvironment(drone.name, drone); // this allows me to access drones through ~
 		if(interpret, { interDroneArray = interDroneArray.add(drone) });
 		//interDroneArray = interDroneArray.add(drone);
 		selectedName = drone.name.asString; // draw the latest drone name in the bottom left corner
@@ -672,9 +677,9 @@ DroneController {
 		thischord = DroneChord.new(hub, name, scale).createChord(type, chord, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave, note);
 	//	thischord.tuning_(tuning);
 		chordDict[name] = thischord;
-		currentEnvironment.put(name, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(name, thischord); // this allows me to access drones through ~
 		if(shortname.isNil, {shortname = name});
-		currentEnvironment.put(shortname, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(shortname, thischord); // this allows me to access drones through ~
 		selectedName = name.asString; // draw the latest drone name in the bottom left corner
 
 		if(hub.post, {
@@ -723,8 +728,8 @@ DroneController {
 		thischord = DroneChord.new(hub, name).defineChord( dronearr );
 		//thischord.tuning_(tuning);
 		chordDict[name] = thischord;
-		currentEnvironment.put(name, thischord); // this allows me to access drones through ~
-		currentEnvironment.put(tempname, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(name, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(tempname, thischord); // this allows me to access drones through ~
 		^("New chord defined : " ++ name);
 	}
 
@@ -747,11 +752,11 @@ DroneController {
 		thissatellites = DroneSatellites.new(hub, name).createSatellites(type, ratios, tonic, harmonics, amp, speed, length, angle, num, spread, env, octave);
 	//	thissatellites.tuning_(tuning);
 		satellitesDict[name] = thissatellites;
-		currentEnvironment.put(name, thissatellites); // this allows me to access drones through ~
+		this.putInEnvironment(name, thissatellites); // this allows me to access drones through ~
 	//	if(shortname.isNil, {shortname = name}); // xxx
 		if(shortname.isNil, {shortname = name.asString[4..6] }); // if the user didn't pass a name, it was generated and we're only interested in the pure name
 		[\shortname, shortname].postln;
-		currentEnvironment.put(shortname.asSymbol, thissatellites); // this allows me to access drones through ~
+		this.putInEnvironment(shortname.asSymbol, thissatellites); // this allows me to access drones through ~
 		selectedName = name.asString; // draw the latest drone name in the bottom left corner
 
 		if(hub.post, {
@@ -796,8 +801,8 @@ DroneController {
 		thisgroup = DroneGroup.new(hub, name).createGroup( groupname, type, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave );
 	//	thisgroup.tuning_(tuning);
 		groupDict[name.asSymbol] = thisgroup;
-		currentEnvironment.put(name.asSymbol, thisgroup); // this allows me to access drones through ~
-		currentEnvironment.put((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
+		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access drones through ~
+		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
 		selectedName = name.asString; // draw the latest drone name in the bottom left corner
 
 		if(hub.post, {
@@ -827,8 +832,8 @@ DroneController {
 		thisgroup = DroneGroup.new(hub, tempname).defineGroup( args );
 		name = name++"_"++tempname; // special case, as I want to be able to run many groups e.g. \grp_oso_loki (where loki is the group template)
 		groupDict[name.asSymbol] = thisgroup;
-		currentEnvironment.put(name.asSymbol, thisgroup); // this allows me to access drones through ~
-		currentEnvironment.put((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
+		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access drones through ~
+		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
 		^("New group defined : " ++ name);
 	}
 
@@ -854,7 +859,7 @@ DroneController {
 		machine = DroneMachine.new(hub, type, target, time, rate, transtime, range).name_(name);
 		machineArray = machineArray.add(machine); // an array that takes care of drawing
 		machineDict[name] = machine;
-		currentEnvironment.put(name, machine); // this allows me to access drones through ~
+		this.putInEnvironment(name, machine); // this allows me to access drones through ~
 		^("New machine created : " ++ machine);
 	}
 

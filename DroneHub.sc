@@ -18,6 +18,7 @@ DroneHub {
 	var <>padDown;
 	var <>appPath;
 	var <>channels;
+	var <>env;
 
 	*new { arg window, argmode, argscale, argfundamental, threnoscopeColor, key, channels, appPath;
 		^super.new.initDroneHub(window, argmode, argscale, argfundamental, threnoscopeColor, key, channels, appPath);
@@ -41,6 +42,7 @@ DroneHub {
 		key = argKey;
 		appPath = argappPath;
 		channels = argchannels;
+		env = this.safeEnvironment;
 
 		[\appPath, appPath].postln;
 		// FOR STANDALONE BINARY ____________________
@@ -72,6 +74,15 @@ DroneHub {
 			{\displayWin} { // display in a window (for app playback)
 				post = false;
 			};
+	}
+	
+	safeEnvironment {
+		var env = currentEnvironment;
+		var proxyClass = \ProxySpace.asClass;
+		if(proxyClass.notNil and: { env.isKindOf(proxyClass) }) {
+			env = env.envir;
+		};
+		^env.parent ?? env;
 	}
 
 	registerSpeakers { |argspeakers|

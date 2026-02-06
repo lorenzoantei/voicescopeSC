@@ -84,6 +84,7 @@ ThrenoScope {
 		
 		var fundamental;
 		var speakers, interpreter, machines, states;
+		var drones, env;
 		var tuning = \et12;
 		var scale = \minor;
 		// var mode = argmode;
@@ -183,7 +184,8 @@ ThrenoScope {
 		// DroneCodeScore - an experiment with Score
 
 		hub = DroneHub.new( window, mode, scale, fundamental, threnoscopeColor, key, channels, appPath ); // - all key data accessible to other classes
-		~singlehub = hub;
+		env = hub.env ? currentEnvironment;
+		env.put(\singlehub, hub);
 
 		DroneSynths.new(false, hub);
 
@@ -192,8 +194,16 @@ ThrenoScope {
 		hub.registerStates( states );
 		speakers = DroneSpeakers.new( hub, channels, fundamental ); // drawing background
 		hub.registerSpeakers( speakers );
-		~drones = DroneController.new( hub, tuning, scale, fundamental); // - main interface
-		hub.registerDrones( ~drones );
+		drones = DroneController.new( hub, tuning, scale, fundamental); // - main interface
+		env.put(\drones, drones);
+		{
+			var proxyClass = \ProxySpace.asClass;
+			if(proxyClass.notNil and: { currentEnvironment.isKindOf(proxyClass) }) {
+				currentEnvironment.envir.put(\drones, drones);
+				currentEnvironment.envir.put(\singlehub, hub);
+			};
+		}.value;
+		hub.registerDrones( drones );
 
 		if((mode == \perform) || (mode == \performWin) || (mode == \dev), {
 			interpreter = DroneInterpreter.new( hub, mode:mode); // - the 'console' for live coding
@@ -209,7 +219,7 @@ ThrenoScope {
 */
 
 	quit {
-		~drones.killAll;
+		if(hub.notNil and: { hub.drones.notNil }, { hub.drones.killAll });
 		window.close;
 	}
 }

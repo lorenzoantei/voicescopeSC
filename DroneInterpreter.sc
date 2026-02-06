@@ -60,7 +60,7 @@ DroneInterpreter {
 			.font_(Font("Monaco", 11))
 			.palette_(darkPalette) // Forza palette
 			.states_([["Quit", Color.white, Color.grey(0.2)]])
-			.action_({ arg butt; ~drones.quit; });
+			.action_({ arg butt; hub.drones.quit; });
 
 		// 2. HELP Button
 		Button(mainwin,Rect(rect.left+65, 5 , 50, 20))

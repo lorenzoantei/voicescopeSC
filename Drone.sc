@@ -1215,9 +1215,16 @@ Drone {
 	// ---  below is all synth creation and drawing
 
 	update {
+		var stepCount, step, rot;
+		// Sub-step rotation to avoid missing channel trigger windows at higher speeds.
+		stepCount = (speed.abs / (5.degrad)).ceil.max(1);
+		step = speed / stepCount;
+		stepCount.do({ |i|
+			rot = (rotation + (step * (i + 1))) % (2*pi);
+			this.synthMachine(rot);
+		});
 		rotation = (rotation + speed)%(2*pi);
 		angle = rotation;
-		this.synthMachine(rotation);
 		oppositemove = false; // if(speed>0, {false}, {true});
 	}
 
