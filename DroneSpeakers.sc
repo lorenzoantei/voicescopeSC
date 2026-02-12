@@ -37,11 +37,11 @@ DroneSpeakers {
 
 	drawImg { |argtuning|
 		var image = nil;
-		"DRAWING IMAGE".postln;
+
 		tuning = argtuning;
 		image = Image.new(sd.asInteger, sd.asInteger);
 		image.draw({
-Ê Ê Ê Ê Ê Ê   Pen.color = backgroundColor;
+        Pen.color = backgroundColor;
 			Pen.fillRect(Rect(0, 0, sd.asInteger, sd.asInteger));
 			Color.black.alpha_(0.25).set;
 			Pen.line(Point(sd-0.5, 0), Point(sd-0.5, sd));
@@ -104,7 +104,7 @@ DroneSpeakers {
 			scScale = false; // as SC makes a distinction between a scale and tuning, but Scala not.
 			scale = DroneScale.new(argscale) 
 		}); // support of the Scala scales
-		[\scale, scale].postln;
+
 		done = false;
 		image = nil;
 	}
@@ -193,7 +193,7 @@ DroneSpeakers {
 	// drawing the harmonics as an image rather than ovals (CPU going down from 23% to 2%)
 	//if(image.isNil, {
 		if(drawharmonics, {
-			\DRAWING_Harmonics.postln;
+
 			harmonicsColor.alpha_(0.2).set;
 			nrHarm.do({arg ratio;
 				circle = (fundamental * ratio).cpsmidi * ((sd/2)/90) - 80;
@@ -203,7 +203,7 @@ DroneSpeakers {
 
 		// if(drawoctaves && drawscale.not, { // no need to draw octaves if already drawing scale
 		if(drawoctaves, { // might need to draw octaves if scale drawn is NOT octave-repeating
-			\DRAWING_Octaves.postln;
+
 			octaveColor.alpha_(0.2).set;
 			nrHarm.do({arg ratio;
 				circle = fundamental*1.55 + (60 * (ratio))  ; // OCTAVES - WORKING !
@@ -214,7 +214,7 @@ DroneSpeakers {
 /*
 // this does not work for scales that are non-ocatave repeating, such as Bohlen Pierce
 		if(drawscale, {
-			\DRAWING_Scale.postln;
+
 			expoctaves = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]-1;
 			expoctaves.size.do({arg ratio, i;
 				scale.ratios.do({arg degree;

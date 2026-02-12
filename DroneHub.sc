@@ -75,6 +75,19 @@ DroneHub {
 				post = false;
 			};
 	}
+
+	resize { |newBounds|
+		var dim = min(newBounds.width, newBounds.height);
+		middle = dim / 2;
+		screenbounds = newBounds;
+		if(speakers.respondsTo(\resize), { 
+			speakers.resize(newBounds) 
+		}, {
+			speakers.instVarPut(10, dim.asFloat); // sd
+			speakers.instVarPut(8, nil); // image
+		});
+		drones.resize(newBounds);
+	}
 	
 	safeEnvironment {
 		var env = currentEnvironment;

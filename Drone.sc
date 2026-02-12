@@ -181,10 +181,11 @@ Drone {
 
 	setDroneLook {
 		var newouter;
-
-		innersize = (freq.cpsmidi * (hub.middle/90)) - 80;
-		outersize = (freq + ((harmonics-1)*fundamental)).cpsmidi * (hub.middle/90) - 80;
-		resonsize = (freq + ((resonance-1)*fundamental)).cpsmidi * (hub.middle/90) - 80;
+		var scaleFactor = hub.middle / 540;
+		point = Point(hub.middle, hub.middle);
+		innersize = (freq.cpsmidi * (hub.middle/90)) - (80 * scaleFactor);
+		outersize = (freq + ((harmonics-1)*fundamental)).cpsmidi * (hub.middle/90) - (80 * scaleFactor);
+		resonsize = (freq + ((resonance-1)*fundamental)).cpsmidi * (hub.middle/90) - (80 * scaleFactor);
 //	\dronelook_deb.postln;
 		// outersize = (fundamental * ((tonic * octaveRatio.pow(octave-1) * ratios[ratio]) + (harmonics-1))).cpsmidi * (hub.middle/90) - 80; // old method - don't delete
 		// resonsize = (fundamental * ((tonic * octaveRatio.pow(octave-1) *  ratios[ratio]) + (resonance-1)) ).cpsmidi * (hub.middle/90) - 80;

@@ -46,8 +46,8 @@ DroneController {
 		fundamental = argfundamental;
 		interpret = false;
 		midipadNames = {nil} ! 8; // the AKAI pad for exposingMIDI to drones
-		screendimension = Window.screenBounds.height;
-		leftoffset = if(hub.mode == \displayFS, {(Window.screenBounds.width-screendimension)/2}, {0});
+		screendimension = min(window.bounds.width, window.bounds.height);
+		leftoffset = (window.bounds.width - screendimension) / 2;
 		//Pen.font = Font( "Helvetica-Bold", 14 );
 		thisThread.randSeed = hub.randomseed;
 
@@ -441,6 +441,24 @@ DroneController {
 			})
 			.drawFunc_( drawFunc );
 			this.start();
+	}
+
+	resize { |newBounds|
+		var topoffset;
+		screendimension = min(newBounds.width, newBounds.height);
+		leftoffset = (newBounds.width - screendimension) / 2;
+		topoffset = (newBounds.height - screendimension) / 2;
+		
+		speakercirlesview.bounds = Rect(leftoffset, topoffset, screendimension, screendimension);
+		drawView.bounds = Rect(leftoffset, topoffset, screendimension, screendimension);
+		
+		speakercircles = speakers.drawImg;
+		speakercirlesview.backgroundImage = speakercircles;
+		
+		droneArray.do({ |drone| drone.setDroneLook });
+		deathArray.do({ |drone| drone.setDroneLook });
+		
+		window.refresh;
 	}
 
 	initDicts { // not used ATM // XXX

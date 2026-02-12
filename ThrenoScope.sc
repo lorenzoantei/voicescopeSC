@@ -149,6 +149,7 @@ ThrenoScope {
 			};
 
 		window = Window("ThrenoScope", Rect(0, 0, screendimension, screendimension), resizable:true, border:border).front;
+		window.view.onResize = { |view| hub.resize(view.bounds) };
 
 		if(fullScreen, { window.fullScreen });
 
