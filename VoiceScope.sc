@@ -206,6 +206,9 @@ VoiceScope {
 		}.value;
 		hub.registerVoices( voices );
 
+		// Mostra la lista dei nodi attivi
+		VoiceTree.new(voices);
+
 		if((mode == \perform) || (mode == \performWin) || (mode == \dev), {
 			interpreter = VoiceInterpreter.new( hub, mode:mode); // - the 'console' for live coding
 			hub.registerInterpreter( interpreter );
