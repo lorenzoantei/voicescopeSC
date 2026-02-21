@@ -1,15 +1,15 @@
 (
     \name: "Voicescope",
-    \summary: "Droning live coding ambient",
-    \author: "Loranto (Original code by Thor Magnusson)",
+    \summary: "Droning live coding ambient (Independent fork of Threnoscope)",
+    \author: "Lorenzo Antei (Original code by Thor Magnusson)",
     \version: "1.0.0",
     \organization: "",
     \country: "Italy",
     \since: "2026",
-    \helpdoc: "HelpSource/Classes/Voicescope.schelp",
+    \helpdoc: "HelpSource/Classes/VoiceScope.schelp",
     \url: "https://github.com/lorenzoantei/Voicescopesc",
     \dependencies: [
-        // Threnoscope originale usa spesso queste estensioni, controlla se servono:
+        // Voicescope originale usa spesso queste estensioni, controlla se servono:
         // "MathLib",
         // "JITLibExtensions" 
     ],

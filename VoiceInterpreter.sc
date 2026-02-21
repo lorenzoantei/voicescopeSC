@@ -1,21 +1,21 @@
-DroneInterpreter {
+VoiceInterpreter {
 
-	var <>mainwin, states, <>textview, <>postview, mode; // textview accessed from DroneStates
+	var <>mainwin, states, <>textview, <>postview, mode; // textview accessed from VoiceStates
 	var <rect, <postrect, <lastCommand;
 	var lineview;
 	
 	*new { |hub, mode|
-		^super.new.initDroneInterpreter(hub, mode);
+		^super.new.initVoiceInterpreter(hub, mode);
 	}
 
-			initDroneInterpreter { |arghub, argmode|
+			initVoiceInterpreter { |arghub, argmode|
 		var leftborder;
 		var hub = arghub;
-		var droneDict = ();
+		var voiceDict = ();
 		var thiscommand;
-		var drones = hub.drones;
-		var selected = drones.selected;
-		var selectedName = try{drones.droneArray[selected].name.asString};
+		var voices = hub.voices;
+		var selected = voices.selected;
+		var selectedName = try{voices.voiceArray[selected].name.asString};
 		
 		// Palette scura forzata per risolvere problemi di tema Linux/Qt
 		var darkPalette = QPalette.dark; 
@@ -36,7 +36,7 @@ DroneInterpreter {
 		// --- SETUP FINESTRA ---
 		if(mode == \dev, { 
 			mainwin = Window("code", Rect(mainwin.bounds.width, 0, 400, mainwin.bounds.height), resizable:true, border:true).front;
-			mainwin.onClose_({ hub.window.close; drones.killAll; });
+			mainwin.onClose_({ hub.window.close; voices.killAll; });
 			
 			// SFONDO NERO e PALETTE SCURA
 			mainwin.view.background = Color.black;
@@ -47,7 +47,7 @@ DroneInterpreter {
 			postrect = Rect(leftborder+1, rect.height+11, 400, mainwin.bounds.height-rect.height-64);
 
 			// Lancio GUI personalizzata
-			{ if("DroneGUI".asSymbol.asClass.notNil) { DroneGUI.new(hub) } }.defer(0.1);
+			{ if("VoiceGUI".asSymbol.asClass.notNil) { VoiceGUI.new(hub) } }.defer(0.1);
 
 		}, {
 			mainwin.bounds = Window.screenBounds;
@@ -60,14 +60,14 @@ DroneInterpreter {
 			.font_(Font("Monaco", 11))
 			.palette_(darkPalette) // Forza palette
 			.states_([["Quit", Color.white, Color.grey(0.2)]])
-			.action_({ arg butt; hub.drones.quit; });
+			.action_({ arg butt; hub.voices.quit; });
 
 		// 2. HELP Button
 		Button(mainwin,Rect(rect.left+65, 5 , 50, 20))
 			.font_(Font("Monaco", 11))
 			.palette_(darkPalette)
 			.states_([["Help", Color.white, Color.grey(0.2)]])
-			.action_({ arg butt; "open http://thormagnusson.github.io/threnoscope".unixCmd; });
+			.action_({ arg butt; "open http://thormagnusson.github.io/voicescope".unixCmd; });
 
 		// 3. Label "Window mode"
 		StaticText(mainwin, Rect(rect.left+125, 5, 120, 20))
@@ -84,7 +84,7 @@ DroneInterpreter {
 			.stringColor_(Color.white)
 			.items_([ "perform", "performWin", "dev", "displayFS", "displayWin"])
 			.action_({ arg menu;
-				hub.drones.mode(menu.item.asSymbol);
+				hub.voices.mode(menu.item.asSymbol);
 			});
 
 		// 5. Label "Main vol"
@@ -142,67 +142,67 @@ DroneInterpreter {
 					if((mod & 524288 == 524288) && (keycode==126), { // alt + up
 						
 						var name, collectivename;
-						selected = (selected-1).clip(0, drones.droneArray.size-1);
-						name = drones.droneArray[selected].name.asString;
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						selected = (selected-1).clip(0, voices.voiceArray.size-1);
+						name = voices.voiceArray[selected].name.asString;
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						if(name.contains("_"), { // it's a group of some sort
 							collectivename = name[0..name.findAll("_").last-1];
 							if(name.contains("chd_"), {
-								hub.drones.chordDict.keys.do({ |key| 
+								hub.voices.chordDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.chordDict[key].selected = true;
+										hub.voices.chordDict[key].selected = true;
 									});
 								});
 							});
 							if(name.contains("sat_"), {
-								hub.drones.satellitesDict.keys.do({ |key| 
+								hub.voices.satellitesDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.satellitesDict[key].selected = true;
+										hub.voices.satellitesDict[key].selected = true;
 									});
 								});
 								//satellitesDict[name[0..6].asSymbol].selected = true;
 							});	
 							if(name.contains("grp_"), {
 								//var grpname = key.asString[0..key.asString.findAll("_")[1]-1];
-								hub.drones.groupDict.keys.do({ |key| 
+								hub.voices.groupDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.groupDict[key].selected = true;
+										hub.voices.groupDict[key].selected = true;
 									});
 								});
 							});	
-							drones.selectedName = collectivename; // only the name of the group
+							voices.selectedName = collectivename; // only the name of the group
 							block{ arg break;
-								drones.droneArray.do({ arg drone, i;
-									if(drone.name.asString.contains("_"), {
-										if((drone.name.asString[0..drone.name.asString.findAll("_").last-1] == collectivename), {
+								voices.voiceArray.do({ arg voice, i;
+									if(voice.name.asString.contains("_"), {
+										if((voice.name.asString[0..voice.name.asString.findAll("_").last-1] == collectivename), {
 											selected = i;
 											break.value();
 										});
 									});
 								});											};
 						}, { 
-							drones.selectedName = drones.droneArray[selected].name.asString;
-							drones.droneArray[selected].selected = true;
+							voices.selectedName = voices.voiceArray[selected].name.asString;
+							voices.voiceArray[selected].selected = true;
 						});
-																		drones.selected = selected;
-						//drones.droneArray[selected].selected = true;
-						[\SELECTED_, drones.droneArray[selected].name].postln;
+																		voices.selected = selected;
+						//voices.voiceArray[selected].selected = true;
+						[\SELECTED_, voices.voiceArray[selected].name].postln;
 						
-						selectedName = drones.droneArray[selected].name.asString;
-						hub.postDroneState(selectedName, selected);
+						selectedName = voices.voiceArray[selected].name.asString;
+						hub.postVoiceState(selectedName, selected);
 //						Document.listener.string = ""; // clear post window
 //						string = "~"++selectedName++"\n"++
-//						"~"++selectedName++".type = \\"++drones.droneArray[selected].type++"\n"++
-//						"~"++selectedName++".tonic = "++drones.droneArray[selected].tonic++"\n"++
-//						"~"++selectedName++".harmonics = "++drones.droneArray[selected].harmonics++"\n"++
-//						"~"++selectedName++".amp = "++drones.droneArray[selected].amp++"\n"++
-//						"~"++selectedName++".speed = "++(drones.droneArray[selected].speed*1000)++"\n"++
-//						"~"++selectedName++".length = "++(drones.droneArray[selected].length*360/(2*pi))++"\n"++
-//						"~"++selectedName++".angle = "++(drones.droneArray[selected].angle*360/(2*pi))++"\n"++
-//						"~"++selectedName++".degree = "++drones.droneArray[selected].degree++"\n"++
-//						"~"++selectedName++".ratio = "++drones.droneArray[selected].ratio++"\n"++
-//						"~"++selectedName++".env = "++drones.droneArray[selected].env++"\n"++
-//						"~"++selectedName++".octave = "++drones.droneArray[selected].octave++"\n";
+//						"~"++selectedName++".type = \\"++voices.voiceArray[selected].type++"\n"++
+//						"~"++selectedName++".tonic = "++voices.voiceArray[selected].tonic++"\n"++
+//						"~"++selectedName++".harmonics = "++voices.voiceArray[selected].harmonics++"\n"++
+//						"~"++selectedName++".amp = "++voices.voiceArray[selected].amp++"\n"++
+//						"~"++selectedName++".speed = "++(voices.voiceArray[selected].speed*1000)++"\n"++
+//						"~"++selectedName++".length = "++(voices.voiceArray[selected].length*360/(2*pi))++"\n"++
+//						"~"++selectedName++".angle = "++(voices.voiceArray[selected].angle*360/(2*pi))++"\n"++
+//						"~"++selectedName++".degree = "++voices.voiceArray[selected].degree++"\n"++
+//						"~"++selectedName++".ratio = "++voices.voiceArray[selected].ratio++"\n"++
+//						"~"++selectedName++".env = "++voices.voiceArray[selected].env++"\n"++
+//						"~"++selectedName++".octave = "++voices.voiceArray[selected].octave++"\n";
 //						Document.listener.string = string; // add info
 //						if(hub.post, { hub.interpreter.postview.string_(string) });
 						nil;
@@ -213,38 +213,38 @@ DroneInterpreter {
 						var name, collectivename;
 						var foundFlag = false;
 						var oldfoundFlag = false;
-						selected = (selected+1).clip(0, drones.droneArray.size-1);
-						name = drones.droneArray[selected].name.asString;
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						selected = (selected+1).clip(0, voices.voiceArray.size-1);
+						name = voices.voiceArray[selected].name.asString;
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						if(name.contains("_"), { // it's a group of some sort
 							collectivename = name[0..name.findAll("_").last-1];
 							if(name.contains("chd_"), {
-								hub.drones.chordDict.keys.do({ |key| 
+								hub.voices.chordDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.chordDict[key].selected = true;
+										hub.voices.chordDict[key].selected = true;
 									});
 								});
 							});
 							if(name.contains("sat_"), {
-								hub.drones.satellitesDict.keys.do({ |key| 
+								hub.voices.satellitesDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.satellitesDict[key].selected = true;
+										hub.voices.satellitesDict[key].selected = true;
 									});
 								});
 							});	
 							if(name.contains("grp_"), {
-								hub.drones.groupDict.keys.do({ |key| 
+								hub.voices.groupDict.keys.do({ |key| 
 									if(key.asString == collectivename, {
-										hub.drones.groupDict[key].selected = true;
+										hub.voices.groupDict[key].selected = true;
 									});
 								});
 							});	
-							drones.selectedName = collectivename; // only the name of the group/sat/chord
+							voices.selectedName = collectivename; // only the name of the group/sat/chord
 							block{ arg break;
-							drones.droneArray[selected .. drones.droneArray.size].do({ arg drone, i;
+							voices.voiceArray[selected .. voices.voiceArray.size].do({ arg voice, i;
 								oldfoundFlag = foundFlag;
-								if(drone.name.asString.contains("_"), {
-									if(drone.name.asString[0..drone.name.asString.findAll("_").last-1] == collectivename, {
+								if(voice.name.asString.contains("_"), {
+									if(voice.name.asString[0..voice.name.asString.findAll("_").last-1] == collectivename, {
 										foundFlag = true;
 									},{
 										foundFlag = false;
@@ -252,103 +252,103 @@ DroneInterpreter {
 								}, {
 									foundFlag = false;
 								});	
-								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a drone outside group
-								    selected = (selected+i-1).clip(0, drones.droneArray.size-1);
+								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a voice outside group
+								    selected = (selected+i-1).clip(0, voices.voiceArray.size-1);
 									("selected down = "+selected).postln;
 									break.value;
 								});
 							});
 							}
 						}, {
-							drones.selectedName = drones.droneArray[selected].name.asString;
-							drones.droneArray[selected].selected = true;
+							voices.selectedName = voices.voiceArray[selected].name.asString;
+							voices.voiceArray[selected].selected = true;
 						});						
 						
 						/*
-						// select another drone
+						// select another voice
 						var name, collectivename;
 						var foundFlag = false;
 						var oldfoundFlag = false;
 						
-						selected = drones.selected;
-						//drones.droneArray[selected].selected = false;
-						selected = (selected+1).clip(0, drones.droneArray.size-1);
+						selected = voices.selected;
+						//voices.voiceArray[selected].selected = false;
+						selected = (selected+1).clip(0, voices.voiceArray.size-1);
 
-						name = drones.droneArray[selected].name.asString;
-						[\oooo_, drones.droneArray[selected].name].postln;
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						name = voices.voiceArray[selected].name.asString;
+						[\oooo_, voices.voiceArray[selected].name].postln;
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						
 						if(name.asString.contains("_"), { // it's a group of some sort
 							collectivename = name[0..name.findAll("_").last-1];
 							[\collectivename, collectivename].postln;
 							if(name.contains("chd_"), {
-								hub.drones.chordDict[collectivename.asSymbol].selected = true;
+								hub.voices.chordDict[collectivename.asSymbol].selected = true;
 							});
 							if(name.contains("sat_"), {
-								hub.drones.satellitesDict[collectivename.asSymbol].selected = true;
+								hub.voices.satellitesDict[collectivename.asSymbol].selected = true;
 							});	
 							if(name.contains("grp_"), {
-								hub.drones.groupDict[collectivename.asSymbol].selected = true;
+								hub.voices.groupDict[collectivename.asSymbol].selected = true;
 							});	
-							drones.selectedName = collectivename; // only the name of the group
-//							drones.chordDict[name.asString[0..6].asSymbol].selected = true;
+							voices.selectedName = collectivename; // only the name of the group
+//							voices.chordDict[name.asString[0..6].asSymbol].selected = true;
 							block{ arg break;
-							drones.droneArray[selected .. drones.droneArray.size].do({ arg drone, i;
+							voices.voiceArray[selected .. voices.voiceArray.size].do({ arg voice, i;
 								"prisdfasd".scramble.postln;
 								oldfoundFlag = foundFlag;
-								if(drone.name.asString[0..drone.name.asString.findAll("_").last-1] == collectivename, {
-									//drone.selected = true;
+								if(voice.name.asString[0..voice.name.asString.findAll("_").last-1] == collectivename, {
+									//voice.selected = true;
 									foundFlag = true;
 								},{
 									foundFlag = false;
 								});
-								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a drone outside group
+								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a voice outside group
 									"LAST DRONE IN THE GROUP - nr: ".post; i.postln;
-								    selected = (selected+i-1).clip(0, drones.droneArray.size-1);
+								    selected = (selected+i-1).clip(0, voices.voiceArray.size-1);
 									("selected down = "+selected).postln;
 									break.value;
 								});
 							});
 							}
 						}, {
-							//selected = (selected+1).clip(0, drones.droneArray.size-1);
-							drones.selectedName = drones.droneArray[selected].name.asString;
-							drones.droneArray[selected].selected = true;
+							//selected = (selected+1).clip(0, voices.voiceArray.size-1);
+							voices.selectedName = voices.voiceArray[selected].name.asString;
+							voices.voiceArray[selected].selected = true;
 						});
 						*/
 						
 						/*
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						if(name.asString.contains("_"), { // it's a group of some sort
-							hub.drones.chordDict[name.asString[0..6].asSymbol].selected = true;
-							selected = (selected + hub.drones.chordDict[name.asString[0..6].asSymbol].dronearray.size-1).clip(0, drones.droneArray.size-1);
+							hub.voices.chordDict[name.asString[0..6].asSymbol].selected = true;
+							selected = (selected + hub.voices.chordDict[name.asString[0..6].asSymbol].voicearray.size-1).clip(0, voices.voiceArray.size-1);
 						//}, {
-							//selected = (selected+1).clip(0, drones.droneArray.size-1);
-						//	drones.droneArray[selected].selected = true;
-						//	drones.selected = selected;
+							//selected = (selected+1).clip(0, voices.voiceArray.size-1);
+						//	voices.voiceArray[selected].selected = true;
+						//	voices.selected = selected;
 						});
 						
 						*/
-																		drones.selected = selected;
-						selectedName = drones.droneArray[selected].name.asString;
-						hub.postDroneState(selectedName, selected);
+																		voices.selected = selected;
+						selectedName = voices.voiceArray[selected].name.asString;
+						hub.postVoiceState(selectedName, selected);
 												
-	//drones.droneArray[selected].selected = true;
-						[\SELECTED_, drones.droneArray[selected].name].postln;
+	//voices.voiceArray[selected].selected = true;
+						[\SELECTED_, voices.voiceArray[selected].name].postln;
 				
 //						Document.listener.string = ""; // clear post window
 //						string = "~"++selectedName++"\n"++
-//						"~"++selectedName++".type = \\"++drones.droneArray[selected].type++"\n"++
-//						"~"++selectedName++".tonic = "++drones.droneArray[selected].tonic++"\n"++
-//						"~"++selectedName++".harmonics = "++drones.droneArray[selected].harmonics++"\n"++
-//						"~"++selectedName++".amp = "++drones.droneArray[selected].amp++"\n"++
-//						"~"++selectedName++".speed = "++(drones.droneArray[selected].speed*1000)++"\n"++
-//						"~"++selectedName++".length = "++(drones.droneArray[selected].length*360/(2*pi))++"\n"++
-//						"~"++selectedName++".angle = "++(drones.droneArray[selected].angle*360/(2*pi))++"\n"++
-//						"~"++selectedName++".degree = "++drones.droneArray[selected].degree++"\n"++
-//						"~"++selectedName++".ratio = "++drones.droneArray[selected].ratio++"\n"++
-//						"~"++selectedName++".env = "++drones.droneArray[selected].env++"\n"++
-//						"~"++selectedName++".octave = "++drones.droneArray[selected].octave++"\n";
+//						"~"++selectedName++".type = \\"++voices.voiceArray[selected].type++"\n"++
+//						"~"++selectedName++".tonic = "++voices.voiceArray[selected].tonic++"\n"++
+//						"~"++selectedName++".harmonics = "++voices.voiceArray[selected].harmonics++"\n"++
+//						"~"++selectedName++".amp = "++voices.voiceArray[selected].amp++"\n"++
+//						"~"++selectedName++".speed = "++(voices.voiceArray[selected].speed*1000)++"\n"++
+//						"~"++selectedName++".length = "++(voices.voiceArray[selected].length*360/(2*pi))++"\n"++
+//						"~"++selectedName++".angle = "++(voices.voiceArray[selected].angle*360/(2*pi))++"\n"++
+//						"~"++selectedName++".degree = "++voices.voiceArray[selected].degree++"\n"++
+//						"~"++selectedName++".ratio = "++voices.voiceArray[selected].ratio++"\n"++
+//						"~"++selectedName++".env = "++voices.voiceArray[selected].env++"\n"++
+//						"~"++selectedName++".octave = "++voices.voiceArray[selected].octave++"\n";
 //						Document.listener.string = string; // add info
 //						if(hub.post, { hub.interpreter.postview.string_(string) });
 
@@ -358,86 +358,86 @@ DroneInterpreter {
 /*
 
 					if((mod & 524288 == 524288) && (keycode==125), { // alt + down
-						// select another drone
+						// select another voice
 						var foundFlag = false;
 						var oldfoundFlag = false;
-						selected = drones.selected;
-						//drones.droneArray[selected].selected = false;
-						[\oooo_, drones.droneArray[selected].name].postln;
+						selected = voices.selected;
+						//voices.voiceArray[selected].selected = false;
+						[\oooo_, voices.voiceArray[selected].name].postln;
 						
-						selected = (selected+1).clip(0, drones.droneArray.size-1);
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
-						if(drones.droneArray[selected].name.asString.contains("_"), { // it's a group of some sort
+						selected = (selected+1).clip(0, voices.voiceArray.size-1);
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
+						if(voices.voiceArray[selected].name.asString.contains("_"), { // it's a group of some sort
 							
 							block{ arg break;
-							drones.droneArray[selected .. drones.droneArray.size].do({ arg drone, i;
+							voices.voiceArray[selected .. voices.voiceArray.size].do({ arg voice, i;
 								"prisdfasd".scramble.postln;
 								oldfoundFlag = foundFlag;
-								if(drones.droneArray[selected].name.asString[0..6] == drone.name.asString[0..6], {
-									drone.selected = true;
+								if(voices.voiceArray[selected].name.asString[0..6] == voice.name.asString[0..6], {
+									voice.selected = true;
 									foundFlag = true;
 								},{
 									foundFlag = false;
 								});
-								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a drone outside group
+								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a voice outside group
 									"LAST DRONE IN THE GROUP - nr: ".post; i.postln;
-								    selected = (selected+i-1).clip(0, drones.droneArray.size-1);
+								    selected = (selected+i-1).clip(0, voices.voiceArray.size-1);
 									("selected down = "+selected).postln;
 									break.value;
 								});
 							});
 							}
 						}, {
-							//selected = (selected+1).clip(0, drones.droneArray.size-1);
-							drones.droneArray[selected].selected = true;
+							//selected = (selected+1).clip(0, voices.voiceArray.size-1);
+							voices.voiceArray[selected].selected = true;
 						});
-													drones.selected = selected;
-//	drones.droneArray[selected].selected = true;
+													voices.selected = selected;
+//	voices.voiceArray[selected].selected = true;
 
 						nil;
 					});
 
 					if((mod & 524288 == 524288) && (keycode==125), { // alt + down
-						// select another drone
+						// select another voice
 						var foundFlag = false;
 						var oldfoundFlag = false;
-						selected = drones.selected;
-						//drones.droneArray[selected].selected = false;
-						[\oooo_, drones.droneArray[selected].name].postln;
-						drones.droneArray.do({ arg drone; drone.selected = false }); // deselect all
-						if(drones.droneArray[selected].name.asString.contains("_"), { // it's a group of some sort
+						selected = voices.selected;
+						//voices.voiceArray[selected].selected = false;
+						[\oooo_, voices.voiceArray[selected].name].postln;
+						voices.voiceArray.do({ arg voice; voice.selected = false }); // deselect all
+						if(voices.voiceArray[selected].name.asString.contains("_"), { // it's a group of some sort
 							
 							block{ arg break;
-							drones.droneArray.do({ arg drone, i;
+							voices.voiceArray.do({ arg voice, i;
 								oldfoundFlag = foundFlag;
-								if(drones.droneArray[selected].name.asString[0..6] == drone.name.asString[0..6], {
-									drone.selected = true;
+								if(voices.voiceArray[selected].name.asString[0..6] == voice.name.asString[0..6], {
+									voice.selected = true;
 									foundFlag = true;
 								},{
 									foundFlag = false;
 								});
-								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a drone outside group
+								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a voice outside group
 									"LAST DRONE IN THE GROUP - nr: ".post; i.postln;
-									selected = i.clip(0, drones.droneArray.size-1);
+									selected = i.clip(0, voices.voiceArray.size-1);
 									("selected = "+selected).postln;
 									break.value;
 								});
 							});
 							}
 						}, {
-							selected = (selected+1).clip(0, drones.droneArray.size-1);
-							drones.droneArray[selected].selected = true;
+							selected = (selected+1).clip(0, voices.voiceArray.size-1);
+							voices.voiceArray[selected].selected = true;
 						});
-													drones.selected = selected;
-//	drones.droneArray[selected].selected = true;
+													voices.selected = selected;
+//	voices.voiceArray[selected].selected = true;
 
 						nil;
 					});
 
 */
 
-					if(  (mod & 524288 == 524288)  && (unicode==127), { // cmd + backdelete button = KILL Selected drone from textview
-						drones.droneArray[selected].kill;
+					if(  (mod & 524288 == 524288)  && (unicode==127), { // cmd + backdelete button = KILL Selected voice from textview
+						voices.voiceArray[selected].kill;
 					});
 
 					if((mod == 131332) || (mod == 131076) && (keycode==36), { // evaluate code in SC mode -> (SHIFT + RETURN)
@@ -474,7 +474,7 @@ DroneInterpreter {
     
     // ... METODI OPINTERPRETER E ALTRI (Mantienili come sono, non servono alla grafica) ...
     // Per brevità ho tagliato il resto, ma tu lascia i metodi opInterpreter, gui, codescore, ecc.
-    // L'unica cosa che conta è il metodo initDroneInterpreter sopra.
+    // L'unica cosa che conta è il metodo initVoiceInterpreter sopra.
 
 	gui { | bool |
 		if( bool, {

@@ -5,7 +5,7 @@
 
 
 // system
-// TODO: implement a parameter-to-midi feature where a specific parameter of a drone can be assigned to a slider or a knob. (-> this should be stored in states, such that a setup can be recalled with parameters etc.)
+// TODO: implement a parameter-to-midi feature where a specific parameter of a voice can be assigned to a slider or a knob. (-> this should be stored in states, such that a setup can be recalled with parameters etc.)
 // TODO: make an UNDO function
 // TODO: make the system argument save (if use writes wrong types) (eg. createDrone(\saw, \minor, 2))
 
@@ -13,13 +13,13 @@
 // sound
 
 // TODO: Add Lag Ugens to detune and other ~drn.set() arguments
-// TODO: Cube sinewaves in the drones SinOsc.ar().cub
+// TODO: Cube sinewaves in the voices SinOsc.ar().cub
 // TODO: oscillating amp.
 // TODO: fix the perceived loudness when using resonace !!!
 // TODO: create a DynKlank and DynKlang synthdefs
 // TODO: Explore "harmonic stretching" as in the harmonics of a piano (8th harmonic stretched) Here I can use the Drag Handle (as in recParam) to tune the harmonic
 // TODO: explore the use of lissajous curves to explore harmonic relationships
-// TODO: create a noise Drone. But using BPF or FFT brick wall?
+// TODO: create a noise Voice. But using BPF or FFT brick wall?
 // TODO: add LFNoise2 into all frequency args.
 // ToDO: Check amplitude argument for sample instruments. Also check RedFrik Phahsor for playing them
 // i.e., fix the tonic_(1, 20) glitches that will be heard when the pitch is changed.
@@ -28,29 +28,29 @@
 // TODO: add tremolo to synths
 
 
-// drones
+// voices
 // TODO: user specified Chords into chorddict
 // TODO: add a spectrogram view
-// TODO: expose drone parameters down to a MIDI interface
+// TODO: expose voice parameters down to a MIDI interface
 
 // score
 // TODO: make it possible to start multiple scores, and stop a unique one
-// TODO: chords and satellites into the dronescore (as a line representation)
+// TODO: chords and satellites into the voicescore (as a line representation)
 // TODO: Fix problem if one tries to swap state with the same state.
 // Having removed the opInt - addToScore needs to be added for all relevant methods
 // BUG: Machines cannot be created from a score (cannot be called from this process)
 // TODO: solve problem with .interpret code (Try e.g., the score for Lauren, \s1Intro)
-// TODO: .killAll needs to go and send a .kill message to all drones, thus ending them on the timeline
-// TODO: if dronescore is playing without view, and the view is started, then start timeline at location
+// TODO: .killAll needs to go and send a .kill message to all voices, thus ending them on the timeline
+// TODO: if voicescore is playing without view, and the view is started, then start timeline at location
 
-// TODO: 	loadsamples here : DroneSynths.new(loadsamples: false);
-// TODO: ~drones.killAll should kill running scores too
+// TODO: 	loadsamples here : VoiceSynths.new(loadsamples: false);
+// TODO: ~voices.killAll should kill running scores too
 
 // machines
 // TODO: fix them all!
 
 
-// TODO: allow for frequency creation argument, as in ~drones.createDrone(\saw, freq: 432)
+// TODO: allow for frequency creation argument, as in ~voices.createDrone(\saw, freq: 432)
 /// TODO: Make ~shf.freq post the frequency (or any other args) into the freq window
 
 // Display Modes:
@@ -66,30 +66,30 @@
 
 /*
 Lukas:
-I just had another �feature suggestion� for the ThrenoScope in mind that I forgot to ask you about earlier: I would find it very useful to be able to change the curve of interpolation between parameters. So when calling for example �~bob.harmonics_(10, 30)�, you could add something like �.exp�, �.sqr�, �.cub� to interpolate exponentially/inverted exponentially, cubicly etc.. That seems like an important compositional parameter when dealing with these kinds of forms.
+I just had another �feature suggestion� for the VoiceScope in mind that I forgot to ask you about earlier: I would find it very useful to be able to change the curve of interpolation between parameters. So when calling for example �~bob.harmonics_(10, 30)�, you could add something like �.exp�, �.sqr�, �.cub� to interpolate exponentially/inverted exponentially, cubicly etc.. That seems like an important compositional parameter when dealing with these kinds of forms.
 
 */
 
 
 
-ThrenoScope {
+VoiceScope {
 	var window, screendimension;
 	var hub;
 
 	*new { arg channels=2, mode=\perform, key="A", appPath;
-		^super.new.initThrenoScope(channels, mode, key, appPath);
+		^super.new.initVoiceScope(channels, mode, key, appPath);
 	}
 
-	initThrenoScope { | channels, mode, key, appPath |
+	initVoiceScope { | channels, mode, key, appPath |
 		
 		var fundamental;
 		var speakers, interpreter, machines, states;
-		var drones, env;
+		var voices, env;
 		var tuning = \et12;
 		var scale = \minor;
 		// var mode = argmode;
 		//var channels = argchannels;
-		var threnoscopeColor;
+		var voicescopeColor;
 		var border, fullScreen, bgcolor;
 
 		//GUI.cocoa; // use this if on SC3.6-
@@ -148,13 +148,13 @@ ThrenoScope {
 				bgcolor = Color.black;
 			};
 
-		window = Window("ThrenoScope", Rect(0, 0, screendimension, screendimension), resizable:true, border:border).front;
+		window = Window("VoiceScope", Rect(0, 0, screendimension, screendimension), resizable:true, border:border).front;
 		window.view.onResize = { |view| hub.resize(view.bounds) };
 
 		if(fullScreen, { window.fullScreen });
 
 		window.view.background = bgcolor;
-		threnoscopeColor = Color.black; // sfondo quadrante grafico
+		voicescopeColor = Color.black; // sfondo quadrante grafico
 
 		if(key.isNumber,{
 			fundamental = key;
@@ -177,37 +177,37 @@ ThrenoScope {
 		//fundamental = 55;
 
 
-		// DroneLimiter.activate;
-		// Drone - the key class of each drone
-		// DroneMachine - the class containing the diverse machines
-		// DroneGUI - an experiment with GUI
-		// DroneChord / DroneSatellites / DroneGroup
-		// DroneCodeScore - an experiment with Score
+		// VoiceLimiter.activate;
+		// Voice - the key class of each voice
+		// VoiceMachine - the class containing the diverse machines
+		// VoiceGUI - an experiment with GUI
+		// VoiceChord / VoiceSatellites / VoiceGroup
+		// VoiceCodeScore - an experiment with Score
 
-		hub = DroneHub.new( window, mode, scale, fundamental, threnoscopeColor, key, channels, appPath ); // - all key data accessible to other classes
+		hub = VoiceHub.new( window, mode, scale, fundamental, voicescopeColor, key, channels, appPath ); // - all key data accessible to other classes
 		env = hub.env ? currentEnvironment;
-		env.put(\singlehub, hub);
+		env.put(\voicehub, hub);
 
-		DroneSynths.new(false, hub);
+		VoiceSynths.new(false, hub);
 
-		states = DroneStates.new( hub ); // - storing states and recording/playing scores
+		states = VoiceStates.new( hub ); // - storing states and recording/playing scores
 
 		hub.registerStates( states );
-		speakers = DroneSpeakers.new( hub, channels, fundamental ); // drawing background
+		speakers = VoiceSpeakers.new( hub, channels, fundamental ); // drawing background
 		hub.registerSpeakers( speakers );
-		drones = DroneController.new( hub, tuning, scale, fundamental); // - main interface
-		env.put(\drones, drones);
+		voices = VoiceController.new( hub, tuning, scale, fundamental); // - main interface
+		env.put(\voices, voices);
 		{
 			var proxyClass = \ProxySpace.asClass;
 			if(proxyClass.notNil and: { currentEnvironment.isKindOf(proxyClass) }) {
-				currentEnvironment.envir.put(\drones, drones);
-				currentEnvironment.envir.put(\singlehub, hub);
+				currentEnvironment.envir.put(\voices, voices);
+				currentEnvironment.envir.put(\voicehub, hub);
 			};
 		}.value;
-		hub.registerDrones( drones );
+		hub.registerVoices( voices );
 
 		if((mode == \perform) || (mode == \performWin) || (mode == \dev), {
-			interpreter = DroneInterpreter.new( hub, mode:mode); // - the 'console' for live coding
+			interpreter = VoiceInterpreter.new( hub, mode:mode); // - the 'console' for live coding
 			hub.registerInterpreter( interpreter );
 		});
 	}
@@ -215,12 +215,12 @@ ThrenoScope {
 /*
 	mode {arg mode;
 		this.quit;
-		this.initThrenoScope(hub.channels, mode, hub.key, hub.appPath);
+		this.initVoiceScope(hub.channels, mode, hub.key, hub.appPath);
 	}
 */
 
 	quit {
-		if(hub.notNil and: { hub.drones.notNil }, { hub.drones.killAll });
+		if(hub.notNil and: { hub.voices.notNil }, { hub.voices.killAll });
 		window.close;
 	}
 }

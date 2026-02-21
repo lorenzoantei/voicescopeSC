@@ -1,40 +1,40 @@
 
-DroneController {
+VoiceController {
 
 	var deathArray, osc; // experimental
-	var <drawView, drawTask, <scp, dronegui, speakercircles, codescore;
-	var <>droneArray, <>machineArray; // arrays are used for drawing
-	var <droneDict, <chordDict, <satellitesDict, <machineDict, <interDict, <groupDict;
+	var <drawView, drawTask, <scp, voicegui, speakercircles, codescore;
+	var <>voiceArray, <>machineArray; // arrays are used for drawing
+	var <voiceDict, <chordDict, <satellitesDict, <machineDict, <interDict, <groupDict;
 	var <>hub, window, screendimension;
-	var drone, <>selected, <>selectedName, interDroneArray, <nameArray;
+	var voice, <>selected, <>selectedName, interVoiceArray, <nameArray;
 	var speakers, <tuning, <scale, <fundamental;
 	var interpreter, states, interpret, oldy;
 	var <globalenv;
 	var drawFunc, mouseDownAct, mouseMoveAct;
-	var dronecount, leftoffset, speakercirlesview, midipadNames, midiout;
+	var voicecount, leftoffset, speakercirlesview, midipadNames, midiout;
 // var testwin;
 
 	*new { arg hub, tuning, scale, fundamental;
-		^super.new.initDroneController(hub, tuning, scale, fundamental);
+		^super.new.initVoiceController(hub, tuning, scale, fundamental);
 	}
 
-	initDroneController { |arghub, argtuning, argscale, argfundamental|
+	initVoiceController { |arghub, argtuning, argscale, argfundamental|
 		hub = arghub;
 		window = hub.window;
 		interpreter = hub.interpreter;
 		states = hub.states;
-		dronecount = 0;
-		droneArray = [];
+		voicecount = 0;
+		voiceArray = [];
 
 		deathArray = [];
 		machineArray = [];
-		droneDict = ();
+		voiceDict = ();
 		chordDict = ();
 		satellitesDict = ();
 		groupDict = ();
 		machineDict = ();
 		interDict = (); // storing interpreted clusters
-		interDroneArray = [];
+		interVoiceArray = [];
 		nameArray = [];
 	//	this.initDicts();
 		speakers = hub.speakers;
@@ -45,7 +45,7 @@ DroneController {
 		scale = argscale;
 		fundamental = argfundamental;
 		interpret = false;
-		midipadNames = {nil} ! 8; // the AKAI pad for exposingMIDI to drones
+		midipadNames = {nil} ! 8; // the AKAI pad for exposingMIDI to voices
 		screendimension = min(window.bounds.width, window.bounds.height);
 		leftoffset = (window.bounds.width - screendimension) / 2;
 		//Pen.font = Font( "Helvetica-Bold", 14 );
@@ -57,23 +57,23 @@ DroneController {
 	//	speakercircles.dump;
 
 		mouseDownAct = { |me, x, y, mod|
-				var seldrone, string;
+				var selvoice, string;
 				var cursorDistCenter = sqrt(([0, 0] - [(hub.middle - x).abs, (hub.middle - y).abs]).squared.sum);
 				var cursorTheta = (Point((hub.middle - x),(hub.middle - y)).theta+pi);
 				oldy = y; // the offset for calculating mouse move rotation
-				droneArray.do({ |drone, i| drone.selected = false }); // deselect all drones
-				droneArray.do({ |drone, i|
+				voiceArray.do({ |voice, i| voice.selected = false }); // deselect all voices
+				voiceArray.do({ |voice, i|
 					var zeroCrossing = false;
-					var loc = drone.getDroneLook;
-					if(loc[2]+loc[3] > (2*pi), { // a drone crossing the zero line
+					var loc = voice.getVoiceLook;
+					if(loc[2]+loc[3] > (2*pi), { // a voice crossing the zero line
 						if(
 						(cursorDistCenter>loc[0]) &&
 						(cursorDistCenter<loc[1]) &&
 						(( cursorTheta > loc[2] ) || ( cursorTheta < ((loc[2] + loc[3]) % (2*pi)))), {
 							selected = i;
-							drone.selected = true;
-							selectedName = drone.name.asString;
-							seldrone = drone;
+							voice.selected = true;
+							selectedName = voice.name.asString;
+							selvoice = voice;
 						});
 					}, {
 					if(
@@ -82,28 +82,28 @@ DroneController {
 						( cursorTheta > loc[2] ) &&
 						( cursorTheta < (loc[2] + loc[3])), {
 							selected = i;
-							drone.selected = true;
-							selectedName = drone.name.asString;
-							seldrone = drone;
+							voice.selected = true;
+							selectedName = voice.name.asString;
+							selvoice = voice;
 						});
 					});
 				});
-//				[\selectedspeed, seldrone.speed].postln;
+//				[\selectedspeed, selvoice.speed].postln;
 //				[\selectedName, selectedName].postln;
 
 
-				if((hub.post || (hub.mode == \displayFS)) && seldrone.isNil.not, {
-					hub.postDroneState(selectedName, selected);
+				if((hub.post || (hub.mode == \displayFS)) && selvoice.isNil.not, {
+					hub.postVoiceState(selectedName, selected);
 
 //					Document.listener.string = ""; // clear post window
 //					string = "~"++selectedName++"\n"++
-//						"~"++selectedName++".type = \\"++seldrone.type++"\n"++
-//					"~"++selectedName++".harmonics = "++seldrone.harmonics++"\n"++
-//					"~"++selectedName++".amp = "++seldrone.amp++"\n"++
-//					"~"++selectedName++".degree = "++seldrone.degree++"\n"++
-//					"~"++selectedName++".ratio = "++seldrone.ratio++"\n"++
-//					"~"++selectedName++".env = "++seldrone.env++"\n"++
-//					"~"++selectedName++".octave = "++seldrone.octave++"\n";
+//						"~"++selectedName++".type = \\"++selvoice.type++"\n"++
+//					"~"++selectedName++".harmonics = "++selvoice.harmonics++"\n"++
+//					"~"++selectedName++".amp = "++selvoice.amp++"\n"++
+//					"~"++selectedName++".degree = "++selvoice.degree++"\n"++
+//					"~"++selectedName++".ratio = "++selvoice.ratio++"\n"++
+//					"~"++selectedName++".env = "++selvoice.env++"\n"++
+//					"~"++selectedName++".octave = "++selvoice.octave++"\n";
 //					Document.listener.string = string; // add info
 //					hub.interpreter.postview.string_(string);
 				});
@@ -116,7 +116,7 @@ DroneController {
 
 		mouseMoveAct = { |me, x, y, mod|
 				var change = (oldy-y)/300;
-				droneArray[selected].relRotation_(change);
+				voiceArray[selected].relRotation_(change);
 				oldy = y;
 			};
 
@@ -124,16 +124,16 @@ DroneController {
 		drawFunc = {
 				//speakers.draw;
 
-				droneArray.do({arg drone; drone.update; drone.draw.value});
+				voiceArray.do({arg voice; voice.update; voice.draw.value});
 
-				deathArray.do({arg drone; drone.update; drone.draw.value}); // drones scheduled for death ... fading out
+				deathArray.do({arg voice; voice.update; voice.draw.value}); // voices scheduled for death ... fading out
 				// machineArray.do({arg machine; machine.update; }); // machines have their own update
 				machineArray.do({arg machine; machine.draw.value }); // machines have their own update
-	 			//try{ Pen.stringAtPoint(droneArray[selected].name.asString, Point(20, screendimension-100)) }; // if there is no drone
+	 			//try{ Pen.stringAtPoint(voiceArray[selected].name.asString, Point(20, screendimension-100)) }; // if there is no voice
 				Color.black.alpha_(0.5).set;
-	// 			try{ Pen.stringAtPoint("ooo", Point(20, 100)) }; // if there is no drone
-	 			try{ Pen.stringAtPoint(selectedName, Point(20, screendimension-100)) }; // if there is no drone
-	 			//try{ Pen.stringAtPoint("RIUFIF", Point(20, screendimension-130)) }; // if there is no drone
+	// 			try{ Pen.stringAtPoint("ooo", Point(20, 100)) }; // if there is no voice
+	 			try{ Pen.stringAtPoint(selectedName, Point(20, screendimension-100)) }; // if there is no voice
+	 			//try{ Pen.stringAtPoint("RIUFIF", Point(20, screendimension-130)) }; // if there is no voice
 			};
 
 //		window.view.backgroundImage = speakercircles; // WSLib
@@ -143,7 +143,7 @@ DroneController {
 		// the circles drawn into a bitmap once
 //		UserView.new(window, Rect(0, 0, screendimension, screendimension)).drawFunc_({ speakers.drawImg });
 
-		// the drone wedges drawn repeatedly
+		// the voice wedges drawn repeatedly
 		drawView = UserView.new(window, Rect(leftoffset, 0, screendimension, screendimension))
 			.mouseDownAction_( mouseDownAct )
 			.mouseMoveAction_( mouseMoveAct )
@@ -153,9 +153,9 @@ DroneController {
 				{126}{ // up arrow
 					if(modifiers == 11010368, {
 						var name, collectivename, string;
-						selected = (selected-1).clip(0, droneArray.size-1);
-						name = droneArray[selected].name.asString;
-						droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						selected = (selected-1).clip(0, voiceArray.size-1);
+						name = voiceArray[selected].name.asString;
+						voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						if(name.contains("_"), { // it's a group of some sort
 							collectivename = name[0..name.findAll("_").last-1];
 							if(name.contains("chd_"), {
@@ -183,32 +183,32 @@ DroneController {
 							});
 							selectedName = collectivename; // only the name of the group
 							block{ arg break;
-								droneArray.do({ arg drone, i;
-									if(drone.name.asString.contains("_"), {
-										if((drone.name.asString[0..drone.name.asString.findAll("_").last-1] == collectivename), {
+								voiceArray.do({ arg voice, i;
+									if(voice.name.asString.contains("_"), {
+										if((voice.name.asString[0..voice.name.asString.findAll("_").last-1] == collectivename), {
 											selected = i;
 											break.value();
 										});
 									});
 								});											};
 						}, {
-							selectedName = droneArray[selected].name.asString;
-							droneArray[selected].selected = true;
+							selectedName = voiceArray[selected].name.asString;
+							voiceArray[selected].selected = true;
 						});
 
 						if(hub.post, {
 
-							hub.postDroneState(selectedName, selected);
+							hub.postVoiceState(selectedName, selected);
 
 //							Document.listener.string = ""; // clear post window
 //							string = "~"++selectedName++"\n"++
-//								"~"++selectedName++".type = \\"++droneArray[selected].type++"\n"++
-//							"~"++selectedName++".harmonics = "++droneArray[selected].harmonics++"\n"++
-//							"~"++selectedName++".amp = "++droneArray[selected].amp++"\n"++
-//							"~"++selectedName++".degree = "++droneArray[selected].degree++"\n"++
-//							"~"++selectedName++".ratio = "++droneArray[selected].ratio++"\n"++
-//							"~"++selectedName++".env = "++droneArray[selected].env++"\n"++
-//							"~"++selectedName++".octave = "++droneArray[selected].octave++"\n";
+//								"~"++selectedName++".type = \\"++voiceArray[selected].type++"\n"++
+//							"~"++selectedName++".harmonics = "++voiceArray[selected].harmonics++"\n"++
+//							"~"++selectedName++".amp = "++voiceArray[selected].amp++"\n"++
+//							"~"++selectedName++".degree = "++voiceArray[selected].degree++"\n"++
+//							"~"++selectedName++".ratio = "++voiceArray[selected].ratio++"\n"++
+//							"~"++selectedName++".env = "++voiceArray[selected].env++"\n"++
+//							"~"++selectedName++".octave = "++voiceArray[selected].octave++"\n";
 //
 //							Document.listener.string = string; // add info
 //
@@ -238,7 +238,7 @@ DroneController {
 										});
 									});
 								}, {
-									droneArray[selected].set(\amp, (droneArray[selected].amp + 0.01).clip(0, 2));
+									voiceArray[selected].set(\amp, (voiceArray[selected].amp + 0.01).clip(0, 2));
 								});
 							});
 						});
@@ -252,9 +252,9 @@ DroneController {
 						var name, collectivename, string;
 						var foundFlag = false;
 						var oldfoundFlag = false;
-						selected = (selected+1).clip(0, droneArray.size-1);
-						name = droneArray[selected].name.asString;
-						droneArray.do({ arg drone; drone.selected = false }); // deselect all
+						selected = (selected+1).clip(0, voiceArray.size-1);
+						name = voiceArray[selected].name.asString;
+						voiceArray.do({ arg voice; voice.selected = false }); // deselect all
 						if(name.contains("_"), { // it's a group of some sort
 							collectivename = name[0..name.findAll("_").last-1];
 							if(name.contains("chd_"), {
@@ -280,10 +280,10 @@ DroneController {
 							});
 							selectedName = collectivename; // only the name of the group/sat/chord
 							block{ arg break;
-							droneArray[selected .. droneArray.size].do({ arg drone, i;
+							voiceArray[selected .. voiceArray.size].do({ arg voice, i;
 								oldfoundFlag = foundFlag;
-								if(drone.name.asString.contains("_"), {
-									if(drone.name.asString[0..drone.name.asString.findAll("_").last-1] == collectivename, {
+								if(voice.name.asString.contains("_"), {
+									if(voice.name.asString[0..voice.name.asString.findAll("_").last-1] == collectivename, {
 										foundFlag = true;
 									},{
 										foundFlag = false;
@@ -291,29 +291,29 @@ DroneController {
 								}, {
 									foundFlag = false;
 								});
-								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a drone outside group
-								    selected = (selected+i-1).clip(0, droneArray.size-1);
+								if((oldfoundFlag == true) && (foundFlag == false), { // we've reached a voice outside group
+								    selected = (selected+i-1).clip(0, voiceArray.size-1);
 									("selected down = "+selected).postln;
 									break.value;
 								});
 							});
 							}
 						}, {
-							selectedName = droneArray[selected].name.asString;
-							droneArray[selected].selected = true;
+							selectedName = voiceArray[selected].name.asString;
+							voiceArray[selected].selected = true;
 						});
 						if(hub.post, {
-							hub.postDroneState(selectedName, selected);
+							hub.postVoiceState(selectedName, selected);
 
 //							Document.listener.string = ""; // clear post window
 //							string = "~"++selectedName++"\n"++
-//								"~"++selectedName++".type = \\"++droneArray[selected].type++"\n"++
-//							"~"++selectedName++".harmonics = "++droneArray[selected].harmonics++"\n"++
-//							"~"++selectedName++".amp = "++droneArray[selected].amp++"\n"++
-//							"~"++selectedName++".degree = "++droneArray[selected].degree++"\n"++
-//							"~"++selectedName++".ratio = "++droneArray[selected].ratio++"\n"++
-//							"~"++selectedName++".env = "++droneArray[selected].env++"\n"++
-//							"~"++selectedName++".octave = "++droneArray[selected].octave++"\n";
+//								"~"++selectedName++".type = \\"++voiceArray[selected].type++"\n"++
+//							"~"++selectedName++".harmonics = "++voiceArray[selected].harmonics++"\n"++
+//							"~"++selectedName++".amp = "++voiceArray[selected].amp++"\n"++
+//							"~"++selectedName++".degree = "++voiceArray[selected].degree++"\n"++
+//							"~"++selectedName++".ratio = "++voiceArray[selected].ratio++"\n"++
+//							"~"++selectedName++".env = "++voiceArray[selected].env++"\n"++
+//							"~"++selectedName++".octave = "++voiceArray[selected].octave++"\n";
 //							Document.listener.string = string; // add info
 //							hub.interpreter.postview.string_(string);
 						});
@@ -341,7 +341,7 @@ DroneController {
 										});
 									});
 								}, {
-									droneArray[selected].set(\amp, (droneArray[selected].amp - 0.01).clip(0, 1));
+									voiceArray[selected].set(\amp, (voiceArray[selected].amp - 0.01).clip(0, 1));
 								});
 							});
 						});
@@ -349,33 +349,33 @@ DroneController {
 					"down".postln;
 				}
 				{123}{
-					// move drone around (fine movement if alt mod is down)
-					droneArray[selected].oppositemove = true;
+					// move voice around (fine movement if alt mod is down)
+					voiceArray[selected].oppositemove = true;
 					if(modifiers == 11010368, {
-						droneArray[selected].rotation_(droneArray[selected].rotation-0.001);
+						voiceArray[selected].rotation_(voiceArray[selected].rotation-0.001);
 					},{
-						droneArray[selected].rotation_(droneArray[selected].rotation-0.01);
+						voiceArray[selected].rotation_(voiceArray[selected].rotation-0.01);
 					});
 					"left".postln;
 				}
 				{124}{
-					// move drone around (fine movement if alt mod is down)
-					droneArray[selected].oppositemove = true;
+					// move voice around (fine movement if alt mod is down)
+					voiceArray[selected].oppositemove = true;
 					if(modifiers == 11010368, {
-						droneArray[selected].rotation_(droneArray[selected].rotation+0.001);
+						voiceArray[selected].rotation_(voiceArray[selected].rotation+0.001);
 					},{
-						droneArray[selected].rotation_(droneArray[selected].rotation+0.01);
+						voiceArray[selected].rotation_(voiceArray[selected].rotation+0.01);
 					});
 					"right".postln;
 				}
 				{51}{ // delete button
-					"delete drone/chord/satellite/group".postln;
-					//if(droneArray.size > 0, {
-						this.killDrone(); // only kill a unique drone when using delete button (not chord or sat)
+					"delete voice/chord/satellite/group".postln;
+					//if(voiceArray.size > 0, {
+						this.killVoice(); // only kill a unique voice when using delete button (not chord or sat)
 					//});
 					[\selectedName, selectedName].postln;
 
-// the below would need the same treatment as amp up and down above, but I decided not to kill drone with delete button
+// the below would need the same treatment as amp up and down above, but I decided not to kill voice with delete button
 //					if(selectedName.contains("chd_"), {
 //						chordDict.keys.do({ |key|
 //							[\key, key.asString].postln;
@@ -401,14 +401,14 @@ DroneController {
 //									});
 //								});
 //							}, {
-//								this.killDrone();
+//								this.killVoice();
 //							});
 //						});
 //					});
 
 				}
 				{36}{"enter - NOT USED ATM ! ".postln;};
-				// play the drone in the chosen scale using numerical keys from 1 to 9
+				// play the voice in the chosen scale using numerical keys from 1 to 9
 				if((unicode > 48) && (unicode < 58), { // using unicode - keycode is not in right numerical order
 					var harm = false;
 					if(modifiers == 8388864, { harm = true });
@@ -433,7 +433,7 @@ DroneController {
 									});
 								});
 							}, {
-								droneArray[selected].degree_(unicode-48);
+								voiceArray[selected].degree_(unicode-48);
 							});
 						});
 					});
@@ -455,20 +455,20 @@ DroneController {
 		speakercircles = speakers.drawImg;
 		speakercirlesview.backgroundImage = speakercircles;
 		
-		droneArray.do({ |drone| drone.setDroneLook });
-		deathArray.do({ |drone| drone.setDroneLook });
+		voiceArray.do({ |voice| voice.setVoiceLook });
+		deathArray.do({ |voice| voice.setVoiceLook });
 		
 		window.refresh;
 	}
 
 	initDicts { // not used ATM // XXX
-		droneDict = ();
+		voiceDict = ();
 		chordDict = ();
 		satellitesDict = ();
 		groupDict = ();
 		machineDict = ();
 		interDict = ();
-		interDroneArray = [];
+		interVoiceArray = [];
 		nameArray = [];
 	}
 
@@ -476,7 +476,7 @@ DroneController {
 		hub.states.startRecord();
 		drawTask = Task({
 			inf.do({ |i|
-	//	if(droneArray.size>0, {droneArray[selected].getSynths.postln});  // XXX DEBUGGING CODE
+	//	if(voiceArray.size>0, {voiceArray[selected].getSynths.postln});  // XXX DEBUGGING CODE
 //				{testwin.isClosed.not.if({ testwin.refresh })}.defer;
 
 				{window.isClosed.not.if({ window.refresh })}.defer;
@@ -491,13 +491,13 @@ DroneController {
 
 	interpret { |function, name|
 		interpret = true;
-		interDroneArray = [];
+		interVoiceArray = [];
 		function.value; // evaluate the function
 		interpret = false;
 		[\interpretNAME, name].postln;
-		if(interDroneArray.size > 0, {
+		if(interVoiceArray.size > 0, {
 			name = name ?? {this.generateName("inter")};
-			interDict[name] = interDroneArray; // for accessing individual drones (not indexed in an array but a dict)
+			interDict[name] = interVoiceArray; // for accessing individual voices (not indexed in an array but a dict)
 			[\interDict, interDict].postln;
 		});
 		^("New interpretation created : " ++ name);
@@ -513,11 +513,11 @@ DroneController {
 			"creating scope".postln;
 			if(Server.default != Server.internal, {"Internal server needed for the scope".postln});
 			switch(hub.speakers.nrChannels)
-				{ 1 }{ Synth.tail(RootNode(Server.default), \dronemixer2, [\out, 100]) }
-				{ 2 }{ Synth.tail(RootNode(Server.default), \dronemixer2, [\out, 100]) }
-				{ 4 }{ Synth.tail(RootNode(Server.default), \dronemixer4, [\out, 100]) }
-				{ 5 }{ Synth.tail(RootNode(Server.default), \dronemixer5, [\out, 100]) }
-				{ 8 }{ Synth.tail(RootNode(Server.default), \dronemixer8, [\out, 100]) };
+				{ 1 }{ Synth.tail(RootNode(Server.default), \voicemixer2, [\out, 100]) }
+				{ 2 }{ Synth.tail(RootNode(Server.default), \voicemixer2, [\out, 100]) }
+				{ 4 }{ Synth.tail(RootNode(Server.default), \voicemixer4, [\out, 100]) }
+				{ 5 }{ Synth.tail(RootNode(Server.default), \voicemixer5, [\out, 100]) }
+				{ 8 }{ Synth.tail(RootNode(Server.default), \voicemixer8, [\out, 100]) };
 
 			scp = PlusFreqScope.new(window, window.bounds);
 			// scp = PlusFreqScope.new(SCWindow.new.front, Rect(0, 0, 400, 800));
@@ -539,9 +539,9 @@ DroneController {
 		if(envt.isArray, { globalenv = envt }, {globalenv = [envt, envt]});
 	}
 
-	pushEnv_ {arg envt; // same as above, but pushing this env into all active Drones
+	pushEnv_ {arg envt; // same as above, but pushing this env into all active Voices
 		if(envt.isArray, { globalenv = envt }, {globalenv = [envt, envt]});
-		droneArray.do({arg drone; drone.env_(globalenv)});
+		voiceArray.do({arg voice; voice.env_(globalenv)});
 	}
 
 	env {
@@ -559,9 +559,9 @@ DroneController {
 //		Document.listener.string_("");
 //		hub.interpreter.postview.string_("");
 		if(type==\args, {^("type, tonic, harmonics, amp, speed, length, angle, degree, ratio, name, env, octave, note") });
-//		if((type.isKindOf(Symbol) && tonic.isKindOf(SimpleNumber) && harmonics.isKindOf(SimpleNumber) && amp.isKindOf(SimpleNumber) && (speed.isKindOf(SimpleNumber) || speed.isKindOf(Nil) ) && (length.isKindOf(SimpleNumber) || length.isKindOf(Nil)) && (angle.isKindOf(SimpleNumber) || angle.isKindOf(Nil)) && degree.isKindOf(SimpleNumber) && ratio.isKindOf(SimpleNumber) && (name.isKindOf(Symbol) || name.isKindOf(Nil)) && (env.isKindOf(SimpleNumber) || env.isKindOf(Array) || env.isKindOf(Nil)) && (octave.isKindOf(SimpleNumber) || octave.isKindOf(Nil)) && post.isKindOf(Boolean)).not, {^"--->   No drone created. Wrong argument types"});
+//		if((type.isKindOf(Symbol) && tonic.isKindOf(SimpleNumber) && harmonics.isKindOf(SimpleNumber) && amp.isKindOf(SimpleNumber) && (speed.isKindOf(SimpleNumber) || speed.isKindOf(Nil) ) && (length.isKindOf(SimpleNumber) || length.isKindOf(Nil)) && (angle.isKindOf(SimpleNumber) || angle.isKindOf(Nil)) && degree.isKindOf(SimpleNumber) && ratio.isKindOf(SimpleNumber) && (name.isKindOf(Symbol) || name.isKindOf(Nil)) && (env.isKindOf(SimpleNumber) || env.isKindOf(Array) || env.isKindOf(Nil)) && (octave.isKindOf(SimpleNumber) || octave.isKindOf(Nil)) && post.isKindOf(Boolean)).not, {^"--->   No voice created. Wrong argument types"});
 
-		dronecount = dronecount + 1;
+		voicecount = voicecount + 1;
 		name = this.generateName(name:name); // if name is nil, a new name is generated, if name, we check if it's used already
 		speed = speed ? 1.0.rand2; // get variations in speed
 		angle = angle ? 360.rand;
@@ -571,7 +571,7 @@ DroneController {
 		}, {
 			if(env.isArray, { envelopearr = env }, { envelopearr = [env, env] });
 		});
-		drone = Drone.new(hub, tuning, scale, fundamental)
+		voice = Voice.new(hub, tuning, scale, fundamental)
 					.createDrone(
 						type,
 						tonic,
@@ -586,99 +586,99 @@ DroneController {
 						octave,
 						note
 					).name_(name);
-		droneArray = droneArray.add(drone); // an array that takes care of drawing
-		droneDict[drone.name] = drone; // for accessing individual drones (not indexed in an array but a dict)
-		this.putInEnvironment(drone.name, drone); // this allows me to access drones through ~
-		if(interpret, { interDroneArray = interDroneArray.add(drone) });
-		//interDroneArray = interDroneArray.add(drone);
-		selectedName = drone.name.asString; // draw the latest drone name in the bottom left corner
+		voiceArray = voiceArray.add(voice); // an array that takes care of drawing
+		voiceDict[voice.name] = voice; // for accessing individual voices (not indexed in an array but a dict)
+		this.putInEnvironment(voice.name, voice); // this allows me to access voices through ~
+		if(interpret, { interVoiceArray = interVoiceArray.add(voice) });
+		//interVoiceArray = interVoiceArray.add(voice);
+		selectedName = voice.name.asString; // draw the latest voice name in the bottom left corner
 		if(drawTask.isPlaying.not, { drawTask.play }); // if cmd + period, then start the drawtask again
-		"------- New Drone Created: ".postln; // This will always print to the main SC post window
-		hub.postDroneState(drone.name, droneArray.size-1);
-		^drone;
+		"------- New Voice Created: ".postln; // This will always print to the main SC post window
+		hub.postVoiceState(voice.name, voiceArray.size-1);
+		^voice;
 	}
 
 // working original: 1)
-//	killDrone { | name, releasetime |
-//		"KILLING DRONE (DroneController class): ".post; name.postln;
-//		// name = name ? droneArray[selected].name; // either the drone passed in (from Drone) or the selected one
-//		name = name ? if(droneArray.size>0, {droneArray[selected].name}); // either the drone passed in (from Drone) or the selected one
-//		droneArray.copy.do({arg drone, i;
-//			if(drone.name == name, {
-//				releasetime = releasetime ? drone.env[1]; // if no arg, use drone env
-//				droneArray[i].killDrone(releasetime);
-//				droneArray.removeAt(i);
+//	killVoice { | name, releasetime |
+//		"KILLING DRONE (VoiceController class): ".post; name.postln;
+//		// name = name ? voiceArray[selected].name; // either the voice passed in (from Voice) or the selected one
+//		name = name ? if(voiceArray.size>0, {voiceArray[selected].name}); // either the voice passed in (from Voice) or the selected one
+//		voiceArray.copy.do({arg voice, i;
+//			if(voice.name == name, {
+//				releasetime = releasetime ? voice.env[1]; // if no arg, use voice env
+//				voiceArray[i].killVoice(releasetime);
+//				voiceArray.removeAt(i);
 //			});
 //		});
-//		selected = (selected - 1).clip(0, droneArray.size-1);
-//		droneDict.removeAt(name);
+//		selected = (selected - 1).clip(0, voiceArray.size-1);
+//		voiceDict.removeAt(name);
 //		nameArray.removeAll(name);
 //	}
 
 
-	killDrone { | name, releasetime |
-		"KILLING DRONE (DroneController class): ".post; name.postln;
-		// name = name ? droneArray[selected].name; // either the drone passed in (from Drone) or the selected one
+	killVoice { | name, releasetime |
+		"KILLING DRONE (VoiceController class): ".post; name.postln;
+		// name = name ? voiceArray[selected].name; // either the voice passed in (from Voice) or the selected one
 		// this method is split into two times:
-		// (slightly complex as the user might create a drone with the same name before the former drone is dead)
+		// (slightly complex as the user might create a voice with the same name before the former voice is dead)
 		{
-			// Time 1) - release the synths and start the fading out of the drone
+			// Time 1) - release the synths and start the fading out of the voice
 			[\selected, selected].postln;
-			[\droneArray, droneArray].postln;
-//			[\selectedname, droneArray[selected].name].postln;
+			[\voiceArray, voiceArray].postln;
+//			[\selectedname, voiceArray[selected].name].postln;
 
-			name = name ? if(droneArray.size>0, {droneArray[selected].name}); // either the drone passed in (from Drone) or the selected one
+			name = name ? if(voiceArray.size>0, {voiceArray[selected].name}); // either the voice passed in (from Voice) or the selected one
 
-			droneArray.copy.do({arg drone, i;
-				if(drone.name == name, {
-					if(drone.dying == false, { // if it's alive
-						releasetime = releasetime ? drone.env[1]; // if no arg, use drone env
-						if(releasetime <= 0, { releasetime = (drone.env[1] ? globalenv[1]).max(0.1) });
-						droneArray[i].killSynths(releasetime); // specific method created for the deathArray fadeout
-						drone.dying = true;
+			voiceArray.copy.do({arg voice, i;
+				if(voice.name == name, {
+					if(voice.dying == false, { // if it's alive
+						releasetime = releasetime ? voice.env[1]; // if no arg, use voice env
+						if(releasetime <= 0, { releasetime = (voice.env[1] ? globalenv[1]).max(0.1) });
+						voiceArray[i].killSynths(releasetime); // specific method created for the deathArray fadeout
+						voice.dying = true;
 
-						deathArray = deathArray.add(drone);
-						droneArray.removeAt(i);
-						droneDict.removeAt(name);
+						deathArray = deathArray.add(voice);
+						voiceArray.removeAt(i);
+						voiceDict.removeAt(name);
 						nameArray.removeAll(name);
 
-//						if(drone.selected, {
-//							//drone.selected = false; // unselect this drone
+//						if(voice.selected, {
+//							//voice.selected = false; // unselect this voice
 //				//			selected = (selected - 1).max(0);
-//				//			selected = (selected - 1)%(droneArray.size);
-// 							selected = ((selected - 1)%dronecount).clip(0, droneArray.size-2);
-//							dronecount = dronecount - 1;
-//							[\dronecount, dronecount].postln;
+//				//			selected = (selected - 1)%(voiceArray.size);
+// 							selected = ((selected - 1)%voicecount).clip(0, voiceArray.size-2);
+//							voicecount = voicecount - 1;
+//							[\voicecount, voicecount].postln;
 //							[\selected, selected].postln;
-//							droneArray[selected].selected = true; // select the drone below
-//							selectedName = droneArray[selected].name; /// XXX - test
+//							voiceArray[selected].selected = true; // select the voice below
+//							selectedName = voiceArray[selected].name; /// XXX - test
 //						});
 					});
 				});
 			});
-			if(droneArray.size>0, {
- 				selected = ((selected - 1)%dronecount).clip(0, droneArray.size-1);
+			if(voiceArray.size>0, {
+ 				selected = ((selected - 1)%voicecount).clip(0, voiceArray.size-1);
 
- 				dronecount = (dronecount - 1).max(0);
-				[\dronecount, dronecount].postln;
+ 				voicecount = (voicecount - 1).max(0);
+				[\voicecount, voicecount].postln;
 				[\selected, selected].postln;
-				droneArray[selected].selected = true; // select the drone below
-				selectedName = droneArray[selected].name; /// XXX - test
+				voiceArray[selected].selected = true; // select the voice below
+				selectedName = voiceArray[selected].name; /// XXX - test
 			});
 
 
-//			droneArray[selected].selected = false;
-//			selected = (selected - 1).clip(0, droneArray.size-1);
-//			droneArray[selected].selected = true;
-			// Time 2) - kill the drone and remove completely it from arrays and dicts
+//			voiceArray[selected].selected = false;
+//			selected = (selected - 1).clip(0, voiceArray.size-1);
+//			voiceArray[selected].selected = true;
+			// Time 2) - kill the voice and remove completely it from arrays and dicts
 			{
-				deathArray.copy.do({arg drone, i;
-					if((drone.name == name) && drone.dying, {
+				deathArray.copy.do({arg voice, i;
+					if((voice.name == name) && voice.dying, {
 						deathArray.removeAt(i);
-//						droneArray.removeAt(i);
+//						voiceArray.removeAt(i);
 					});
 				});
-//				droneDict.removeAt(name);
+//				voiceDict.removeAt(name);
 //				nameArray.removeAll(name);
 			}.defer(releasetime);
 		}.value;
@@ -692,26 +692,26 @@ DroneController {
 //		if((type.isKindOf(Symbol) && (chord.isKindOf(Symbol) || chord.isKindOf(Array)) && tonic.isKindOf(SimpleNumber) && (harmonics.isKindOf(SimpleNumber) || harmonics.isKindOf(Nil) ) && amp.isKindOf(SimpleNumber) && (speed.isKindOf(SimpleNumber) || speed.isKindOf(Nil) ) && (length.isKindOf(SimpleNumber) || length.isKindOf(Nil)) && (angle.isKindOf(SimpleNumber) || angle.isKindOf(Nil)) && degree.isKindOf(SimpleNumber) && ratio.isKindOf(SimpleNumber) && (name.isKindOf(Symbol) || name.isKindOf(Nil)) && (env.isKindOf(SimpleNumber) || env.isKindOf(Array) || env.isKindOf(Nil)) && (octave.isKindOf(SimpleNumber) || octave.isKindOf(Nil)) ).not, {^"--->   No chord created. Wrong argument types"});
 		shortname = name; // get the user generated name for access through ~ global vars
 		name = this.generateName("chd", name); // create a unique system name which can't be duplicated
-		thischord = DroneChord.new(hub, name, scale).createChord(type, chord, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave, note);
+		thischord = VoiceChord.new(hub, name, scale).createChord(type, chord, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave, note);
 	//	thischord.tuning_(tuning);
 		chordDict[name] = thischord;
-		this.putInEnvironment(name, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(name, thischord); // this allows me to access voices through ~
 		if(shortname.isNil, {shortname = name});
-		this.putInEnvironment(shortname, thischord); // this allows me to access drones through ~
-		selectedName = name.asString; // draw the latest drone name in the bottom left corner
+		this.putInEnvironment(shortname, thischord); // this allows me to access voices through ~
+		selectedName = name.asString; // draw the latest voice name in the bottom left corner
 
 		if(hub.post, {
 			"------- New Chord Created: ".postln;
 			string = 	"~"++shortname++"\n"++
-			"~"++shortname++".harmonics = "++thischord.dronearray[0].harmonics++"\n"++
+			"~"++shortname++".harmonics = "++thischord.voicearray[0].harmonics++"\n"++
 			"~"++shortname++".amp = "++amp++"\n"++
 			"~"++shortname++".speed = "++speed++"\n"++
 			"~"++shortname++".length = "++length++"\n"++
 			"~"++shortname++".angle = "++angle++"\n"++
 			"~"++shortname++".degree = "++degree++"\n"++
 			"~"++shortname++".ratio = "++ratio++"\n"++
-			"~"++shortname++".env = "++thischord.dronearray[0].env++"\n"++
-			"~"++shortname++".octave = "++thischord.dronearray[0].octave++"\n" ++
+			"~"++shortname++".env = "++thischord.voicearray[0].env++"\n"++
+			"~"++shortname++".octave = "++thischord.voicearray[0].octave++"\n" ++
 			"~"++shortname++".note = "++note++"\n";
 			string.postln;
 			hub.interpreter.postview.string_(string);
@@ -721,43 +721,43 @@ DroneController {
 
 
 //		("~"++shortname).postln;
-//		("~"++shortname++".harmonics = "++thischord.dronearray[0].harmonics).postln;
+//		("~"++shortname++".harmonics = "++thischord.voicearray[0].harmonics).postln;
 //		("~"++shortname++".amp = "++amp).postln;
 //		("~"++shortname++".speed = "++speed).postln;
 //		("~"++shortname++".length = "++length).postln;
 //		("~"++shortname++".angle = "++angle).postln;
 //		("~"++shortname++".degree = "++degree).postln;
 //		("~"++shortname++".ratio = "++ratio).postln;
-//		("~"++shortname++".env = "++thischord.dronearray[0].env).postln;
-//		("~"++shortname++".octave = "++thischord.dronearray[0].octave).postln;
+//		("~"++shortname++".env = "++thischord.voicearray[0].env).postln;
+//		("~"++shortname++".octave = "++thischord.voicearray[0].octave).postln;
 //		"\n".postln;
-//		{hub.interpreter.textview.string = "\n New drone created : ~" ++ drone.name++ "\n"}.defer;
-//		{hub.interpreter.postview.string = "\n New drone created : ~" ++ drone.name++ "\n"}.defer;
+//		{hub.interpreter.textview.string = "\n New voice created : ~" ++ voice.name++ "\n"}.defer;
+//		{hub.interpreter.postview.string = "\n New voice created : ~" ++ voice.name++ "\n"}.defer;
 //		{hub.interpreter.textview.string = hub.interpreter.textview.string ++ "\n~" ++ thischord.name}.defer;
 		^("New chord created : " ++ name);
 	}
 
 	defineChord { | ...args |
-		var name, tempname, dronearr, thischord;
+		var name, tempname, voicearr, thischord;
 		args = args.flatten;
 		tempname = args.removeAt(0); // the first item is the name
 		name = this.generateName("chd", tempname);
-		dronearr = droneArray.reject({|item| args.includes(item.name).not });
-		thischord = DroneChord.new(hub, name).defineChord( dronearr );
+		voicearr = voiceArray.reject({|item| args.includes(item.name).not });
+		thischord = VoiceChord.new(hub, name).defineChord( voicearr );
 		//thischord.tuning_(tuning);
 		chordDict[name] = thischord;
-		this.putInEnvironment(name, thischord); // this allows me to access drones through ~
-		this.putInEnvironment(tempname, thischord); // this allows me to access drones through ~
+		this.putInEnvironment(name, thischord); // this allows me to access voices through ~
+		this.putInEnvironment(tempname, thischord); // this allows me to access voices through ~
 		^("New chord defined : " ++ name);
 	}
 
-	killChord { |name| // called from DroneChord:kill
+	killChord { |name| // called from VoiceChord:kill
 		chordDict.removeAt(name);
 		nameArray.removeAll(name);
 	}
 
 	killChords { // all chords
-		chordDict.do({arg chord; chord.dronearray.do({arg drone; drone.kill }) });
+		chordDict.do({arg chord; chord.voicearray.do({arg voice; voice.kill }) });
 		chordDict = ();
 	}
 
@@ -767,26 +767,26 @@ DroneController {
 		if(type==\args, {^("type, ratios, tonic, harmonics, amp, speed, length, angle, num, spread, env, octave, name") });
 		shortname = name; // the short name created by the user
 		name = this.generateName("sat", name); // long system name - both can be used
-		thissatellites = DroneSatellites.new(hub, name).createSatellites(type, ratios, tonic, harmonics, amp, speed, length, angle, num, spread, env, octave);
+		thissatellites = VoiceSatellites.new(hub, name).createSatellites(type, ratios, tonic, harmonics, amp, speed, length, angle, num, spread, env, octave);
 	//	thissatellites.tuning_(tuning);
 		satellitesDict[name] = thissatellites;
-		this.putInEnvironment(name, thissatellites); // this allows me to access drones through ~
+		this.putInEnvironment(name, thissatellites); // this allows me to access voices through ~
 	//	if(shortname.isNil, {shortname = name}); // xxx
 		if(shortname.isNil, {shortname = name.asString[4..6] }); // if the user didn't pass a name, it was generated and we're only interested in the pure name
 		[\shortname, shortname].postln;
-		this.putInEnvironment(shortname.asSymbol, thissatellites); // this allows me to access drones through ~
-		selectedName = name.asString; // draw the latest drone name in the bottom left corner
+		this.putInEnvironment(shortname.asSymbol, thissatellites); // this allows me to access voices through ~
+		selectedName = name.asString; // draw the latest voice name in the bottom left corner
 
 		if(hub.post, {
 			"------- New Satellites Created: ".postln;
 			string = 	"~"++shortname++"\n"++
-			"~"++shortname++".harmonics = "++thissatellites.dronearray[0].harmonics++"\n"++
+			"~"++shortname++".harmonics = "++thissatellites.voicearray[0].harmonics++"\n"++
 			"~"++shortname++".amp = "++amp++"\n"++
 			"~"++shortname++".speed = "++speed++"\n"++
 			"~"++shortname++".length = "++length++"\n"++
 			"~"++shortname++".angle = "++angle++"\n"++
-			"~"++shortname++".env = "++thissatellites.dronearray[0].env++"\n"++
-			"~"++shortname++".octave = "++thissatellites.dronearray[0].octave++"\n";
+			"~"++shortname++".env = "++thissatellites.voicearray[0].env++"\n"++
+			"~"++shortname++".octave = "++thissatellites.voicearray[0].octave++"\n";
 			string.postln;
 			hub.interpreter.postview.string_(string);
 		});
@@ -800,7 +800,7 @@ DroneController {
 	}
 
 	killSatellites {
-		satellitesDict.do({arg satellites; satellites.dronearray.do({arg drone; drone.kill }) });
+		satellitesDict.do({arg satellites; satellites.voicearray.do({arg voice; voice.kill }) });
 		satellitesDict = ();
 	}
 
@@ -816,26 +816,26 @@ DroneController {
 		name = this.generateName("grp");
 		name = name++"_"++groupname; // special case, as I want to be able to run many groups e.g. \grp_oso_loki (where loki is the group template)
 		[\name2, name].postln;
-		thisgroup = DroneGroup.new(hub, name).createGroup( groupname, type, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave );
+		thisgroup = VoiceGroup.new(hub, name).createGroup( groupname, type, tonic, harmonics, amp, speed, length, angle, degree, ratio, env, octave );
 	//	thisgroup.tuning_(tuning);
 		groupDict[name.asSymbol] = thisgroup;
-		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access drones through ~
-		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
-		selectedName = name.asString; // draw the latest drone name in the bottom left corner
+		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access voices through ~
+		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access voices through ~
+		selectedName = name.asString; // draw the latest voice name in the bottom left corner
 
 		if(hub.post, {
 			"------- New Group Created, of type:".post; (groupname).postln;
 			postname = name[name.findAll("_")[0]+1..name.findAll("_")[1]-1];
 			string = "~"++postname++"\n"++
-			"~"++postname++".harmonics = "++thisgroup.dronearray[0].harmonics++"\n"++
+			"~"++postname++".harmonics = "++thisgroup.voicearray[0].harmonics++"\n"++
 			"~"++postname++".amp = "++amp++"\n"++
 			"~"++postname++".speed = "++speed++"\n"++
 			"~"++postname++".length = "++length++"\n"++
 			"~"++postname++".angle = "++angle++"\n"++
 			"~"++postname++".degree = "++degree++"\n"++
 			"~"++postname++".ratio = "++ratio++"\n"++
-			"~"++postname++".env = "++thisgroup.dronearray[0].env++"\n"++
-			"~"++postname++".octave = "++thisgroup.dronearray[0].octave++"\n";
+			"~"++postname++".env = "++thisgroup.voicearray[0].env++"\n"++
+			"~"++postname++".octave = "++thisgroup.voicearray[0].octave++"\n";
 			string.postln;
 			hub.interpreter.postview.string_(string)
 		});
@@ -847,11 +847,11 @@ DroneController {
 		args = args.flatten;
 		tempname = args.removeAt(0); // the first item is the name
 		name = this.generateName("grp");
-		thisgroup = DroneGroup.new(hub, tempname).defineGroup( args );
+		thisgroup = VoiceGroup.new(hub, tempname).defineGroup( args );
 		name = name++"_"++tempname; // special case, as I want to be able to run many groups e.g. \grp_oso_loki (where loki is the group template)
 		groupDict[name.asSymbol] = thisgroup;
-		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access drones through ~
-		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access drones through ~
+		this.putInEnvironment(name.asSymbol, thisgroup); // this allows me to access voices through ~
+		this.putInEnvironment((name[name.findAll("_")[0]+1..name.findAll("_")[1]-1]).asSymbol, thisgroup); // this allows me to access voices through ~
 		^("New group defined : " ++ name);
 	}
 
@@ -861,7 +861,7 @@ DroneController {
 	}
 
 	killGroups {
-		groupDict.do({arg groups; groups.do({arg drone; drone.kill }) });
+		groupDict.do({arg groups; groups.do({arg voice; voice.kill }) });
 		groupDict = ();
 	}
 
@@ -874,10 +874,10 @@ DroneController {
 		//hub.interpreter.postview.string_("");
 		if(type==\args, {^("type, target, time, rate, transtime, range, name") });
 		name = name ?? {this.generateName("mach")};
-		machine = DroneMachine.new(hub, type, target, time, rate, transtime, range).name_(name);
+		machine = VoiceMachine.new(hub, type, target, time, rate, transtime, range).name_(name);
 		machineArray = machineArray.add(machine); // an array that takes care of drawing
 		machineDict[name] = machine;
-		this.putInEnvironment(name, machine); // this allows me to access drones through ~
+		this.putInEnvironment(name, machine); // this allows me to access voices through ~
 		^("New machine created : " ++ machine);
 	}
 
@@ -907,11 +907,11 @@ DroneController {
 		rt = releasetime ? globalenv[1];
 		if(rt.isNil, { rt = 3 });
 		if(rt <= 0, { rt = 3 });
-		droneArray.copy.do({arg drone; this.killDrone( drone.name, rt ) });
+		voiceArray.copy.do({arg voice; this.killVoice( voice.name, rt ) });
 		machineArray.do({arg machine; machine.kill });
-		// I should not need the below as all drones remove themselves from arrays and dicts
-//		droneArray = [];
-//		droneDict = ();
+		// I should not need the below as all voices remove themselves from arrays and dicts
+//		voiceArray = [];
+//		voiceDict = ();
 //		chordDict = ();
 //		groupDict = ();
 //		satellitesDict = ();
@@ -920,7 +920,7 @@ DroneController {
 	}
 
 	freeSynths { | releasetime |
-		droneArray.do({arg drone; drone.freeSynths( releasetime ) });
+		voiceArray.do({arg voice; voice.freeSynths( releasetime ) });
 	}
 
 	// not finished yet
@@ -929,46 +929,46 @@ DroneController {
 
 		// HMMM !
 		[\lastcommand, hub.interpreter.lastCommand].postln;
-		if(cmd.contains("createDrone"), { hub.drones.droneArray.last.kill });
+		if(cmd.contains("createDrone"), { hub.voices.voiceArray.last.kill });
 		if(cmd.contains("tonic"), { "not ready yet".postln; }); // XXX - where to store the previous state?
 
 	}
 
 	rename { | oldname, newname |
-		var drone;
-		drone = droneDict.removeAt(oldname);
-		drone.name = newname;
-		droneDict[newname] = drone;
-		^("New drone name : "++newname);
+		var voice;
+		voice = voiceDict.removeAt(oldname);
+		voice.name = newname;
+		voiceDict[newname] = voice;
+		^("New voice name : "++newname);
 	}
 
 	names {
-		var dronenames;
-		dronenames = "";
-		droneDict.keys.do({ arg item; dronenames = dronenames ++ " | " ++ item });
-		dronenames = dronenames ++ " | ";
-		^dronenames;
+		var voicenames;
+		voicenames = "";
+		voiceDict.keys.do({ arg item; voicenames = voicenames ++ " | " ++ item });
+		voicenames = voicenames ++ " | ";
+		^voicenames;
 	}
 
 	select { |argname|
-		droneArray.do({arg drone; drone.selected = false });
-		droneDict[argname].selected = true;
-		droneArray.do({arg drone, i; drone.postln; if(drone.selected, { selected = i }) }); // global var
-		^("Drone selected : "++ argname);
+		voiceArray.do({arg voice; voice.selected = false });
+		voiceDict[argname].selected = true;
+		voiceArray.do({arg voice, i; voice.postln; if(voice.selected, { selected = i }) }); // global var
+		^("Voice selected : "++ argname);
 	}
 
 	deselect { |argname|
-		droneArray.do({arg drone; drone.selected = false });
-		^("Deselecting all drones");
+		voiceArray.do({arg voice; voice.selected = false });
+		^("Deselecting all voices");
 	}
 
 	tuning_ { |argtuning, dur|
 		var temptuning;
 		tuning = argtuning;
 		temptuning = Tuning.newFromKey(tuning.asSymbol); 
-		if(temptuning.isNil, { temptuning = DroneScale.new(tuning) });
+		if(temptuning.isNil, { temptuning = VoiceScale.new(tuning) });
 		if(temptuning.isNil.not, { 
-			droneArray.do({arg drone; drone.tuning_(tuning, dur) });
+			voiceArray.do({arg voice; voice.tuning_(tuning, dur) });
 			if(speakers.drawscale, {
 				speakercircles = speakers.drawImg(tuning);
 				speakercirlesview.backgroundImage = speakercircles;
@@ -982,7 +982,7 @@ DroneController {
 	scale_ { |argscale|
 		scale = argscale;
 		hub.scale = scale;
-		droneArray.do({arg drone; drone.scale_(argscale) });
+		voiceArray.do({arg voice; voice.scale_(argscale) });
 		speakers.setScale_(scale);
 		speakercircles = speakers.drawImg(tuning);
 		speakercirlesview.backgroundImage = speakercircles;
@@ -1021,28 +1021,28 @@ DroneController {
 	}
 
 	amp_ { |argamp, dur|
-		droneArray.do({ |drone| drone.amp_(argamp, dur) });
-		^("All drones -> amp set to : " ++ argamp);
+		voiceArray.do({ |voice| voice.amp_(argamp, dur) });
+		^("All voices -> amp set to : " ++ argamp);
 	}
 		
-	relativeAmp_ {|change=0, dur=2| // change amp relative to current amp of each drone
-		droneArray.do({ |drone| drone.relAmp_(change, dur) });
-		^("All drones -> amp altered by : " ++ (change*100) ++ " %");
+	relativeAmp_ {|change=0, dur=2| // change amp relative to current amp of each voice
+		voiceArray.do({ |voice| voice.relAmp_(change, dur) });
+		^("All voices -> amp altered by : " ++ (change*100) ++ " %");
 	}
 
-	relativeSpeed_ {|change=0| // change speed relative to current amp of each drone
-		droneArray.do({arg drone; drone.relativeSpeed_(change) });
-		^("All drones -> speed altered by : " ++ (change*100) ++ " %");
+	relativeSpeed_ {|change=0| // change speed relative to current amp of each voice
+		voiceArray.do({arg voice; voice.relativeSpeed_(change) });
+		^("All voices -> speed altered by : " ++ (change*100) ++ " %");
 	}
 
-	relativeLength_ {|change=0| // change length relative to current amp of each drone
-		droneArray.do({arg drone; drone.relativeLength_(change) });
-		^("All drones -> length altered by : " ++ (change*100) ++ " %");
+	relativeLength_ {|change=0| // change length relative to current amp of each voice
+		voiceArray.do({arg voice; voice.relativeLength_(change) });
+		^("All voices -> length altered by : " ++ (change*100) ++ " %");
 	}
 
-	set { | ...args | //  all commands to the synth that do NOT change the graphic drone on the GUI
-		droneArray.do({arg drone; drone.set(*args) });
-		^("All drones -> args set to : " ++ args);
+	set { | ...args | //  all commands to the synth that do NOT change the graphic voice on the GUI
+		voiceArray.do({arg voice; voice.set(*args) });
+		^("All voices -> args set to : " ++ args);
 	}
 
 	
@@ -1099,9 +1099,9 @@ DroneController {
 
 	gui_ { | bool |
 		if( bool, {
-			dronegui = DroneGUI.new(hub);
+			voicegui = VoiceGUI.new(hub);
 		}, {
-			dronegui.remove;
+			voicegui.remove;
 		});
 		hub.interpreter.gui(bool);
 	}
@@ -1110,7 +1110,7 @@ DroneController {
 		"speakers: ".post; speakers.drawspeakers.postln;
 		"harmonics: ".post; speakers.drawharmonics.postln;	}
 
-	state { // post the state of the dronecircle
+	state { // post the state of the voicecircle
 		var string;
 		if(hub.post, {
 			//Document.listener.string = ""; // xxx - might remove
@@ -1121,14 +1121,14 @@ DroneController {
 			"\ngroups : " ++ groupDict.keys.asArray.asString ++
 			"\nmachines : " ++ machineDict.keys.asArray.asString ++
 			"\ninterpreted : " ++ interDict.keys.asArray.asString ++
-			"\ndrones : " ++ droneDict.keys.asArray.asString ++
+			"\nvoices : " ++ voiceDict.keys.asArray.asString ++
 			"\n";
 
 			hub.interpreter.postview.string_(string);
 		});
 	}
 
-	methods { // post what methods the dronecircle takes
+	methods { // post what methods the voicecircle takes
 		var string;
 		if(hub.post, {
 			//Document.listener.string = ""; // xxx - might remove
@@ -1136,16 +1136,16 @@ DroneController {
 			"\ncreateDrone(type, tonic, harmonics, amp, speed, length, angle, ratio)" ++
 			"\ncreateChord(type, chord(array), tonic, harmonics, amp, speed, length, angle)" ++
 			"\ncreateSatellites(type, num, tonic, harmonics, amp, speed, length, angle, ratio, scale)" ++
-			"\ntuning_ : set tuning (better done on a drones level)" ++
-			"\nscale_ : set the scale (better done on a drones level)" ++
-			"\nrelativeAmp : set relative amplitude (-0.1 will lower all drones by 10%)" ++
+			"\ntuning_ : set tuning (better done on a voices level)" ++
+			"\nscale_ : set the scale (better done on a voices level)" ++
+			"\nrelativeAmp : set relative amplitude (-0.1 will lower all voices by 10%)" ++
 			"\ntunings : print the list of tunings" ++
 			"\nscales : print the list of scales" ++
 			"\nchords : print the list of chords" ++
 			"\ndrawharmonics_ : draw the harmonic circles on GUI" ++
 			"\ndrawspeakers_ : draw the speaker locations on GUI" ++
 			"\nscope_ : draw spectra on GUI" ++
-			"\nset : arguments to all drone synths" ++
+			"\nset : arguments to all voice synths" ++
 			"\n";
 			hub.interpreter.postview.string_(string);
 		});
@@ -1174,7 +1174,7 @@ DroneController {
 		^name.asSymbol;
 	}
 
-	// DroneStates methods
+	// VoiceStates methods
 
 	startRecord {
 		states.startRecord();
@@ -1250,18 +1250,18 @@ DroneController {
 
 	// stop the playback of a MIDI file
 	stopMIDI {
-		droneArray.copy.do({ | drone, i |
-			if(drone.name.asString.contains("midi"), {
-				this.killDrone(drone.name);
+		voiceArray.copy.do({ | voice, i |
+			if(voice.name.asString.contains("midi"), {
+				this.killVoice(voice.name);
 			});
 		});
 	}
 
-	// allow for the creation of drones on key press on a MIDI Keyboard
-	// different from Drone:addMIDI (which listens to MIDI for a particular drone)
+	// allow for the creation of voices on key press on a MIDI Keyboard
+	// different from Voice:addMIDI (which listens to MIDI for a particular voice)
 	addMIDI { | type=\saw, harmonics=4, inC=false, env=#[0,0] |
-		var midiDroneArray, offset;
-		midiDroneArray = Array.fill(127, { nil });
+		var midiVoiceArray, offset;
+		midiVoiceArray = Array.fill(127, { nil });
 		// by default the system is in A - subtract 1 off the offset as base ratio in Threnoscope is 1 (and I'm minusing below)
 		offset = (fundamental.cpsmidi%12)-1;
 		if(hub.midi == false, {
@@ -1270,7 +1270,7 @@ DroneController {
 			hub.midi = true;
 		});
 		MIDIdef.noteOn(\globalMIDIon, {arg ...args;
-			var octave, ratio, amp, drone;
+			var octave, ratio, amp, voice;
 			args.postln;
 //			if(inC, { // in case the user likes to think in C
 //				"IN C".postln;
@@ -1295,14 +1295,14 @@ DroneController {
 			//ratio = args[1]-11;
 			amp = args[0]/127;
 		//	[\octave, octave, \ratio, ratio].postln;
-			drone = this.createDrone(type, 1, harmonics, amp, 0, 300, rrand(210, 270), 1, ratio, env:env);
-			if(midiDroneArray[args[1]].isNil, {
-				midiDroneArray[args[1]] = drone;
+			voice = this.createDrone(type, 1, harmonics, amp, 0, 300, rrand(210, 270), 1, ratio, env:env);
+			if(midiVoiceArray[args[1]].isNil, {
+				midiVoiceArray[args[1]] = voice;
 			});
 		});
 		MIDIdef.noteOff(\globalMIDIoff, {arg ...args;
-			midiDroneArray[args[1]].kill;
-			midiDroneArray[args[1]] = nil;
+			midiVoiceArray[args[1]].kill;
+			midiVoiceArray[args[1]] = nil;
 		});
 	}
 
@@ -1311,7 +1311,7 @@ DroneController {
 		MIDIdef(\globalMIDIoff).free;
 	}
 
-	// this method accepts two modes. drone mode is default, but synthargs allow for control that work on the synth through .set()
+	// this method accepts two modes. voice mode is default, but synthargs allow for control that work on the synth through .set()
 	exposeMIDI { |pad, name, synthargs|
 		var lpd8index; // The MIDI controller index in the MIDI controller list
 		//var offset;
@@ -1333,27 +1333,27 @@ DroneController {
 			midiout = MIDIOut(lpd8index);
 		 });
 
-		if(pad.isNil && name.isNil, { // no drone nor pad are specified - a global assignment of first 8 drones
-			droneArray[0..7].do({arg drone, i;
-				midipadNames[i] = drone.name;
-				droneArray[i].exposeMIDI; // set up the drone-specific midi listener for the knobs
+		if(pad.isNil && name.isNil, { // no voice nor pad are specified - a global assignment of first 8 voices
+			voiceArray[0..7].do({arg voice, i;
+				midipadNames[i] = voice.name;
+				voiceArray[i].exposeMIDI; // set up the voice-specific midi listener for the knobs
 			});
 		}, {
-			 // select the right drone (either the one selected or the one dedicated by 'name')
+			 // select the right voice (either the one selected or the one dedicated by 'name')
 			if(name.isNil.not, {
-				droneArray.do({arg drone, i; droneArray[i].selected = false }); // deselect all
-				droneArray.do({arg drone, i;
-					if(drone.name == name, {
-						droneArray[i].selected = true;
+				voiceArray.do({arg voice, i; voiceArray[i].selected = false }); // deselect all
+				voiceArray.do({arg voice, i;
+					if(voice.name == name, {
+						voiceArray[i].selected = true;
 						selected = i;
 					});
 				});
-			}, { // no name is passed, so the selected drone will get the pad
-				name = droneArray[selected].name;
+			}, { // no name is passed, so the selected voice will get the pad
+				name = voiceArray[selected].name;
 			});
 			midipadNames[pad] = name;
 			[\midipadNames, midipadNames].postln;
-			droneArray[selected].exposeMIDI(synthargs); // set up the drone-specific midi listener for the knobs
+			voiceArray[selected].exposeMIDI(synthargs); // set up the voice-specific midi listener for the knobs
 		});
 
 		MIDIdef.noteOn(\expnoteOn, { arg val, num, chan, src; �
@@ -1368,14 +1368,14 @@ DroneController {
 			nme = midipadNames[num-36];
 			[\selectedNAME, nme].postln;
 			if(nme.isNil.not, {
-				droneArray.do({arg drone, i; droneArray[i].selected = false }); // deselect all
-				droneArray.do({arg drone, i;
-					if(drone.name == nme, {
-						droneArray[i].selected = true;
+				voiceArray.do({arg voice, i; voiceArray[i].selected = false }); // deselect all
+				voiceArray.do({arg voice, i;
+					if(voice.name == nme, {
+						voiceArray[i].selected = true;
 						selected = i;
 						//if(hub.post, {
 							[\nme, nme, \selected, selected].postln;
-							{hub.postDroneState(nme.asSymbol, selected)}.defer;
+							{hub.postVoiceState(nme.asSymbol, selected)}.defer;
 						//});
 					});
 				});
@@ -1407,7 +1407,7 @@ DroneController {
 //						{1}{ // freq
 //							"val is: ".post; val.postln;
 //							if(val > offset[num], {change = 1},{change = -1});
-//							droneArray[selected].freq = droneArray[selected].freq + change;
+//							voiceArray[selected].freq = voiceArray[selected].freq + change;
 //							offset[num] = val;
 //
 //	//						if(synthargs[num].isNil, {
@@ -1419,14 +1419,14 @@ DroneController {
 //						{2}{ // harmonics
 //							"val is: ".post; val.postln;
 //							if(val > offset[num], {change = 0.1},{change = -0.1});
-//							droneArray[selected].harmonics = droneArray[selected].harmonics + change;
+//							voiceArray[selected].harmonics = voiceArray[selected].harmonics + change;
 //							offset[num] = val;
 //
 //							}
 //						{3}{ // amp
 //							"val is: ".post; val.postln;
 //							if(val > offset[num], {change = 0.01},{change = -0.01});
-//							droneArray[selected].amp = droneArray[selected].amp + change;
+//							voiceArray[selected].amp = voiceArray[selected].amp + change;
 //							offset[num] = val;
 //							}
 //						{4}{
@@ -1435,7 +1435,7 @@ DroneController {
 //						{5}{ // freq high res
 //							"val is: ".post; val.postln;
 //							if(val > offset[num], {change = 0.1},{change = -0.1});
-//							droneArray[selected].freq = droneArray[selected].freq + change;
+//							voiceArray[selected].freq = voiceArray[selected].freq + change;
 //							offset[num] = val;
 //							}
 //						{6}{
@@ -1450,7 +1450,7 @@ DroneController {
 //			//});
 //		});
 
-		// set the AKAI pads receivers - Jump between drones
+		// set the AKAI pads receivers - Jump between voices
 //		MIDIdef.program(\program, { arg prog, chan, src;
 //			var nme;
 //			"program".postln;�
@@ -1458,10 +1458,10 @@ DroneController {
 //			[src,chan,prog].postln;
 //			[\selectedNAME, nme].postln;
 //			if(nme.isNil.not, {
-//				droneArray.do({arg drone, i; droneArray[i].selected = false }); // deselect all
-//				droneArray.do({arg drone, i;
-//					if(drone.name == nme, {
-//						droneArray[i].selected = true;
+//				voiceArray.do({arg voice, i; voiceArray[i].selected = false }); // deselect all
+//				voiceArray.do({arg voice, i;
+//					if(voice.name == nme, {
+//						voiceArray[i].selected = true;
 //						selected = i;
 //					});
 //				});
@@ -1482,14 +1482,14 @@ DroneController {
 //					{1}{ // freq
 //						"val is: ".post; val.postln;
 //						if(synthArguments[num].isNil, {
-//							droneArray[selected].freq = droneArray[selected].freq + (val-offset);
+//							voiceArray[selected].freq = voiceArray[selected].freq + (val-offset);
 //						},{
-//							droneArray[selected].set(synthArguments[num], 33); // need linlin here?
+//							voiceArray[selected].set(synthArguments[num], 33); // need linlin here?
 //						});
 //						}
 //					{2}{ //
 //						"val is: ".post; val.postln;
-//							droneArray[selected].harmonics = droneArray[selected].harmonics + ((val-offset)/10);
+//							voiceArray[selected].harmonics = voiceArray[selected].harmonics + ((val-offset)/10);
 //						}
 //					{3}{
 //						"val is: ".post; val.postln;
@@ -1514,38 +1514,38 @@ DroneController {
 
 	}
 
-	// -> User interaction (used for automation of drones)
+	// -> User interaction (used for automation of voices)
 
-	// this method is also in Drone, but here for general control
-	auto_ { | bool | // stop automation of all drones
-		droneArray.do({arg drone; drone.auto_( bool ) });
+	// this method is also in Voice, but here for general control
+	auto_ { | bool | // stop automation of all voices
+		voiceArray.do({arg voice; voice.auto_( bool ) });
 	}
 
-	// this method is also in Drone, but here for general control
-	clearAuto { | bool | // clear automation of all drones
-		droneArray.do({arg drone; drone.clearauto });
+	// this method is also in Voice, but here for general control
+	clearAuto { | bool | // clear automation of all voices
+		voiceArray.do({arg voice; voice.clearauto });
 	}
 
 	// the GUI control
-	rec_ { | drone, method, min, max, rnd=0 | // non-user method called from Drone
+	rec_ { | voice, method, min, max, rnd=0 | // non-user method called from Voice
 		var movementarray = [];
 		var offsetTime, scaled;
 		var currentparamval, currentparamline;
 		var smoothx;
 
-		if(drone.isArray, { // coming from Chord, Group or Satellites
+		if(voice.isArray, { // coming from Chord, Group or Satellites
 				"______________DRONE IS an ARRAY".postln;
 			try{
-				currentparamval = drone[0].perform(method); // simply getting at the instance variable
+				currentparamval = voice[0].perform(method); // simply getting at the instance variable
 			}{
 				"______________here".postln;
-				currentparamval = drone[0].synthParams.at(method);			};
+				currentparamval = voice[0].synthParams.at(method);			};
 		}, {
 				"______________DRONE IS a DRONE".postln;
 			try{
-				currentparamval = drone.perform(method); // simply getting at the instance variable
+				currentparamval = voice.perform(method); // simply getting at the instance variable
 			}{
-				currentparamval = drone.synthParams.at(method);			};
+				currentparamval = voice.synthParams.at(method);			};
 		});
 
 		currentparamline = currentparamval.linlin(min, max, 0, screendimension).round(1)+0.5;
@@ -1553,8 +1553,8 @@ DroneController {
 		scaled = smoothx.min(screendimension).linlin( 0, screendimension, min, max ).round(rnd);
 
 		drawView.drawFunc_({ // Swap out the draw function temporarily -> draw a line with the current value
-			droneArray.do({arg drone; drone.update; drone.draw.value});
-			deathArray.do({arg drone; drone.update; drone.draw.value});
+			voiceArray.do({arg voice; voice.update; voice.draw.value});
+			deathArray.do({arg voice; voice.update; voice.draw.value});
 			machineArray.do({arg machine; machine.draw.value });
 			Pen.strokeColor = Color.black;
 			Pen.color = Color.black;
@@ -1563,7 +1563,7 @@ DroneController {
 			Pen.stringAtPoint(scaled.asString, Point(smoothx+15, (screendimension/2)+15));
 			Pen.stroke;
 
- 			try{ Pen.stringAtPoint(droneArray[selected].name.asString, Point(20, screendimension-100)) };
+ 			try{ Pen.stringAtPoint(voiceArray[selected].name.asString, Point(20, screendimension-100)) };
 		});
 
 		drawView.mouseDownAction_({ | view, x |
@@ -1582,18 +1582,18 @@ DroneController {
 			scaled = smoothx.min(screendimension).linlin( 0, screendimension, min, max ).round(rnd);
 			movementarray = movementarray.add( [Main.elapsedTime - offsetTime, scaled ] );
 			offsetTime = Main.elapsedTime;
-			if(drone.isArray, { // coming from Chord, Group or Satellites
-				drone.do({ |drone| drone.perform((method++"_").asSymbol, scaled); }); // update the user action in real-time
+			if(voice.isArray, { // coming from Chord, Group or Satellites
+				voice.do({ |voice| voice.perform((method++"_").asSymbol, scaled); }); // update the user action in real-time
 			}, {
-				drone.perform((method++"_").asSymbol, scaled); // update the user action in real-time
+				voice.perform((method++"_").asSymbol, scaled); // update the user action in real-time
 			});
 		});
 
 		drawView.mouseUpAction_({
-			if(drone.isArray, { // coming from Chord, Group or Satellites
-				drone.do({ |drone| drone.startAuto( method, movementarray); }); // update the user action in real-time
+			if(voice.isArray, { // coming from Chord, Group or Satellites
+				voice.do({ |voice| voice.startAuto( method, movementarray); }); // update the user action in real-time
 			}, {
-				drone.startAuto( method, movementarray );
+				voice.startAuto( method, movementarray );
 			});
 			drawView.mouseDownAction_( mouseDownAct );
 			drawView.mouseMoveAction_( mouseMoveAct );
@@ -1602,23 +1602,23 @@ DroneController {
 		});
 	}
 
-	setParam_ { | drone, method, min, max, rnd=0 | // non-user method called from Drone
+	setParam_ { | voice, method, min, max, rnd=0 | // non-user method called from Voice
 		var currentparamval, currentparamline;
 		var scaled, smoothx;
 
-		if(drone.isArray, { // coming from Chord, Group or Satellites
+		if(voice.isArray, { // coming from Chord, Group or Satellites
 				"______________DRONE IS ARRAY".postln;
 			try{
-				currentparamval = drone[0].perform(method); // simply getting at the instance variable
+				currentparamval = voice[0].perform(method); // simply getting at the instance variable
 			}{
 				"______________here".postln;
-				currentparamval = drone[0].synthParams.at(method);			};
+				currentparamval = voice[0].synthParams.at(method);			};
 		}, {
 				"______________DRONE IS a DRONE".postln;
 			try{
-				currentparamval = drone.perform(method); // simply getting at the instance variable
+				currentparamval = voice.perform(method); // simply getting at the instance variable
 			}{
-				currentparamval = drone.synthParams.at(method);			};
+				currentparamval = voice.synthParams.at(method);			};
 		});
 
 		currentparamline = currentparamval.linlin(min, max, 0, screendimension).round(1)+0.5;
@@ -1626,8 +1626,8 @@ DroneController {
 		scaled = smoothx.min(screendimension).linlin( 0, screendimension, min, max ).round(rnd);
 
 		drawView.drawFunc_({ // Swap out the draw function temporarily -> draw a line with the current value
-			droneArray.do({arg drone; drone.update; drone.draw.value});
-			deathArray.do({arg drone; drone.update; drone.draw.value});
+			voiceArray.do({arg voice; voice.update; voice.draw.value});
+			deathArray.do({arg voice; voice.update; voice.draw.value});
 			machineArray.do({arg machine; machine.draw.value });
 			Color(0, 0.3, 0).alpha_(0.7).set;
 
@@ -1636,7 +1636,7 @@ DroneController {
 			Pen.addRect(Rect(smoothx-5, (screendimension/2)-5, 10, 10));
 			Pen.stringAtPoint(scaled.asString, Point(smoothx+15, (screendimension/2)+15));
 			Pen.stroke;
- 			try{ Pen.stringAtPoint(droneArray[selected].name.asString, Point(20, screendimension-100)) };
+ 			try{ Pen.stringAtPoint(voiceArray[selected].name.asString, Point(20, screendimension-100)) };
 		});
 
 		drawView.mouseMoveAction_({ | view, x |
@@ -1648,10 +1648,10 @@ DroneController {
 			smoothx = x;
 			// scaled = x.min(screendimension).linlin( 0, screendimension, min, max );
 			scaled = smoothx.min(screendimension).linlin( 0, screendimension, min, max ).round(rnd);
-			if(drone.isArray, { // coming from Chord, Group or Satellites
-				drone.do({ |drone| drone.perform((method++"_").asSymbol, scaled); }); // update the user action in real-time
+			if(voice.isArray, { // coming from Chord, Group or Satellites
+				voice.do({ |voice| voice.perform((method++"_").asSymbol, scaled); }); // update the user action in real-time
 			}, {
-				drone.perform((method++"_").asSymbol, scaled); // update the user action in real-time
+				voice.perform((method++"_").asSymbol, scaled); // update the user action in real-time
 			});
 		});
 
@@ -1668,7 +1668,7 @@ DroneController {
 		osc = NetAddr(ip, port);
 	}
 
-	sendOSC { arg address='/threnoscope', message;
+	sendOSC { arg address='/voicescope', message;
 		osc.sendMsg(address, message);
 	}
 
@@ -1758,7 +1758,7 @@ speaker channels:
 
 	}
 
-	mixEightToMono { arg in=0, channelOffset=20; // this might become loud with long (in degrees) drones
+	mixEightToMono { arg in=0, channelOffset=20; // this might become loud with long (in degrees) voices
 		hub.channelOffset = channelOffset;
 		Synth(\channelrouter8_1, [\in, channelOffset+0, \out, 0], 1, \addToTail );
 		Synth(\channelrouter8_1, [\in, channelOffset+1, \out, 0], 1, \addToTail );
@@ -1783,7 +1783,7 @@ speaker channels:
 
 	mode {arg mode;
 		this.quit;
-		ThrenoScope.new(hub.channels, mode, hub.key, hub.appPath);
+		VoiceScope.new(hub.channels, mode, hub.key, hub.appPath);
 	}
 
 }

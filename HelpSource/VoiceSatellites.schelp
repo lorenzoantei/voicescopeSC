@@ -1,7 +1,7 @@
-TITLE:: DroneSatellites
-summary:: Bunch of short drones randomly moving in space.
+TITLE:: VoiceSatellites
+summary:: Bunch of short voices randomly moving in space.
 categories:: Live Coding
-related:: Classes/Drone, Classes/DroneChord, Classes/ThrenoScope
+related:: Classes/Voice, Classes/VoiceChord, Classes/VoiceScope
 
 DESCRIPTION::
 
@@ -15,7 +15,7 @@ ARGUMENT:: hub
 ARGUMENT:: name
 Name of the satellites.
 
-returns:: Current DroneSatellites instance and its parameters.
+returns:: Current VoiceSatellites instance and its parameters.
 
 
 INSTANCEMETHODS::
@@ -270,7 +270,7 @@ ARGUMENT:: dur
 Time to set the interval.
 
 METHOD:: angle
-Sets an angle for the drones.
+Sets an angle for the voices.
 
 ARGUMENT:: angle
 The angle to set.
@@ -288,7 +288,7 @@ ARGUMENT:: arghub
 
 ARGUMENT:: argname
 
-returns:: Current DroneSatellites instance.
+returns:: Current VoiceSatellites instance.
 
 METHOD:: relTonic
 Changes the multiplier of the frequencies of the satellites in relation to their current frequencies.
@@ -400,9 +400,9 @@ Changes the speed of the satellites in relation to their current speed.
 ARGUMENT:: change
 The speed to change.
 
-METHOD:: dronearray
+METHOD:: voicearray
 
-returns:: Array of drones.
+returns:: Array of voices.
 
 METHOD:: env
 Sets an envelope for the satellites.
@@ -427,18 +427,18 @@ returns:: Current harmonics.
 EXAMPLES::
 
 IMPORTANT:
-It is not needed to call this class directly, a global variable ~drones is used instead.
+It is not needed to call this class directly, a global variable ~voices is used instead.
 
 code::
 //creating satellites within a scale
-~drones.createSatellites(\pulse, \bartok)
+~voices.createSatellites(\pulse, \bartok)
 
 //adding a number of satellites we want, in this case 30
-~drones.createSatellites(\pulse, \bartok, num: 30)
+~voices.createSatellites(\pulse, \bartok, num: 30)
 
 //customize their speed, so every satellite moves left and right
 //in whatever speed between -20 and 20 (negative integers for moving left)
-~drones.createSatellites(\pulse, \bartok, num: 30, name: \particles)
+~voices.createSatellites(\pulse, \bartok, num: 30, name: \particles)
 
 ~particles.speed_({rrand(-20,20)})
 //or

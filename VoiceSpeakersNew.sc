@@ -1,5 +1,5 @@
 
-DroneSpeakersNew {
+VoiceSpeakersNew {
 
 	var <>nrChannels;
 	var <>harmonicsColor, <>scaleOctaveColor, <>octaveColor, <>degreeColor, <>speakerColor;
@@ -16,10 +16,10 @@ DroneSpeakersNew {
 	var <scale;
 
 	*new { arg hub, channels, fundamental;
-		^super.new.initDroneSpeakersNew(hub, channels, fundamental);
+		^super.new.initVoiceSpeakersNew(hub, channels, fundamental);
 	}
 
-	initDroneSpeakersNew { |arghub, channels=1, argfundamental|
+	initVoiceSpeakersNew { |arghub, channels=1, argfundamental|
 		nrChannels = channels;
 		hub = arghub;
 		window = hub.window;
@@ -48,7 +48,7 @@ DroneSpeakersNew {
 				this.drawSpeakers.value;
 				this.drawHarmonics.value;
 			}, {
-				hub.drones.drawView.backgroundImage_(image, 1, 1);
+				hub.voices.drawView.backgroundImage_(image, 1, 1);
 				done = true;
 			});
 		});
@@ -68,7 +68,7 @@ DroneSpeakersNew {
 		});
 		^image;
 	}
-// the following methods are used in DroneController
+// the following methods are used in VoiceController
 
 	speakers_ { | bool |
 		drawspeakers = bool.asBoolean; // asBoolean allows for 0 or 1 to save typings
@@ -96,7 +96,7 @@ DroneSpeakersNew {
 
 	setScale_ { | argscale |
 		scale = Scale.newFromKey(argscale.asSymbol);
-		if(scale.isNil, { scale = DroneScale.new(argscale) }); // support of the Scala scales
+		if(scale.isNil, { scale = VoiceScale.new(argscale) }); // support of the Scala scales
 		done = false;
 		image = nil;
 	}

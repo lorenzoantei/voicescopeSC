@@ -4,7 +4,7 @@ A SuperCollider support for reading Scala files:
 http://www.xs4all.nl/~huygensf/scala/scl_format.html
 
 
-a = DroneScale("bohlen-p_9");
+a = VoiceScale("bohlen-p_9");
 a.tuning.octaveRatio
 a.degrees
 a.semitones
@@ -13,18 +13,18 @@ a.pitchesPerOctave
 
 */
 
-DroneScale : Tuning {
+VoiceScale : Tuning {
 
 	var <pitchesPerOctave;
 	//var pathToSclDir = "/Users/thm21/Library/Application Support/SuperCollider/scl/"; 
 	// Platform.userAppSupportDir+/+"scl/"; // the location of the Scale library
 	
-//	var pathToSclDir = ~singlehub.appPath++"/scl/"; 
+//	var pathToSclDir = ~voicehub.appPath++"/scl/"; 
 	
 	//var pathToUserSclDir = "/Users/thm21/Library/Application Support/SuperCollider/scl_user/"; 
 	// Platform.userAppSupportDir+/+"scl_user/"; // user collection of Scala scales
 	
-//	var pathToUserSclDir = ~singlehub.appPath++"/scl_user/"; 
+//	var pathToUserSclDir = ~voicehub.appPath++"/scl_user/"; 
 
 	*new { | scl |
 		^super.new.readScl( scl.asString ); // convert it to string in case it's a symbol
@@ -35,8 +35,8 @@ DroneScale : Tuning {
 		var tuningobject;
 		
 		// RUNNING AS STANDALONE
-		// var pathToSclDir = ~singlehub.appPath++"/scl/"; 
-		// var pathToUserSclDir = ~singlehub.appPath++"/scl_user/"; 
+		// var pathToSclDir = ~voicehub.appPath++"/scl/"; 
+		// var pathToUserSclDir = ~voicehub.appPath++"/scl_user/"; 
 		
 		// RUNNING Threnoscope as classes in SC:
 		var pathToSclDir = Platform.userAppSupportDir++"/scl/"; 

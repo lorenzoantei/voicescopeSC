@@ -1,5 +1,5 @@
 
-Drone {
+Voice {
 	classvar oscresp, atomNetAddr, atomcount = -1;
 	var thisatomnumber = 0;
 
@@ -18,10 +18,10 @@ Drone {
 	var buffer;
 
 	*new { arg hub, tuning, scale, fundamental;
-		^super.new.initDrone(hub, tuning, scale, fundamental);
+		^super.new.initVoice(hub, tuning, scale, fundamental);
 	}
 
-	initDrone { | arghub, argtuning, argscale, argfundamental |
+	initVoice { | arghub, argtuning, argscale, argfundamental |
 		hub = arghub;
 		window = hub.window;
 		tuning = argtuning;
@@ -44,7 +44,7 @@ Drone {
 			ampMult = 1; // no need to make the colour appear slowly
 		}, {
 			ampMult = 0;
-			Task({((argenv[0]/0.05).round).do({ ampMult = ampMult + step; 0.05.wait; })}).start; // slow appearance of drone colour
+			Task({((argenv[0]/0.05).round).do({ ampMult = ampMult + step; 0.05.wait; })}).start; // slow appearance of voice colour
 		});
 
 		type = argtype;
@@ -87,14 +87,14 @@ Drone {
 
 		freq = fundamental * tonic * octaveRatio.pow(octave-1) * ratios[ratio]; // octave added
 
-		this.setDroneLook();
+		this.setVoiceLook();
 
 		speed = argspeed/1000;
 		length = arglength.max(6) / (360 / (2*pi) ); // arglength
 		rotation =  (argangle / (360 / (2*pi) )) - length;
 		angle = argangle; // Initialize angle here
 		rotation = (rotation + speed)%(2*pi); // added later
-		strokeColor = if( hub.threnoscopeColor == Color.white, { Color.black }, { Color.white });
+		strokeColor = if( hub.voicescopeColor == Color.white, { Color.black }, { Color.white });
 
 		// testing whether colours are interesting as indication of type (when fixing this, do the same in the .type_ menthod)
 		switch(type)
@@ -113,7 +113,7 @@ Drone {
 			{\atom}		{ this.initAtom; {this.startSynth()}.defer; }
 			{
 				// Force mono buffers even if the sample file is stereo.
-				buffer = Buffer.readChannel(Server.default, DroneSynths.bufferPath(type, freq), channels:[0], action:{ this.startSynth() }) ; // samples
+				buffer = Buffer.readChannel(Server.default, VoiceSynths.bufferPath(type, freq), channels:[0], action:{ this.startSynth() }) ; // samples
 			};
 
 		if(fillColor.isNil, { fillColor = Color.rand(0.1, 0.7) });
@@ -161,7 +161,7 @@ Drone {
 	}
 
 	/*
-		~drones.createDrone(\atom, 4, name:\ooo)
+		~voices.createDrone(\atom, 4, name:\ooo)
 		~ooo.harmonics = 3+(0.1.rand)
 		~ooo.amp = 0.3+(0.1.rand)
 		~ooo.freq = 354+(0.1.rand)
@@ -170,7 +170,7 @@ Drone {
 		~ooo.set(\pitch, 0.35+(0.1.rand) )
 		~ooo.set(\loopStart, 0.3+(0.1.rand) )
 		~ooo.set(\loopEnd, 0.65+(0.1.rand) )
-		~drones.killAll
+		~voices.killAll
 		//	thisatomnumber goes up to 8 and stand for the book.
 	*/
 
@@ -179,14 +179,14 @@ Drone {
 	}
 
 
-	setDroneLook {
+	setVoiceLook {
 		var newouter;
 		var scaleFactor = hub.middle / 540;
 		point = Point(hub.middle, hub.middle);
 		innersize = (freq.cpsmidi * (hub.middle/90)) - (80 * scaleFactor);
 		outersize = (freq + ((harmonics-1)*fundamental)).cpsmidi * (hub.middle/90) - (80 * scaleFactor);
 		resonsize = (freq + ((resonance-1)*fundamental)).cpsmidi * (hub.middle/90) - (80 * scaleFactor);
-//	\dronelook_deb.postln;
+//	\voicelook_deb.postln;
 		// outersize = (fundamental * ((tonic * octaveRatio.pow(octave-1) * ratios[ratio]) + (harmonics-1))).cpsmidi * (hub.middle/90) - 80; // old method - don't delete
 		// resonsize = (fundamental * ((tonic * octaveRatio.pow(octave-1) *  ratios[ratio]) + (resonance-1)) ).cpsmidi * (hub.middle/90) - 80;
 
@@ -197,7 +197,7 @@ Drone {
 		synthParams[\freq] = freq;
 	}
 
-	getDroneLook { // called from DroneMachine for drawing
+	getVoiceLook { // called from VoiceMachine for drawing
 		^[innersize, outersize, rotation, length];
 	}
 
@@ -217,14 +217,14 @@ Drone {
 	env_ { | envt |  // supporting passing in of both array [0, 1] (attack and release) and just an integer (for both A&R)
 		if(envt.isArray, { env = envt }, {env = [envt, envt]});
 		synthParams[\env] = env;
-		^("Drone : "++ name ++ " -> env set to : " ++ env);
+		^("Voice : "++ name ++ " -> env set to : " ++ env);
 	}
 
 	env {
 		^env;
 	}
 
-	// the freq_ method is the key method that controls the changes of a drone (all other methods update their data and call this)
+	// the freq_ method is the key method that controls the changes of a voice (all other methods update their data and call this)
 	freq_ { | argfreq, dur | // time-morph method - this method basically uses the tonic to set the freq
 		var oldfreq, step;
 		var recursiveMaxHarm;
@@ -244,7 +244,7 @@ Drone {
 //			tonic = argfreq/fundamental;
 //			freq = fundamental * tonic * octaveRatio.pow(octave-1) * ratios[ratio]; // octave added
 //			freq = argfreq;
-			this.setDroneLook();
+			this.setVoiceLook();
 			synthgroup.set(\freq, freq);
 			synthParams[\freq] = freq;
 		}, {
@@ -264,14 +264,14 @@ Drone {
 				);
 			});
 		});
-		^("Drone : "++ name ++ " -> tonic set to : " ++ tonic);
+		^("Voice : "++ name ++ " -> tonic set to : " ++ tonic);
 	}
 
 	postAuto { // xxx delete this
 		autoTaskDict.postln;
 	}
 
-	relFreq_ { | change=0, dur | // change freq relative to current freq of the drone
+	relFreq_ { | change=0, dur | // change freq relative to current freq of the voice
 		var newfreq;
 		newfreq = (freq + change).clip(20, 20000);
 		this.freq_( newfreq, dur );
@@ -283,10 +283,10 @@ Drone {
 		newfreq = fundamental * tonic * octaveRatio.pow(octave-1) * ratios[ratio]; // octave added
 		this.freq_(newfreq, dur);
 		synthParams[\tonic] = argtonic;
-		^("Drone : "++ name ++ " -> tonic set to : " ++ tonic);
+		^("Voice : "++ name ++ " -> tonic set to : " ++ tonic);
 	}
 
-	relTonic_ { | change=0, dur | // change tonic relative to current tonic of the drone
+	relTonic_ { | change=0, dur | // change tonic relative to current tonic of the voice
 		var newtonic;
 		newtonic = (tonic + change).clip(1, 20);
 		[\tonic, tonic, \newtonic, newtonic ].postln;
@@ -311,10 +311,10 @@ Drone {
 		degree = scaledegrees.indexOf((ratio-0.2).nearestInList(scaledegrees)); // if no degree has been passed, I force the degree to be the nearest in scale
 		this.freq_(newfreq, dur);
 		synthParams[\ratio] = argratio;
-		^("Drone : "++ name ++ " -> ratio set to : " ++ ratio);
+		^("Voice : "++ name ++ " -> ratio set to : " ++ ratio);
 	}
 
-	relRatio_ { | change=0, dur | // change freq relative to current freq of the drone
+	relRatio_ { | change=0, dur | // change freq relative to current freq of the voice
 		var newratio;
 		newratio = ratio + change;
 		this.ratio_( newratio, dur );
@@ -332,10 +332,10 @@ Drone {
 			this.freq_(newfreq, dur);
 		});
 		synthParams[\degree] = argdegree;
-		^("Drone : "++ name ++ " -> degree set to : " ++ argdegree);
+		^("Voice : "++ name ++ " -> degree set to : " ++ argdegree);
 	}
 
-	relDegree_ { | change=0, dur | // change freq relative to current freq of the drone
+	relDegree_ { | change=0, dur | // change freq relative to current freq of the voice
 		var newdegree;
 		newdegree = degree + change;
 		this.degree_( newdegree, dur );
@@ -356,7 +356,7 @@ Drone {
 		degree = scaledegrees.indexOf((ratio-0.2).nearestInList(scaledegrees)); // if no degree has been passed, I force the degree to be the nearest in scale
 		this.freq_(newfreq, dur);
 		synthParams[\ratio] = ratio;
-		^("Drone : "++ name ++ " -> ratio set to : " ++ ratio);
+		^("Voice : "++ name ++ " -> ratio set to : " ++ ratio);
 	}
 
 	// XXX - Should a machine represent the automation of these three methods?
@@ -382,10 +382,10 @@ Drone {
 		newfreq = fundamental * tonic * octaveRatio.pow(octave-1) * ratios[ratio]; // octave added
 		this.freq_(newfreq, dur);
 		synthParams[\octave] = argoctave;
-		^("Drone : "++ name ++ " -> octave set to : " ++ octave);
+		^("Voice : "++ name ++ " -> octave set to : " ++ octave);
 	}
 
-	relOctave_ { | change=0, dur | // change freq relative to current freq of the drone
+	relOctave_ { | change=0, dur | // change freq relative to current freq of the voice
 		var newoctave;
 		newoctave = octave + change;
 		this.octave_( newoctave, dur );
@@ -412,7 +412,7 @@ Drone {
 		if(dur.isNil || (dur == 0), {
 			harmonics = recursiveMaxHarm.(argharmonics); // make sure not to blow the filter
 			harmonics = argharmonics.max(1);
-			this.setDroneLook();
+			this.setVoiceLook();
 			synthgroup.set(\harmonics, harmonics);
 			synthParams[\harmonics] = argharmonics.max(1);
 		}, {
@@ -433,7 +433,7 @@ Drone {
 				);
 			});
 		});
-		^("Drone : "++ name ++ " -> harmonics set to : " ++ harmonics);
+		^("Voice : "++ name ++ " -> harmonics set to : " ++ harmonics);
 	}
 
 	resonance_ { | argres, dur=nil |
@@ -449,7 +449,7 @@ Drone {
 		}, {
 			if(dur.isNil || (dur == 0), {
 				resonance = argres;
-				this.setDroneLook();
+				this.setVoiceLook();
 				synthgroup.set(\resonance, resonance);
 				synthParams[\resonance] = resonance;
 			}, {
@@ -470,7 +470,7 @@ Drone {
 				});
 			});
 		});
-		^("Drone : "++ name ++ " -> resonance set to : " ++ resonance);
+		^("Voice : "++ name ++ " -> resonance set to : " ++ resonance);
 	}
 
 	amp_ { | argamp, dur |
@@ -496,19 +496,19 @@ Drone {
 				);
 			});
 		});
-		^("Drone : "++ name ++ " -> amp set to : " ++ argamp);
+		^("Voice : "++ name ++ " -> amp set to : " ++ argamp);
 	}
 
-	relAmp_ { | change=0, dur=10 | // change amp relative to current amp the drone
+	relAmp_ { | change=0, dur=10 | // change amp relative to current amp the voice
 		this.amp_( amp + (amp * change), dur);
 	}
 
 	speed_ { | argspeed |
 		speed = argspeed.value/1000; // .value since it's possible to pass a function as a speed arg
-		^("Drone : "++ name ++ " -> speed set to : " ++ speed);
+		^("Voice : "++ name ++ " -> speed set to : " ++ speed);
 	}
 
-	relSpeed_ { | change=0 | // change speed relative to current speed of the drone (increase/decrease with the input amount)
+	relSpeed_ { | change=0 | // change speed relative to current speed of the voice (increase/decrease with the input amount)
 		if(speed <= 0, {
 			speed = speed - (change/1000);
 		},{
@@ -521,7 +521,7 @@ Drone {
 		"rotation :  ".post; rotation.postln;
 		this.freeSynths();
 		this.startSynth();
-		^("Drone : "++ name ++ " -> angle set to : " ++ argangle);
+		^("Voice : "++ name ++ " -> angle set to : " ++ argangle);
 	}
 
 	rotation_ { | argrotation | // use this rather than angle from GUI
@@ -539,15 +539,15 @@ Drone {
 		this.freeSynths();
 		this.startSynth();
 		this.synthMachine(rotation);
-		^("Drone : "++ name ++ " -> length set to : " ++ length);
+		^("Voice : "++ name ++ " -> length set to : " ++ length);
 	}
 
-	relLength_ { | change=0 | // change length relative to current length of the drone
+	relLength_ { | change=0 | // change length relative to current length of the voice
 		length = (length + (change*((2*pi)/360))).max(0.01).min(2pi);
 		this.freeSynths();
 		this.startSynth();
 		this.synthMachine(rotation);
-		^("Drone : "++ name ++ " -> length set to : " ++ length);
+		^("Voice : "++ name ++ " -> length set to : " ++ length);
 	}
 
 	selected_ { | argsel |
@@ -555,7 +555,7 @@ Drone {
 		if(selected, { // only if newly selected (not deselected)
 			// [\name, name, \freq, freq, \tonic, tonic, \harmonics, harmonics, \amp, amp].postln;
 		});
-		^("Drone : "++ name ++ " -> selected set to : " ++ true);
+		^("Voice : "++ name ++ " -> selected set to : " ++ true);
 	}
 
 	tuning_ { | argtuning, dur |
@@ -575,7 +575,7 @@ Drone {
 
 			temptuningratios = Tuning.newFromKey(argtuning.asSymbol);
 
-			if(temptuningratios.isNil, { "IN HERE \n ++ \n".postln;temptuningratios = DroneScale.new(argtuning) }); // support of the Scala scales / tunings
+			if(temptuningratios.isNil, { "IN HERE \n ++ \n".postln;temptuningratios = VoiceScale.new(argtuning) }); // support of the Scala scales / tunings
 
 			if(temptuningratios.isKindOf(Scale), {
 				tuningratios = temptuningratios.ratios;
@@ -593,13 +593,13 @@ Drone {
 
 		localfreq = fundamental * tonic * octaveRatio.pow(octave-1) * ratios[ratio];
 		this.freq_(localfreq, dur); // freq is set in .freq_
-		^("Drone : "++ name ++ " -> tuning set to : " ++ tuning);
+		^("Voice : "++ name ++ " -> tuning set to : " ++ tuning);
 	}
 
 	scale_ { | argscale |
 		var scl, semitones;
-		scala = false; // by default expecting an SC scale, not Scala (Fokker) - see DroneScales class
-		scale = argscale; // set the variable for the Drone instance (don't delete)
+		scala = false; // by default expecting an SC scale, not Scala (Fokker) - see VoiceScales class
+		scale = argscale; // set the variable for the Voice instance (don't delete)
 
 		if(scale.isArray, {
 			semitones = scale;
@@ -614,7 +614,7 @@ Drone {
 
 
 				scala = true;
-				scl = DroneScale.new(scale);
+				scl = VoiceScale.new(scale);
 	
 				"This is a Scala scale".postln;
 
@@ -626,17 +626,17 @@ Drone {
 			semitones = scl.semitones;
 		});
 
-		scalesize = semitones.size; // needed from DroneMachines
+		scalesize = semitones.size; // needed from VoiceMachines
 		scaledegrees = Array.fill(5, {|i| semitones+(i*12)+1 }).flatten; // add 1 because of indexing from 1
 		scaledegrees = scaledegrees.insert(0, 0); // put a zero at the beginning so I can index from 1
-		^("Drone : "++ name ++ " -> scale set to : " ++ scale);
+		^("Voice : "++ name ++ " -> scale set to : " ++ scale);
 	}
 
 	chord_ { | argchord |
 		if(argchord.isArray, {
 			chord = argchord;
 		},{
-			chord = hub.drones.getChordDict.at(argchord);
+			chord = hub.voices.getChordDict.at(argchord);
 		});
 	}
 
@@ -657,33 +657,33 @@ Drone {
 //			{\formant}	{ fillColor = Color.new( rrand(0.1, 0.7), rrand(0.1, 0.7), rrand(0.1, 0.2) ) }
 //			{\atom}		{ this.initAtom; { this.startSynth()}.defer; }
 //			{
-//				buffer = Buffer.read(Server.default, DroneSynths.bufferPath(type, freq), action:{ this.startSynth() }) ; // samples
+//				buffer = Buffer.read(Server.default, VoiceSynths.bufferPath(type, freq), action:{ this.startSynth() }) ; // samples
 //			};
-		this.setDroneLook();
+		this.setVoiceLook();
 		this.startSynth();
 		synthParams[\type] = type;
-		^("Drone : "++ name ++ " -> type set to : " ++ type);
+		^("Voice : "++ name ++ " -> type set to : " ++ type);
 	}
 
-	set { | ...args | // this method is for all commands to the synth that do NOT change the graphic drone on the GUI
+	set { | ...args | // this method is for all commands to the synth that do NOT change the graphic voice on the GUI
 		if(args.indexOf(\amp).isNil.not, { amp = args[args.indexOf(\amp)+1] }); // set the amplitude
 		synthParams.putAll(args);
 		synthgroup.set(*args);
-		^("Drone : "++ name ++ " -> args set to : " ++ args);
+		^("Voice : "++ name ++ " -> args set to : " ++ args);
 	}
 
-	// used for deathArray in DroneController for slow visual fadeout
+	// used for deathArray in VoiceController for slow visual fadeout
 	killSynths { | releasetime=0 |
 		var step;
 		var tempsynthgroup = synthgroup;
 
 		if(releasetime > 0.5, {
 			step = 0.05/releasetime;
-			// fork works, but not Task (when drones are fading out in scores) - DON'T mess with this! !!!
-//	 		Task({ ((releasetime/0.05).round).do({ ampMult = ampMult - (step*1.5); "FADING OUT".postln; 0.05.wait; })}).start(TempoClock.new); // slow disappearance of drone colour
-	 		{ ((releasetime/0.05).round).do({ ampMult = ampMult - (step*1.5); 0.05.wait; }); this.killDrone }.fork(TempoClock.new); // slow disappearance of drone colour
+			// fork works, but not Task (when voices are fading out in scores) - DON'T mess with this! !!!
+//	 		Task({ ((releasetime/0.05).round).do({ ampMult = ampMult - (step*1.5); "FADING OUT".postln; 0.05.wait; })}).start(TempoClock.new); // slow disappearance of voice colour
+	 		{ ((releasetime/0.05).round).do({ ampMult = ampMult - (step*1.5); 0.05.wait; }); this.killVoice }.fork(TempoClock.new); // slow disappearance of voice colour
 		});
-		synths = synths.collect({arg synth; if(synth.isNil, {666}, {synth}) }); // remove nil from array (else drone might cross line & create a new synth)
+		synths = synths.collect({arg synth; if(synth.isNil, {666}, {synth}) }); // remove nil from array (else voice might cross line & create a new synth)
 		"killing synths for ___ ".post; this.name.postln;
 		"synths : ".post; synths.postln;
 
@@ -715,26 +715,26 @@ Drone {
 		synths = Array.fill(nrChannels, { nil }); // remove references to synths from synths array
 	}
 
-	// this method is used when a drone is killed, as in ~name.kill
-	// it then reports to the controller which does some array sorting, and kills the drone (killDrone method below)
-	kill { | releasetime | // from User -> DroneInterpreter // NOTE - don't put 0 as default arg - with nil the synth uses its envelope
-		"Killing drone (Drone Class): ".post; this.name.postln;
-		//this.killDrone();
+	// this method is used when a voice is killed, as in ~name.kill
+	// it then reports to the controller which does some array sorting, and kills the voice (killVoice method below)
+	kill { | releasetime | // from User -> VoiceInterpreter // NOTE - don't put 0 as default arg - with nil the synth uses its envelope
+		"Killing voice (Voice Class): ".post; this.name.postln;
+		//this.killVoice();
 		if(atomcount > -1, { oscresp.remove });
-		hub.drones.killDrone(this.name, releasetime);
+		hub.voices.killVoice(this.name, releasetime);
 	}
 
-	// Setter-style alias to avoid nil errors when users write ~drone.kill_(time)
+	// Setter-style alias to avoid nil errors when users write ~voice.kill_(time)
 	kill_ { | releasetime |
 		this.kill(releasetime);
 	}
 
-	// this method is private for the DroneController class - not used by user
-	killDrone { | releasetime |
+	// this method is private for the VoiceController class - not used by user
+	killVoice { | releasetime |
 		// free all tasks, synths and MIDI
 		autoTaskDict.do({ | task | task.stop; "killing autoTask".postln; [\task, task].postln; }); // kill automation
 		this.freeSynths( releasetime );
-		this.removeMIDI(); // in case there is a MIDI listener on the drone
+		this.removeMIDI(); // in case there is a MIDI listener on the voice
 	}
 
 	// ---------------------------------------> automation code  ---------------------------------------------
@@ -755,11 +755,11 @@ Drone {
 	recParam {| method, min, max, round=0 |
 		var tempmethod = method.asSymbol;
 		if(autoTaskDict.at(tempmethod).isNil.not, { autoTaskDict.at(tempmethod).stop }); // stop the task if it's there
-		hub.drones.rec_(this, method, min, max, round); // on next mousedown the recording will start
+		hub.voices.rec_(this, method, min, max, round); // on next mousedown the recording will start
 	}
 
 	setParam {| method, min, max, round=0 | // GUI update of parameters - no automation
-		hub.drones.setParam_(this, method, min, max, round);
+		hub.voices.setParam_(this, method, min, max, round);
 	}
 
 	stopParam { | method |
@@ -768,7 +768,7 @@ Drone {
 		autoTaskDict.removeAt( method.asSymbol );
 	}
 
-	startAuto { | method, movementarray | // method called only from DroneController
+	startAuto { | method, movementarray | // method called only from VoiceController
 		var tempmethod = method.asSymbol;
 		method = (method++"_").asSymbol;
 		autoTaskDict.add(tempmethod ->
@@ -794,8 +794,8 @@ Drone {
 		autoTaskDict = ();
 	}
 
-	// MIDI file playback (called from DroneStates)
-	startMIDI { | name, movementarray | // method called only from DroneController (start and stop is there)
+	// MIDI file playback (called from VoiceStates)
+	startMIDI { | name, movementarray | // method called only from VoiceController (start and stop is there)
 		autoTaskDict.add(name ->
 			Task({
 				inf.do({ |i|
@@ -817,8 +817,8 @@ Drone {
 		);
 	}
 
-	// Drone specific MIDI interface listener
-	addMIDI { | transp=0, dur | // this drone will listen to MIDI messages
+	// Voice specific MIDI interface listener
+	addMIDI { | transp=0, dur | // this voice will listen to MIDI messages
 		if(hub.midi == false, { MIDIClient.init(2, 2); MIDIIn.connectAll; hub.midi = true });
 		MIDIdef.noteOn(this.name, {arg ...args;
 			var aratio;
@@ -959,7 +959,7 @@ Drone {
 
 	// --------------------------------------------------------------------------------------------------------
 
-	state { // post the state of the drone (not the synth state which is below)
+	state { // post the state of the voice (not the synth state which is below)
 
 		var string;
 
@@ -999,21 +999,21 @@ Drone {
 		^string;
 	}
 
-	methods { // post what methods the drone takes
+	methods { // post what methods the voice takes
 
 		^"\ntonic_ : setting the tonic from the fundamental" ++
 		"\nharmonics_ : set the number of harmonics" ++
-		"\nfreq_ : set the frequency of a drone (same as tonic, but different interface)" ++
+		"\nfreq_ : set the frequency of a voice (same as tonic, but different interface)" ++
 		"\nratio_ : set ratio in the chosen tuning" ++
 		"\namp_ : set the amplitude" ++
 		"\nrelAmp_ : set the relative amplitude" ++
 		"\nspeed_ : set the speed (0 to 100)" ++
 		"\nangle_ : set the angle (0 to 360 - starting on right)" ++
-		"\nlength_ : set the length of the drone (0 to 360)" ++
+		"\nlength_ : set the length of the voice (0 to 360)" ++
 		"\nselected_ : set selection to true or false" ++
-		"\ntuning_ : set tuning (better done on a drones level)" ++
+		"\ntuning_ : set tuning (better done on a voices level)" ++
 		"\nratio_ : set the tuning ratio (the semitone) indexing from 1" ++
-		"\nscale_ : set the scale (better done on a drones level)" ++
+		"\nscale_ : set the scale (better done on a voices level)" ++
 		"\ndegree_ : set the scale degree (the note in the scale) indexing from 1" ++
 		"\ntype_ : set the synth type (saw, sine, tri, cub, pulse, formant)"
 	}
@@ -1387,26 +1387,26 @@ Drone {
 		out = out + hub.channelOffset;
 		^switch(type)
 			{\saw}{ // add detune here.
-				Synth(\dronesaw, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicesaw, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\sine}{
-				Synth(\dronesine, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicesine, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\tri}{
-				Synth(\dronetri, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicetri, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\cub}{
-				Synth(\dronecub, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicecub, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\pulse}{
-				Synth(\dronepulse, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicepulse, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\atom}{
 				// here send an OSC message with the new out:
-				this.sendAtomChannel(out, 1); // in DroneAtom file
+				this.sendAtomChannel(out, 1); // in VoiceAtom file
 				}
 			{\formant}{
-				Synth(\droneformant, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
+				Synth(\voiceformant, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
 				\amp, amp, \oscfreq, sp[\oscfreq], \oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr],
 				\time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\eliane}{
@@ -1414,32 +1414,32 @@ Drone {
 				\amp, amp, \oscfreq, sp[\oscfreq], \oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr],
 				\time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\noise}{
-				Synth(\dronenoise, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
+				Synth(\voicenoise, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
 				\amp, amp, \oscfreq, sp[\oscfreq], \oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr],
 				\time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\klank}{
-				Synth(\droneklank, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
+				Synth(\voiceklank, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
 				\amp, amp, \oscfreq, sp[\oscfreq], \oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr],
 				\time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 			{\gendy}{
-				Synth(\dronegendy, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
+				Synth(\voicegendy, [\out, out, \freq, freq, \formfreq, sp[\formfreq], \bwfreq, sp[\bwfreq], \harmonics, harmonics, \resonance, sp[\resonance],
 				\amp, amp, \oscfreq, sp[\oscfreq], \oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr],
 				\time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 
 			{\pad}{
-				Synth(\dronepad, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicepad, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }
 		    /*{\padw}{
-				Synth(\dronepadw, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
+				Synth(\voicepadw, [\out, out, \freq, freq, \harmonics, harmonics, \amp, amp, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup) }*/
 			{ var nearestFreq, midinote; // else, it's a sample
 				var noteData, startLoop, endLoop;
-				noteData = DroneSynths.noteData(type, freq);
+				noteData = VoiceSynths.noteData(type, freq);
 				midinote = noteData[0].cpsmidi; // this is a reference freq for microtuning or out of tune samples
 				startLoop = noteData[1];
 				endLoop = noteData[2];
 				//[\startLoop_____________, startLoop, \endLoop, endLoop].postln;
-				Synth(\droneinstr, [\buffer, buffer, \out, out, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp*2, \startLoop, startLoop,
+				Synth(\voiceinstr, [\buffer, buffer, \out, out, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp*2, \startLoop, startLoop,
 				\endLoop, endLoop, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
 				\oscamp, sp[\oscamp], \env, sp[\env], \dep, sp[\dep], \arr, sp[\arr], \time, sp[\time], \fgate, sp[\fgate], \detune, sp[\detune]], synthgroup)
 			};
@@ -1447,19 +1447,19 @@ Drone {
 			{\piano}{
 				var nearestFreq, midinote;
 				var noteData, startLoop, endLoop;
-				//nearestFreq = DroneSynths.nearestFreq(\piano, freq);
+				//nearestFreq = VoiceSynths.nearestFreq(\piano, freq);
 				[\freq, freq].postln;
 				//[\nearestFreq, nearestFreq].postln;
 				// calculate rate here!
 				// (freq.cpsmidi-60).midiratio
 				// move
-				noteData = DroneSynths.noteData(\piano, freq);
-				// midinote = DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
+				noteData = VoiceSynths.noteData(\piano, freq);
+				// midinote = VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
 				midinote = noteData[0].cpsmidi; // this is a reference freq for microtuning or out of tune samples
 				startLoop = noteData[1];
 				endLoop = noteData[2];
 				[\startLoop_____________, startLoop, \endLoop, endLoop].postln;
-				// rate = (freq.cpsmidi - DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
+				// rate = (freq.cpsmidi - VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
 				// [\rate________________, rate].postln;
 				Synth(\instr, [\out, out, \buffer, buffer, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp, \startLoop, startLoop,
 				\endLoop, endLoop, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
@@ -1467,19 +1467,19 @@ Drone {
 			{\organ}{
 				var nearestFreq, midinote;
 				var noteData, startLoop, endLoop;
-				//nearestFreq = DroneSynths.nearestFreq(\piano, freq);
+				//nearestFreq = VoiceSynths.nearestFreq(\piano, freq);
 				[\freq, freq].postln;
 				//[\nearestFreq, nearestFreq].postln;
 				// calculate rate here!
 				// (freq.cpsmidi-60).midiratio
 				// move
-				noteData = DroneSynths.noteData(\organ, freq);
-				// midinote = DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
+				noteData = VoiceSynths.noteData(\organ, freq);
+				// midinote = VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
 				midinote = noteData[0].cpsmidi; // this is a reference freq for microtuning or out of tune samples
 				startLoop = noteData[1];
 				endLoop = noteData[2];
 				[\startLoop_____________, startLoop, \endLoop, endLoop].postln;
-				// rate = (freq.cpsmidi - DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
+				// rate = (freq.cpsmidi - VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
 				// [\rate________________, rate].postln;
 				Synth(\instr, [\out, out, \buffer, buffer, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp, \startLoop, startLoop,
 				\endLoop, endLoop, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
@@ -1487,19 +1487,19 @@ Drone {
 			{\organdist}{
 				var nearestFreq, midinote;
 				var noteData, startLoop, endLoop;
-				//nearestFreq = DroneSynths.nearestFreq(\piano, freq);
+				//nearestFreq = VoiceSynths.nearestFreq(\piano, freq);
 				[\freq, freq].postln;
 				//[\nearestFreq, nearestFreq].postln;
 				// calculate rate here!
 				// (freq.cpsmidi-60).midiratio
 				// move
-				noteData = DroneSynths.noteData(\organdist, freq);
-				// midinote = DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
+				noteData = VoiceSynths.noteData(\organdist, freq);
+				// midinote = VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
 				midinote = noteData[0].cpsmidi; // this is a reference freq for microtuning or out of tune samples
 				startLoop = noteData[1];
 				endLoop = noteData[2];
 				[\startLoop_____________, startLoop, \endLoop, endLoop].postln;
-				// rate = (freq.cpsmidi - DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
+				// rate = (freq.cpsmidi - VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
 				// [\rate________________, rate].postln;
 				Synth(\instr, [\out, out, \buffer, buffer, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp, \startLoop, startLoop,
 				\endLoop, endLoop, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],
@@ -1507,19 +1507,19 @@ Drone {
 			{\organharm}{
 				var nearestFreq, midinote;
 				var noteData, startLoop, endLoop;
-				//nearestFreq = DroneSynths.nearestFreq(\piano, freq);
+				//nearestFreq = VoiceSynths.nearestFreq(\piano, freq);
 				[\freq, freq].postln;
 				//[\nearestFreq, nearestFreq].postln;
 				// calculate rate here!
 				// (freq.cpsmidi-60).midiratio
 				// move
-				noteData = DroneSynths.noteData(\organharm, freq);
-				// midinote = DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
+				noteData = VoiceSynths.noteData(\organharm, freq);
+				// midinote = VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote];
 				midinote = noteData[0].cpsmidi; // this is a reference freq for microtuning or out of tune samples
 				startLoop = noteData[1];
 				endLoop = noteData[2];
 				[\startLoop_____________, startLoop, \endLoop, endLoop].postln;
-				// rate = (freq.cpsmidi - DroneSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
+				// rate = (freq.cpsmidi - VoiceSynths.sampleDict[\piano][nearestFreq.asSymbol][\midinote] ).midiratio;
 				// [\rate________________, rate].postln;
 				Synth(\instr, [\out, out, \buffer, buffer, \freq, freq, \midinote, midinote, \harmonics, harmonics*2, \amp, amp, \startLoop, startLoop,
 				\endLoop, endLoop, \oscfreq, sp[\oscfreq], \resonance, sp[\resonance],

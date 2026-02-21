@@ -1,17 +1,17 @@
 
-DroneChord {
+VoiceChord {
 
-	var <>dronearray;
+	var <>voicearray;
 	var <selected;
 	var hub, <name;
 	var chordtype, chordratios;
 	var <tuning, <scale, scaledegrees; // scale is used for chord progressions
 	
 	*new { | hub, name, scale |
-		^super.new.initDroneChord( hub, name, scale );
+		^super.new.initVoiceChord( hub, name, scale );
 	}
 
-	initDroneChord { | arghub, argname, argscale |
+	initVoiceChord { | arghub, argname, argscale |
 		hub = arghub;
 		name = argname;
 		scale = argscale;
@@ -19,10 +19,10 @@ DroneChord {
 	
 	createChord { | type=\saw, chord=#[1,5,8], tonic=1, harmonics, amp=0.2, speed, length, angle, degree=1, ratio=1, env, octave, note |
 
-		var drone;
+		var voice;
 		chordtype = chord; // for outside info, see chord method below
 		selected = false;
-		dronearray = [];
+		voicearray = [];
 		if(chord.isArray, { // its a custom chord
 			//rat = "";
 			//chord.do({arg i; rat = rat++i.asString });
@@ -42,32 +42,32 @@ DroneChord {
 		
 		// a chord can be created in different ratios (which are halftones by default)
 		chordratios.do({arg chordratio, i;
-			var angleArg, lengthArg, harmonicsArg, drone;
+			var angleArg, lengthArg, harmonicsArg, voice;
 			angleArg = angle.value ? 360.rand; // angle.value allows for functions to be passed, e.g. {rrand(100,190)}
 			lengthArg = length.value ? (100+(160.rand));
 			harmonicsArg = harmonics.value ? (2+(3.rand));
 
-			drone = hub.drones.createDrone( type, tonic, harmonicsArg, amp, speed, lengthArg, angleArg, degree, chordratio+ratio-1, name++"_"++chordratio, env, octave, post:false );
-			drone.chord_(chordratios); // make the drone aware of which chord it is a member of
-			dronearray = dronearray.add(drone);
+			voice = hub.voices.createDrone( type, tonic, harmonicsArg, amp, speed, lengthArg, angleArg, degree, chordratio+ratio-1, name++"_"++chordratio, env, octave, post:false );
+			voice.chord_(chordratios); // make the voice aware of which chord it is a member of
+			voicearray = voicearray.add(voice);
 		});
 		this.scale_(scale); // set the scaledegrees (if chord is to be harmonically transposed)
 	}
 	
-	// define a chord from existing drones
+	// define a chord from existing voices
 	defineChord { | array | // XXX - TODO- is this working?
 		Post << array;
-		dronearray = array;
-		dronearray.do({ | drone | drone.name.postln });
+		voicearray = array;
+		voicearray.do({ | voice | voice.name.postln });
 	}
 	
 	selected_ { | bool |
 		selected = bool;
-		dronearray.do({ |drone| drone.selected = bool });
+		voicearray.do({ |voice| voice.selected = bool });
 	}
 	
-	printDroneArray {
-		dronearray.do({arg drone; drone.name.println });
+	printVoiceArray {
+		voicearray.do({arg voice; voice.name.println });
 	}
 	
 	type {
@@ -81,72 +81,72 @@ DroneChord {
 			chordratios = hub.getChordDict.at(chord.asSymbol)+1; // indexing by 1
 		});
 		
-		if(chordratios.size == dronearray.size, {
+		if(chordratios.size == voicearray.size, {
 			"--> SAME SIZE".postln;
 			chordratios.do({ | ratio, i |
-				dronearray[i].ratio_(ratio+transp, dur);
+				voicearray[i].ratio_(ratio+transp, dur);
 			});
 		}, {
-			if(chordratios.size < dronearray.size, { // if there are more drones than tunings 
-				dronearray.copy.do({ | drone, i |
+			if(chordratios.size < voicearray.size, { // if there are more voices than tunings 
+				voicearray.copy.do({ | voice, i |
 					if(chordratios[i].isNil, {
 						"--> KILLING DRONE".postln;
 						if(dur.isNil.not, { // if it's a time-change chord
-							drone.amp_(0, dur); // and fade out
-							//drone.ratio_(chordratios[i]+transp, dur);
+							voice.amp_(0, dur); // and fade out
+							//voice.ratio_(chordratios[i]+transp, dur);
 							{var drname;
-							drname = drone.name;
-							drone.kill;
-							dronearray.copy.do({ | drone, i |
-								if(drone.name == drname, {
-									dronearray.removeAt(i)
+							drname = voice.name;
+							voice.kill;
+							voicearray.copy.do({ | voice, i |
+								if(voice.name == drname, {
+									voicearray.removeAt(i)
 								});
 							});
 							}.defer(dur);
 						}, {
 							var drname;
-							drname = drone.name;
-							drone.kill;
-							dronearray.copy.do({ | drone, i |
-								if(drone.name == drname, {
-									dronearray.removeAt(i)
+							drname = voice.name;
+							voice.kill;
+							voicearray.copy.do({ | voice, i |
+								if(voice.name == drname, {
+									voicearray.removeAt(i)
 								});
 							});
 						});
 					}, {
-						drone.ratio_(chordratios[i]+transp, dur);
+						voice.ratio_(chordratios[i]+transp, dur);
 					});
 				});				
 			}, {
 				"--> YES - MORE RATIOS".postln;
 				chordratios.do({ | ratio, i |
-					if(dronearray[i].isNil, {
-						var drone;
+					if(voicearray[i].isNil, {
+						var voice;
 						"--> ADDING DRONE".postln;
 						[\name, name].postln;
-						drone = hub.drones.createDrone(
-											dronearray[0].type,
-											dronearray[0].tonic,
-											dronearray[0].harmonics,
-											dronearray[0].amp,
-											dronearray[0].speed,
+						voice = hub.voices.createDrone(
+											voicearray[0].type,
+											voicearray[0].tonic,
+											voicearray[0].harmonics,
+											voicearray[0].amp,
+											voicearray[0].speed,
 											rrand(100, 300),
 											360.rand,
 											1, // degree
 											ratio, 
 											name++"_"++ratio, 
-											dronearray[0].env,
-											dronearray[0].octave,
+											voicearray[0].env,
+											voicearray[0].octave,
 											post:false
 										);
-						dronearray = dronearray.add( drone );
+						voicearray = voicearray.add( voice );
 						if(dur.isNil.not, { // if it's a time change chord
-							drone.amp_(0); // start new drone with 0 vol
-							drone.amp_(dronearray[0].amp, dur); // and fade in
-							drone.ratio_(ratio+transp, dur);
+							voice.amp_(0); // start new voice with 0 vol
+							voice.amp_(voicearray[0].amp, dur); // and fade in
+							voice.ratio_(ratio+transp, dur);
 						});
 					}, {
-						dronearray[i].ratio_(ratio+transp, dur);
+						voicearray[i].ratio_(ratio+transp, dur);
 					});
 				});				
 			});
@@ -160,30 +160,30 @@ DroneChord {
 	
 	// in many of these I need to calculate from the offset
 	
-	env_ { |envt| dronearray.do({arg drone; drone.env = envt }) }
-	tonic_ { |tonic,dur| dronearray.do({arg drone; drone.tonic_(tonic, dur) }) }
-	relTonic_ { |change, dur| dronearray.do({arg drone; drone.relTonic_(change, dur) }) }
+	env_ { |envt| voicearray.do({arg voice; voice.env = envt }) }
+	tonic_ { |tonic,dur| voicearray.do({arg voice; voice.tonic_(tonic, dur) }) }
+	relTonic_ { |change, dur| voicearray.do({arg voice; voice.relTonic_(change, dur) }) }
 	freq_ { |freq, dur| 
 		var fundamental, ratio;
-		fundamental = dronearray.collect({|drone| drone.freq }).minItem;
-		dronearray.do({arg drone; 
-			ratio = drone.freq / fundamental;
-			drone.freq_(freq*ratio, dur);
+		fundamental = voicearray.collect({|voice| voice.freq }).minItem;
+		voicearray.do({arg voice; 
+			ratio = voice.freq / fundamental;
+			voice.freq_(freq*ratio, dur);
 		}) 
 	}// not working on a chord
-	relFreq_ { |change, dur| dronearray.do({arg drone; drone.relFreq_(change, dur) }) }
+	relFreq_ { |change, dur| voicearray.do({arg voice; voice.relFreq_(change, dur) }) }
 	
 	ratio_ { |ratio, dur, harmonic=false| 
 		var offsetratio;
 		chordratios.do({ |pureratio, i|
 			offsetratio = pureratio+ratio-1;
 			if(harmonic, {offsetratio = (offsetratio-0.2).nearestInList(scaledegrees) });
-			dronearray[i].ratio_(offsetratio, dur);
+			voicearray[i].ratio_(offsetratio, dur);
 		});
 	} // works
 	
 	relRatio_ { |change, dur, harmonic=false| 
-		dronearray.do({arg drone; drone.ratio_(change+drone.ratio, dur, harmonic) }) 
+		voicearray.do({arg voice; voice.ratio_(change+voice.ratio, dur, harmonic) }) 
 	} // works
 	
 	note_ { |note, dur, harmonic=false| 
@@ -199,7 +199,7 @@ DroneChord {
 		chordratios.do({ |pureratio, i|
 			offsetratio = pureratio+ratio-1;
 			if(harmonic, {offsetratio = (offsetratio-0.2).nearestInList(scaledegrees) });
-			dronearray[i].ratio_(offsetratio, dur);
+			voicearray[i].ratio_(offsetratio, dur);
 		});
 	} 
 		
@@ -210,33 +210,33 @@ DroneChord {
 		chordratios.do({ |pureratio, i|
 			offsetratio = pureratio+ratio-1;
 			if(harmonic, {offsetratio = (offsetratio-0.2).nearestInList(scaledegrees) });
-			dronearray[i].ratio_(offsetratio, dur);
+			voicearray[i].ratio_(offsetratio, dur);
 		});
 	} 
-	relDegree_ { |change, dur, harmonic=false| dronearray.do({arg drone; drone.degree_(change+drone.degree, dur, harmonic) }) } // works
+	relDegree_ { |change, dur, harmonic=false| voicearray.do({arg voice; voice.degree_(change+voice.degree, dur, harmonic) }) } // works
 
-	// playRatios { |dur, slide| dronearray.do({arg drone; drone.playRatios(dur, slide) }) }
-	// playDegrees { |dur, slide| dronearray.do({arg drone; drone.playDegrees(dur, slide) }) }
-	// playScale { |dur, slide| dronearray.do({arg drone; drone.playScale(dur, slide) }) }
-	octave_ { |octave, dur| dronearray.do({arg drone; drone.octave_(octave, dur) }) }
-	relOctave_ { |change, dur| dronearray.do({arg drone; drone.relOctave_(change, dur) }) }
-	transpose_ { |interval, dur| dronearray.do({arg drone; drone.transpose_(interval, dur) }) }
-	interval_ { |interval, dur| dronearray.do({arg drone; drone.interval_(interval, dur) }) }
+	// playRatios { |dur, slide| voicearray.do({arg voice; voice.playRatios(dur, slide) }) }
+	// playDegrees { |dur, slide| voicearray.do({arg voice; voice.playDegrees(dur, slide) }) }
+	// playScale { |dur, slide| voicearray.do({arg voice; voice.playScale(dur, slide) }) }
+	octave_ { |octave, dur| voicearray.do({arg voice; voice.octave_(octave, dur) }) }
+	relOctave_ { |change, dur| voicearray.do({arg voice; voice.relOctave_(change, dur) }) }
+	transpose_ { |interval, dur| voicearray.do({arg voice; voice.transpose_(interval, dur) }) }
+	interval_ { |interval, dur| voicearray.do({arg voice; voice.interval_(interval, dur) }) }
 	
-	harmonics_ { |harmonics, dur| dronearray.do({arg drone; drone.harmonics_(harmonics, dur) }) }
-	resonance_ { |res, dur| dronearray.do({arg drone; drone.resonance_(res, dur) }) }
-	amp_ { |amp, dur| dronearray.do({arg drone; drone.amp_(amp, dur) }) } // working
-	amp { ^dronearray[0].amp } 
-	relAmp_ { |change, dur| dronearray.do({arg drone; drone.relAmp_(change, dur) }) } // working
-	speed_ { |speed| dronearray.do({arg drone; drone.speed_(speed) }) } // working
-	relSpeed_ { |change| dronearray.do({arg drone; drone.relSpeed_(change) }) } // working
-	angle_ { |angle| dronearray.do({arg drone; drone.angle_(angle) }) } // working
-	length_ { |length| dronearray.do({arg drone; drone.length_(length) }) } // working
-	relLength_ { |change| dronearray.do({arg drone; drone.relLength_(change) }) } // working
-	tuning_ { |argtuning, dur| tuning = argtuning; dronearray.do({arg drone; drone.tuning_(tuning, dur) }) } // working
+	harmonics_ { |harmonics, dur| voicearray.do({arg voice; voice.harmonics_(harmonics, dur) }) }
+	resonance_ { |res, dur| voicearray.do({arg voice; voice.resonance_(res, dur) }) }
+	amp_ { |amp, dur| voicearray.do({arg voice; voice.amp_(amp, dur) }) } // working
+	amp { ^voicearray[0].amp } 
+	relAmp_ { |change, dur| voicearray.do({arg voice; voice.relAmp_(change, dur) }) } // working
+	speed_ { |speed| voicearray.do({arg voice; voice.speed_(speed) }) } // working
+	relSpeed_ { |change| voicearray.do({arg voice; voice.relSpeed_(change) }) } // working
+	angle_ { |angle| voicearray.do({arg voice; voice.angle_(angle) }) } // working
+	length_ { |length| voicearray.do({arg voice; voice.length_(length) }) } // working
+	relLength_ { |change| voicearray.do({arg voice; voice.relLength_(change) }) } // working
+	tuning_ { |argtuning, dur| tuning = argtuning; voicearray.do({arg voice; voice.tuning_(tuning, dur) }) } // working
 	scale_ { |scale| 
 		var scala, scl, semitones, octaveRatio, scalesize;
-		scala = false; // by default expecting an SC scale, not Scala (Fokker) - see DroneScales class
+		scala = false; // by default expecting an SC scale, not Scala (Fokker) - see VoiceScales class
 		if(scale.isArray, {
 			semitones = scale;
 		}, {
@@ -244,31 +244,31 @@ DroneChord {
 			octaveRatio = scl.tuning.octaveRatio; // this is for non-octave repeating scales such as Bohlen Pierce 3:1 'tritave' scale
 			if(scl.isNil, { // support of the Scala scales
 				scala = true;
-				scl = DroneScale.new(scale); 
+				scl = VoiceScale.new(scale); 
 				"This is a Scala scale".postln;
 				this.tuning_(scale); // the Scala scales are also tunings
 			}); 
 			semitones = scl.semitones;
 		});
-		scalesize = semitones.size; // needed from DroneMachines
+		scalesize = semitones.size; // needed from VoiceMachines
 		scaledegrees = Array.fill(5, {|i| semitones+(i*12)+1 }).flatten; // add 1 because of indexing from 1
 		scaledegrees = scaledegrees.insert(0, 0); // put a zero at the beginning so I can index from 1
 		
-		dronearray.do({arg drone; drone.scale_(scale) });
+		voicearray.do({arg voice; voice.scale_(scale) });
 	}
 	chord_ { |chord, dur, transp=0| // transposition in ratios (half-notes if et12)
 		this.changeChord(chord, dur, transp);
-		dronearray.do({arg drone; drone.chord_(chord) }); // the chord of a drone
+		voicearray.do({arg voice; voice.chord_(chord) }); // the chord of a voice
 	}  
-	type_ { |type| dronearray.do({arg drone; drone.type_(type) }) }
-	set { | ...args | dronearray.do({arg drone; drone.set(*args) }) }
-	freeSynths { |releasetime| dronearray.do({arg drone; drone.freeSynths(releasetime) }) } // the chord of a drone 
-	kill { |releasetime| hub.drones.killChord(name); dronearray.do({arg drone; drone.kill(releasetime) }) }
-	auto_ { |bool| dronearray.do({arg drone; drone.auto_(bool) }) }
-	clearauto { dronearray.do({arg drone; drone.clearauto() }) }
-	recParam {| method, min, max, round=0 | hub.drones.rec_(dronearray, method, min, max, round) }
-	setParam {| method, min, max, round=0 | hub.drones.setParam_(dronearray, method, min, max, round) }
-	stopParam { | method | dronearray.do({arg drone; drone.stopParam(method) }) }
+	type_ { |type| voicearray.do({arg voice; voice.type_(type) }) }
+	set { | ...args | voicearray.do({arg voice; voice.set(*args) }) }
+	freeSynths { |releasetime| voicearray.do({arg voice; voice.freeSynths(releasetime) }) } // the chord of a voice 
+	kill { |releasetime| hub.voices.killChord(name); voicearray.do({arg voice; voice.kill(releasetime) }) }
+	auto_ { |bool| voicearray.do({arg voice; voice.auto_(bool) }) }
+	clearauto { voicearray.do({arg voice; voice.clearauto() }) }
+	recParam {| method, min, max, round=0 | hub.voices.rec_(voicearray, method, min, max, round) }
+	setParam {| method, min, max, round=0 | hub.voices.setParam_(voicearray, method, min, max, round) }
+	stopParam { | method | voicearray.do({arg voice; voice.stopParam(method) }) }
 
 	// Chord specific MIDI interface listener
 	addMIDI { | transp=0, dur, harmonic=false | // this chord will listen to MIDI messages
@@ -286,14 +286,14 @@ DroneChord {
 	}
 
 	perform { arg command;
-		if(command.contains("changeChord") || command.contains("type"), { // methods of this class (not its drones)
+		if(command.contains("changeChord") || command.contains("type"), { // methods of this class (not its voices)
 			var combinedstring; // = ("this"++command);
-			combinedstring = ("~drones.chordDict[\\"++name++"]"++command); // accessing this through the dict (since this. doesn't work)
+			combinedstring = ("~voices.chordDict[\\"++name++"]"++command); // accessing this through the dict (since this. doesn't work)
 			combinedstring.interpret;
 		}, {
-			dronearray.do({arg drone;
+			voicearray.do({arg voice;
 				var combinedstring, interprstr;
-				combinedstring = ("~drones.droneDict[\\"++drone.name++"]"++command);
+				combinedstring = ("~voices.voiceDict[\\"++voice.name++"]"++command);
 				combinedstring.postln;
 				try{ 
 					interprstr = combinedstring.interpret;

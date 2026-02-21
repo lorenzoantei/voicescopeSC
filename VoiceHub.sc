@@ -1,10 +1,10 @@
 
 // the system's singleton class
 
-DroneHub {
+VoiceHub {
 
 	var <>window, <middle;
-	var <>speakers, <>drones, <>interpreter, <>states;
+	var <>speakers, <>voices, <>interpreter, <>states;
 	var <>randomseed;
 	//var <>recording;
 	var <>midi, <fundamental, <midinoteoffset;
@@ -14,17 +14,17 @@ DroneHub {
 	var <pathtouserscalafiles; // = "/Users/thm21/Library/Application Support/SuperCollider/scl_user/";
 	var <mode, <>post;
 	var <>scale, <key;
-	var <threnoscopeColor;
+	var <voicescopeColor;
 	var <>padDown;
 	var <>appPath;
 	var <>channels;
 	var <>env;
 
-	*new { arg window, argmode, argscale, argfundamental, threnoscopeColor, key, channels, appPath;
-		^super.new.initDroneHub(window, argmode, argscale, argfundamental, threnoscopeColor, key, channels, appPath);
+	*new { arg window, argmode, argscale, argfundamental, voicescopeColor, key, channels, appPath;
+		^super.new.initVoiceHub(window, argmode, argscale, argfundamental, voicescopeColor, key, channels, appPath);
 	}
 
-	initDroneHub { |argwindow, argmode, argscale, argfundamental, argThrenoscopeColor, argKey, argchannels, argappPath |
+	initVoiceHub { |argwindow, argmode, argscale, argfundamental, argThrenoscopeColor, argKey, argchannels, argappPath |
 		window = argwindow;
 		mode = argmode;
 		midi = false;
@@ -37,7 +37,7 @@ DroneHub {
 		screenbounds = Window.screenBounds;
 		scale = argscale;
 		channelOffset = 0;
-		threnoscopeColor = argThrenoscopeColor;
+		voicescopeColor = argThrenoscopeColor;
 		padDown = false;
 		key = argKey;
 		appPath = argappPath;
@@ -86,7 +86,7 @@ DroneHub {
 			speakers.instVarPut(10, dim.asFloat); // sd
 			speakers.instVarPut(8, nil); // image
 		});
-		drones.resize(newBounds);
+		voices.resize(newBounds);
 	}
 	
 	safeEnvironment {
@@ -102,8 +102,8 @@ DroneHub {
 		speakers = argspeakers;
 	}
 
-	registerDrones { |argdrones|
-		drones = argdrones;
+	registerVoices { |argvoices|
+		voices = argvoices;
 	}
 
 	registerInterpreter { |arginterpreter|
@@ -120,22 +120,22 @@ DroneHub {
 	}
 
 
-	postDroneState {arg selectedName, selected;
+	postVoiceState {arg selectedName, selected;
 		var string;
 		string = "~"++selectedName++"\n"++
-		"~"++selectedName++".type = \\"++drones.droneArray[selected].type++"\n"++
-		"~"++selectedName++".tonic = "++drones.droneArray[selected].tonic++"\n"++
-		"~"++selectedName++".freq = "++drones.droneArray[selected].freq++"\n"++
-		"~"++selectedName++".harmonics = "++drones.droneArray[selected].harmonics++"\n"++
-		"~"++selectedName++".amp = "++drones.droneArray[selected].amp++"\n"++
-		"~"++selectedName++".speed = "++(drones.droneArray[selected].speed*1000)++"\n"++
-		"~"++selectedName++".length = "++(drones.droneArray[selected].length*360/(2*pi))++"\n"++
-		"~"++selectedName++".angle = "++(drones.droneArray[selected].angle*360/(2*pi))++"\n"++
-		"~"++selectedName++".degree = "++drones.droneArray[selected].degree++"\n"++
-		"~"++selectedName++".ratio = "++drones.droneArray[selected].ratio++"\n"++
-		"~"++selectedName++".env = "++drones.droneArray[selected].env++"\n"++
-		"~"++selectedName++".octave = "++drones.droneArray[selected].octave++"\n"
-		"~"++selectedName++".note = "++drones.droneArray[selected].note++"\n";
+		"~"++selectedName++".type = \\"++voices.voiceArray[selected].type++"\n"++
+		"~"++selectedName++".tonic = "++voices.voiceArray[selected].tonic++"\n"++
+		"~"++selectedName++".freq = "++voices.voiceArray[selected].freq++"\n"++
+		"~"++selectedName++".harmonics = "++voices.voiceArray[selected].harmonics++"\n"++
+		"~"++selectedName++".amp = "++voices.voiceArray[selected].amp++"\n"++
+		"~"++selectedName++".speed = "++(voices.voiceArray[selected].speed*1000)++"\n"++
+		"~"++selectedName++".length = "++(voices.voiceArray[selected].length*360/(2*pi))++"\n"++
+		"~"++selectedName++".angle = "++(voices.voiceArray[selected].angle*360/(2*pi))++"\n"++
+		"~"++selectedName++".degree = "++voices.voiceArray[selected].degree++"\n"++
+		"~"++selectedName++".ratio = "++voices.voiceArray[selected].ratio++"\n"++
+		"~"++selectedName++".env = "++voices.voiceArray[selected].env++"\n"++
+		"~"++selectedName++".octave = "++voices.voiceArray[selected].octave++"\n"
+		"~"++selectedName++".note = "++voices.voiceArray[selected].note++"\n";
 		if (interpreter.isNil.not and: {post}) {
 			{interpreter.postview.string_(string)}.defer;
 		} {

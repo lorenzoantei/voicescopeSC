@@ -9,16 +9,16 @@ LPF
 
 */
 
-DroneSynths {
+VoiceSynths {
 
 	classvar <sampleDict;
 	classvar hub;
 
 	*new { arg loadsamples, hub;
-		^super.new.initDroneSynths(loadsamples, hub);
+		^super.new.initVoiceSynths(loadsamples, hub);
 	}
 
-	initDroneSynths {arg loadsamples, arghub;
+	initVoiceSynths {arg loadsamples, arghub;
 
 		hub = arghub;
 
@@ -90,7 +90,7 @@ DroneSynths {
 			delay = DelayN.ar(LoopBuf.ar(1, buffer, rate*dir, changetr, startLoop, startLoop, endLoop, 2), trianglelength/2, trianglelength/2);
 			signal = XFade2.ar(delay, signal+att, (EnvGen.ar((Env.triangle(trianglelength, -2)), tr+(changetr-1)) +1), Lag.kr(amp, 3));
 
-			// threnoscope system
+			// voicescope system
 			signal = LPF.ar(signal, freq * harmonics);
 			signal = BPeakEQ.ar(signal, freq*Lag.kr(resonance, 1), 1, Lag.kr(resamp, 1));
 			envl = EnvGen.kr(Env.asr(env[0], 1, env[1], 0), gate, doneAction:doneAction);
@@ -98,13 +98,13 @@ DroneSynths {
 			Out.ar(out, signal);
 		}).add;
 
-		SynthDef(\droneLimiter, {
+		SynthDef(\voiceLimiter, {
 			var input = In.ar(0, 2);
 		//	input = Select.ar(CheckBadValues.ar(input, 0, 0), [input, DC.ar(0), DC.ar(0), input]);
 			ReplaceOut.ar(0, Limiter.ar(input, 0.8)) ;
 		}).add;
 
-		SynthDef(\dronesaw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicesaw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -158,7 +158,7 @@ DroneSynths {
 		}, [0, 0.4]).add;
 
 
-		SynthDef(\dronenoise, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicenoise, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -183,7 +183,7 @@ DroneSynths {
 		}, [0, 0.4]).add;
 
 
-		SynthDef(\droneklank, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voiceklank, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -217,7 +217,7 @@ DroneSynths {
 		}, [0, 0.4]).add;
 
 
-		SynthDef(\dronegendy, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicegendy, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2, range = 20;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -241,7 +241,7 @@ DroneSynths {
 
 
 /*
-		SynthDef(\dronenoise, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicenoise, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -271,7 +271,7 @@ a.set(\freq, 111)
 a.set(\harmonics, 11)
 
 */
-//		SynthDef(\dronesaw, {arg freq=110, harmonics=2, oscfreq=1, out=0, amp=0.42;
+//		SynthDef(\voicesaw, {arg freq=110, harmonics=2, oscfreq=1, out=0, amp=0.42;
 //			var signal;
 //			signal = LPF.ar(Saw.ar(freq, amp), freq*harmonics);
 //			Out.ar(out, signal);
@@ -299,7 +299,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 	signal = XFade2.ar(delay, signal+att, (EnvGen.ar((Env.triangle(trianglelength, -2)), tr)+1).poll, Lag.kr(amp, 3));
 	//signal = XFade2.ar(delay, signal+att, (MouseX.kr(-1, 1)).poll, Lag.kr(amp, 3));
 
-	// threnoscope system
+	// voicescope system
 	signal = LPF.ar(signal, freq * harmonics);
 	signal = BPeakEQ.ar(signal, freq*Lag.kr(resonance, 1), 1, Lag.kr(resamp, 1));
 	envl = EnvGen.kr(Env.asr(env[0], 1, env[1], 0), gate, doneAction:2);
@@ -309,7 +309,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 
 */
 
-		SynthDef(\droneinstr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43100, endLoop=161200, t_trig=1, attack=1, ratex=1,
+		SynthDef(\voiceinstr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43100, endLoop=161200, t_trig=1, attack=1, ratex=1,
 			dir= 1, amp=0.42, env=#[3,3], harmonics=4, resonance=1, resamp=0, doneAction=2;
 
 			var signal, delay, tr, att, envl, onsetenvtime;
@@ -334,7 +334,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 			delay = DelayN.ar(LoopBuf.ar(1, buffer, rate*dir, changetr, startLoop, startLoop, endLoop, 2), trianglelength/2, trianglelength/2);
 			signal = XFade2.ar(delay, signal+att, (EnvGen.ar((Env.triangle(trianglelength, -2)), tr+(changetr-1)) +1), Lag.kr(amp, 3));
 
-			// threnoscope system
+			// voicescope system
 			signal = LPF.ar(signal, freq * harmonics);
 			signal = BPeakEQ.ar(signal, freq*Lag.kr(resonance, 1), 1, Lag.kr(resamp, 1));
 			envl = EnvGen.kr(Env.asr(env[0], 1, env[1], 0), gate, doneAction:doneAction);
@@ -342,7 +342,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 			Out.ar(out, signal);
 		}).add;
 
-		SynthDef(\dronesine, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
+		SynthDef(\voicesine, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -369,7 +369,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 
 
 
-		SynthDef(\dronetri, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicetri, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -391,7 +391,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 			Out.ar(out, signal);
 		}, [0.4, 0.4]).add;
 
-		SynthDef(\dronecub, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicecub, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -414,7 +414,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		}, [0.4, 0.4]).add;
 
 
-		SynthDef(\dronepulse, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicepulse, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -437,7 +437,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		}, [0.4, 0.4]).add;
 
 
-		SynthDef(\droneformant, {arg freq=110, formfreq=3, bwfreq=2, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voiceformant, {arg freq=110, formfreq=3, bwfreq=2, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 
 			var signal, freqmodosc, freqmodline, envl;
@@ -460,7 +460,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		}, [0.4, 12, 12, 0.4]).add;
 
 
-		SynthDef(\dronepad, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
+		SynthDef(\voicepad, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 			var signal, freqmodosc, freqmodline, envl, amps;
 
@@ -478,7 +478,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		}).add;
 /*
 ///First New Synth (a try out)
-		SynthDef(\dronepadw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
+		SynthDef(\voicepadw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.3, gate=1,
 			env=#[3,3], dep=1, arr=2, time=10, fgate=0, detune=0, resonance=1, resamp=0, doneAction=2;
 			var signal, freqmodosc, freqmodline, envl, amps;
 
@@ -500,10 +500,10 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 
 
 
-		SynthDef(\dronemixer2, { Out.ar(100, In.ar(0, 2).sum) }).add;
-		SynthDef(\dronemixer4, { Out.ar(100, In.ar(0, 4).sum) }).add;
-		SynthDef(\dronemixer5, { Out.ar(100, In.ar(0, 5).sum) }).add;
-		SynthDef(\dronemixer8, { Out.ar(100, In.ar(0, 8).sum) }).add;
+		SynthDef(\voicemixer2, { Out.ar(100, In.ar(0, 2).sum) }).add;
+		SynthDef(\voicemixer4, { Out.ar(100, In.ar(0, 4).sum) }).add;
+		SynthDef(\voicemixer5, { Out.ar(100, In.ar(0, 5).sum) }).add;
+		SynthDef(\voicemixer8, { Out.ar(100, In.ar(0, 8).sum) }).add;
 
 
 	}
@@ -522,7 +522,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		nearestKey = keys.detect({ |k| k.asFloat == nearestFreq });
 	//	path = sampleDict[instr][nearestFreq.asSymbol][\path];
 		// Use the appPath base so the quark location determines the samples folder.
-		path = hub.appPath ++"/threnoscope/samples/"++ sampleDict[instr][nearestKey][\path];
+		path = hub.appPath ++"/voicescope/samples/"++ sampleDict[instr][nearestKey][\path];
 
 		[\nearestFreq, nearestFreq, \sample, path].postln;
 		^path;
@@ -551,9 +551,9 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 	// here instruments and their frequencies and disk paths are listed
 	initSampleDict {
 		var file, string;
-	//	file = File("sounds/threnoscope/_samples.scd","r");
+	//	file = File("sounds/voicescope/_samples.scd","r");
 
-		//file = File("/Users/thm21/Library/Application Support/SuperCollider/sounds/threnoscope/_samples.scd","r");
+		//file = File("/Users/thm21/Library/Application Support/SuperCollider/sounds/voicescope/_samples.scd","r");
 
 		[\HUBAPPPATH, hub.appPath].postln;
 
@@ -561,11 +561,11 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 	  	// file = File(hub.appPath++"/samples/_samples.scd","r");
 
 		// RUNNING TS AS CLASSES IN SC
-		file = File(hub.appPath ++ "/threnoscope/samples/_samples.scd", "r");
+		file = File(hub.appPath ++ "/voicescope/samples/_samples.scd", "r");
 
 
 
-	//	file = File(hub.appPath++"/sounds/threnoscope/_samples.scd","r");
+	//	file = File(hub.appPath++"/sounds/voicescope/_samples.scd","r");
 		string = file.readAllString;
 		sampleDict = string.interpret;
 		file.close;
@@ -574,21 +574,21 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		[\sampleDict, sampleDict].postln;
 
 
-//Drone
+//Voice
 //sampleDict = ();
 //
 //// piano
 //sampleDict.add(\piano -> ());
-//sampleDict[\piano].add(\55 -> ().add(\midinote -> 33).add(\path -> "sounds/threnoscope/55hz.aiff"));
-//sampleDict[\piano].add(\110 -> ().add(\midinote -> 45).add(\path -> "sounds/threnoscope/110hz.aiff"));
-//sampleDict[\piano].add(\220 -> ().add(\midinote -> 57).add(\path -> "sounds/threnoscope/220hz.aiff"));
-//sampleDict[\piano].add(\440 -> ().add(\midinote -> 69).add(\path -> "sounds/threnoscope/440hz.aiff"));
+//sampleDict[\piano].add(\55 -> ().add(\midinote -> 33).add(\path -> "sounds/voicescope/55hz.aiff"));
+//sampleDict[\piano].add(\110 -> ().add(\midinote -> 45).add(\path -> "sounds/voicescope/110hz.aiff"));
+//sampleDict[\piano].add(\220 -> ().add(\midinote -> 57).add(\path -> "sounds/voicescope/220hz.aiff"));
+//sampleDict[\piano].add(\440 -> ().add(\midinote -> 69).add(\path -> "sounds/voicescope/440hz.aiff"));
 //
 //// organ
 //sampleDict.add(\organ -> ());
-//sampleDict[\organ].add(\55 -> "sounds/threnoscope/440hz.aiff");
-//sampleDict[\organ].add(\110 -> "sounds/threnoscope/440hz.aiff");
-//sampleDict[\organ].add(\220 -> "sounds/threnoscope/440hz.aiff");
+//sampleDict[\organ].add(\55 -> "sounds/voicescope/440hz.aiff");
+//sampleDict[\organ].add(\110 -> "sounds/voicescope/440hz.aiff");
+//sampleDict[\organ].add(\220 -> "sounds/voicescope/440hz.aiff");
 
 		// etc
 	}
@@ -601,7 +601,7 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 
 // choose whether one want's a line or osc
 
-		SynthDef(\dronesaw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicesaw, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			envtime=10, dep=1, arr=2, time=10, fgate=0, detune=0;
 
 			var signal, freqmodosc, freqmodline, env;
@@ -622,9 +622,9 @@ SynthDef(\instr, {arg buffer, out=0, freq=440, midinote=69, gate=1, startLoop=43
 		}, [0.2, 0.2]).add;
 
 
-a = Synth(\dronesaw,[\amp, 0.5])
+a = Synth(\voicesaw,[\amp, 0.5])
 
-a = Synth(\dronesaw,[\amp, 0.5])
+a = Synth(\voicesaw,[\amp, 0.5])
 
 a.set(\fgate, 1)
 a.set(\dep, 1)
@@ -641,7 +641,7 @@ a.set(\detune, 0.7)
 
 
 
-		SynthDef(\dronesine, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
+		SynthDef(\voicesine, {arg freq=110, harmonics=2, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1,
 			envtime=10, dep=1, arr=2, time=10, fgate=0, detune=0;
 
 			var signal, freqmodosc, freqmodline, env;
@@ -661,7 +661,7 @@ a.set(\detune, 0.7)
 			Out.ar(out, signal!2);
 		}, [0.2, 0.2]).add;
 
-a = Synth(\dronesine,[\amp, 0.5])
+a = Synth(\voicesine,[\amp, 0.5])
 
 a.set(\freq, 1333)
 
@@ -690,7 +690,7 @@ a.set(\detune, 1)
 /*
 // SinOscFB (the feedback gives harmonics moving from 0 to 2 in the iphase)
 
-SynthDef(\dronesinefb, {arg freq=110, iphase=0.9, harmonics=20, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1, atttime=1, dectime=1, freqmoddep=1, freqmodarr=2, freqmodtime=10, freqmodlinegate=0, phaseoscfreq=0.1, phaseoscamp=0, phasemoddep=1, phasemodarr=2, phasemodtime=10, phasemodlinegate;
+SynthDef(\voicesinefb, {arg freq=110, iphase=0.9, harmonics=20, oscfreq=0.1, oscamp=0, out=0, amp=0.42, gate=1, atttime=1, dectime=1, freqmoddep=1, freqmodarr=2, freqmodtime=10, freqmodlinegate=0, phaseoscfreq=0.1, phaseoscamp=0, phasemoddep=1, phasemodarr=2, phasemodtime=10, phasemodlinegate;
 	var signal, freqmodosc, freqmodline, phasemodosc, phasemodline, env;
 	freqmodosc = SinOsc.ar(oscfreq, 0, oscamp, 1);
 	freqmodline = EnvGen.ar(Env.new([freqmoddep,freqmodarr],[freqmodtime]), freqmodlinegate);
@@ -702,9 +702,9 @@ SynthDef(\dronesinefb, {arg freq=110, iphase=0.9, harmonics=20, oscfreq=0.1, osc
 	Out.ar(out, signal);
 }).add;
 
-b = Synth(\dronefsine,[\amp, 0.5])
+b = Synth(\voicefsine,[\amp, 0.5])
 
-a = Synth(\dronesinefb)
+a = Synth(\voicesinefb)
 a.set(\freqmodlinegate, 1)
 a.set(\freqmoddep, 2)
 a.set(\freqmodarr, 1)

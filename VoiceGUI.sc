@@ -1,13 +1,13 @@
-DroneGUI {
+VoiceGUI {
 
 	var hub, controller, mainwin, guiwin, intRect;
 var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, speedgui, lengthgui, anglegui, tuninggui, envgui, spreadgui, numbergui, freqgui;
 
 	*new { arg hub;
-		^super.new.initDroneGUI(hub);
+		^super.new.initVoiceGUI(hub);
 	}
 
-	initDroneGUI{arg ahub;
+	initVoiceGUI{arg ahub;
 
 		var params = ().add('type' -> \saw).add('tonic' -> 1).add('harmonics' -> 3).add('amp' -> 0.2).add('speed' -> 1).add('length' -> 30).add('angle' -> 0).add('chord' -> \minor).add('ratio' -> 1).add('env' -> 1).add('freq' -> 55).add('spread' -> 1).add('number' -> 5);
 		var selected = 0;
@@ -16,14 +16,14 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 
 		mainwin = hub.interpreter.mainwin;
 		intRect = hub.interpreter.rect;
-	//	guiwin = Window("drone", Rect(mainwin.bounds.width+100, 0, 400, 800), resizable:true, border:true).front;
+	//	guiwin = Window("voice", Rect(mainwin.bounds.width+100, 0, 400, 800), resizable:true, border:true).front;
 
 		guiwin = CompositeView(mainwin, Rect(intRect.left, 0, 400, 400));
 
 	// -------- DRONES
 
 		modegui = PopUpMenu(guiwin, Rect(300, 50, 80, 20))
-				.items_(["drone","chord","satellites"])
+				.items_(["voice","chord","satellites"])
 				.action_({ arg menu;
 					params.add('mode' -> menu.item);
 Ê Ê 					[menu.value, menu.item].postln;
@@ -45,7 +45,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 
 
 		chordgui = PopUpMenu(guiwin, Rect(300, 125, 80, 20))
-				.items_(~drones.getChordDict.keys.asArray.deepCopy) //
+				.items_(~voices.getChordDict.keys.asArray.deepCopy) //
 				.action_({ arg menu;
 					params.add('chord' -> menu.item.asSymbol);
 Ê Ê 					[menu.value, menu.item].postln;
@@ -53,21 +53,21 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 
 		namegui = PopUpMenu(guiwin, Rect(300, 150, 80, 20))
 				.items_([" - new - "]
-						++ ~drones.chordDict.keys.asArray.deepCopy
-						++ ~drones.satellitesDict.keys.asArray.deepCopy
-						++ ~drones.interDict.keys.asArray.deepCopy
-						++ ~drones.droneDict.keys.asArray.deepCopy)
+						++ ~voices.chordDict.keys.asArray.deepCopy
+						++ ~voices.satellitesDict.keys.asArray.deepCopy
+						++ ~voices.interDict.keys.asArray.deepCopy
+						++ ~voices.voiceDict.keys.asArray.deepCopy)
 				.mouseDownAction_({arg menu;
 					menu.items_([" - new - "]
-						++ ~drones.chordDict.keys.asArray.deepCopy
-						++ ~drones.satellitesDict.keys.asArray.deepCopy
-						++ ~drones.interDict.keys.asArray.deepCopy
-						++ ~drones.droneDict.keys.asArray.deepCopy)})
+						++ ~voices.chordDict.keys.asArray.deepCopy
+						++ ~voices.satellitesDict.keys.asArray.deepCopy
+						++ ~voices.interDict.keys.asArray.deepCopy
+						++ ~voices.voiceDict.keys.asArray.deepCopy)})
 				.action_({ arg menu;
-					// get the params from the drone and update GUI
+					// get the params from the voice and update GUI
 					if(menu.item != " - new - ", {
-						~drones.select(menu.item);
-						selected = ~drones.selected;
+						~voices.select(menu.item);
+						selected = ~voices.selected;
 					});
 				});
 
@@ -77,18 +77,18 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 
 				params.postln;
 
-				if(modegui.value == 0, { // drone
-					~drones.createDrone(params.type, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env, params.octave);
+				if(modegui.value == 0, { // voice
+					~voices.createDrone(params.type, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env, params.octave);
 				});
 
 				if(modegui.value == 1, { // chord
 					"chord".postln;
-					~drones.createChord(params.type, params.chord, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env);
+					~voices.createChord(params.type, params.chord, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, 1, params.ratio, params.env);
 				});
 
 				if(modegui.value == 2, { // satellites
 					"sat".postln;
-					~drones.createSatellites(params.type, params.scale, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, params.number, params.spread, params.env);
+					~voices.createSatellites(params.type, params.scale, params.tonic, params.harmonics, params.amp, params.speed, params.length, params.angle, params.number, params.spread, params.env);
 				});
 
 			});
@@ -99,7 +99,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 				var command;
 				command = "~"++namegui.item++".kill";
 				command.interpret;
-				//~drones.hub.interpreter.opInterpreter("> " ++ command);
+				//~voices.hub.interpreter.opInterpreter("> " ++ command);
 				[\command, command].postln;
 				namegui.value_(0);
 			//	modegui.value.postln;
@@ -108,9 +108,9 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 		Button(guiwin, Rect(300, 225, 80, 20))
 			.states_([["killAll"]])
 			.action_({
-				//~drones.killAll;
-				hub.drones.killAll;
-				//~drones.hub.interpreter.opInterpreter("> ~drones.killAll");
+				//~voices.killAll;
+				hub.voices.killAll;
+				//~voices.hub.interpreter.opInterpreter("> ~voices.killAll");
 				namegui.value_(0);
 			});
 
@@ -120,10 +120,10 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 			.action_({
 
 				namegui.items_([" - new - "]
-						++ ~drones.chordDict.keys.asArray.deepCopy
-						++ ~drones.satellitesDict.keys.asArray.deepCopy
-						++ ~drones.interDict.keys.asArray.deepCopy
-						++ ~drones.droneDict.keys.asArray.deepCopy);
+						++ ~voices.chordDict.keys.asArray.deepCopy
+						++ ~voices.satellitesDict.keys.asArray.deepCopy
+						++ ~voices.interDict.keys.asArray.deepCopy
+						++ ~voices.voiceDict.keys.asArray.deepCopy);
 
 			//	modegui.value.postln;
 			});
@@ -136,7 +136,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -150,7 +150,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -164,7 +164,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -178,7 +178,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -192,7 +192,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -206,7 +206,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -220,7 +220,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -234,7 +234,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});
@@ -248,7 +248,7 @@ var modegui, typegui, scalegui, chordgui, namegui, tonicgui, harmgui, ampgui, sp
 					if(namegui.item != " - new - ", {
 						if(sl.value != val, {
 							command.interpret;
-							//~drones.hub.interpreter.opInterpreter("> " ++ command);
+							//~voices.hub.interpreter.opInterpreter("> " ++ command);
 							val = sl.value;
 						});
 					});

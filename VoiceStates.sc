@@ -2,7 +2,7 @@
 // This class will be useful in installation context where machines
 // can move between sets
 
-DroneStates {
+VoiceStates {
 	
 	var hub;
 	var recScoreArray, scoreArray;
@@ -14,16 +14,16 @@ DroneStates {
 	//var starttime;
 	
 	*new { |hub|
-		^super.new.initDroneStates( hub);
+		^super.new.initVoiceStates( hub);
 	}
 
-	initDroneStates { |arghub| 
+	initVoiceStates { |arghub| 
 		hub = arghub;
 		randomseed = hub.randomseed;
 		// standalone
 		// storedGroupsDict = Object.readArchive(hub.appPath++"/groups/groups.grp");
 		// classes
-		storedGroupsDict = Object.readArchive(Platform.userAppSupportDir++"/threnoscope/groups/groups.grp");
+		storedGroupsDict = Object.readArchive(Platform.userAppSupportDir++"/voicescope/groups/groups.grp");
 		if(storedGroupsDict.isNil, { storedGroupsDict = () });
 	}
 	
@@ -52,9 +52,9 @@ DroneStates {
 				string.contains("swapState") 	|| 
 				string.contains("viewScope") 	|| 
 				string.contains("playCodeScore")	|| 
-				string.contains("states") 		||  // from DroneController
-				string.contains("tunings") 		||  // from DroneController
-				string.contains("scales") 		||  // from DroneController
+				string.contains("states") 		||  // from VoiceController
+				string.contains("tunings") 		||  // from VoiceController
+				string.contains("scales") 		||  // from VoiceController
 				string.contains("killAll")
 			).not, { // don't record the first playscore
 			if(recording, {
@@ -69,7 +69,7 @@ DroneStates {
 	loadState { |name, recording| // one might want to record a loadstate
 		var score;
 		"LOADING STATE: ".post; name.postln;
-		hub.drones.killAll; // remove all playing drones
+		hub.voices.killAll; // remove all playing voices
 		// if(recording.not, { this.startRecord() }); // clear scoreArray (dafault)
 		#randomseed, score = Object.readArchive(hub.appPath++"/states/"++name++".drnST");
 		thisThread.randSeed = randomseed;
@@ -85,7 +85,7 @@ DroneStates {
 		// standalone
 		// #randomseed, score = Object.readArchive(hub.appPath++"/states/"++name++".drnST");
 		// classes 
-		#randomseed, score = Object.readArchive(Platform.userAppSupportDir++"/threnoscope/states/"++name++".drnST");
+		#randomseed, score = Object.readArchive(Platform.userAppSupportDir++"/voicescope/states/"++name++".drnST");
 		thisThread.randSeed = randomseed;
 		score.do({ arg event;
 			event[1].interpret;
@@ -112,40 +112,40 @@ DroneStates {
 		// standalone
 		// file = File(hub.appPath++"/states/"++name++".drnST", "w");
 		// classes 
-		file = File(Platform.userAppSupportDir++"/threnoscope/states/"++name++".drnST", "w");
+		file = File(Platform.userAppSupportDir++"/voicescope/states/"++name++".drnST", "w");
 		file.write(score);
 		file.close;	
 	}
 	
 	swapState { |name, time=10|
-		var score, olddrones;		
+		var score, oldvoices;		
 		"SWAPPING STATE: ".post; name.postln;
 		// standalone
 		// #randomseed, score = Object.readArchive(hub.appPath++"/states/"++name++".drnST");
 		// classes
-		#randomseed, score = Object.readArchive(Platform.userAppSupportDir++"/threnoscope/states/"++name++".drnST");
+		#randomseed, score = Object.readArchive(Platform.userAppSupportDir++"/voicescope/states/"++name++".drnST");
 		thisThread.randSeed = randomseed;
-		olddrones = hub.drones.droneDict.keys.deepCopy;
-		// get rid of old drones
-		{ olddrones.do({ |name|
-				{hub.drones.createMachine(\amp, name, 0.2)}.defer; // XXX - todo: make a dedicated "swapmachine"
-				(time/olddrones.size).wait;
-				//drone.kill;
-				//hub.drones.droneDict.at(name).kill;
+		oldvoices = hub.voices.voiceDict.keys.deepCopy;
+		// get rid of old voices
+		{ oldvoices.do({ |name|
+				{hub.voices.createMachine(\amp, name, 0.2)}.defer; // XXX - todo: make a dedicated "swapmachine"
+				(time/oldvoices.size).wait;
+				//voice.kill;
+				//hub.voices.voiceDict.at(name).kill;
 				//{hub.interpreter.opInterpreter("> " ++ name.asString++".kill")}.defer;
 				{name.asString++".kill"}.defer;
 
 			}) }.fork(TempoClock.new);
 		// clean the dictionaries:
-	//	hub.drones.initDicts();
-//		hub.drones.chordDict = ();
-//		hub.drones.satelliteDict = ();
-//		hub.drones.machineDict = ();
-//		hub.drones.interDict = ();
-//		// create the new drones
+	//	hub.voices.initDicts();
+//		hub.voices.chordDict = ();
+//		hub.voices.satelliteDict = ();
+//		hub.voices.machineDict = ();
+//		hub.voices.interDict = ();
+//		// create the new voices
 		{ score.do({ arg event;
 			"STATES EVENT: ".post; event.postln;
-				{hub.drones.createMachine(\neutral, time: 0.1)}.defer;
+				{hub.voices.createMachine(\neutral, time: 0.1)}.defer;
 				//{hub.interpreter.opInterpreter("> " ++ event[1])}.defer;
 				{event[1].interpret}.defer;
 				(time/score.size).wait;
@@ -169,7 +169,7 @@ DroneStates {
 		// standalone
 		// file = File(hub.appPath++"/scores/"++name++".drnSC", "w");
 		// classes
-		file = File(Platform.userAppSupportDir++"/threnoscope/scores/"++name++".drnSC", "w");
+		file = File(Platform.userAppSupportDir++"/voicescope/scores/"++name++".drnSC", "w");
 		file.write(score);
 		file.close;	
 	}
@@ -178,14 +178,14 @@ DroneStates {
 		// var offsettime, lastoffsettime, score;
 		var zerotimeindex, schedulemainclockat;
 		
-		//hub.post = false; // turn drone creation posting off
+		//hub.post = false; // turn voice creation posting off
 		//this.startRecord(); // or should it stop recording?
 		speed = aspeed;
 		//if(name.isNil.not, {
 		// standalone
 		// #randomseed, scoreArray = (hub.appPath++"/scores/"++name++".drnSC").load;
 		// classes 
-		#randomseed, scoreArray = (Platform.userAppSupportDir++"/threnoscope/scores/"++name++".drnSC").load;
+		#randomseed, scoreArray = (Platform.userAppSupportDir++"/voicescope/scores/"++name++".drnSC").load;
 		//});
 		scoreArray = scoreArray.sort({arg a, b; a[0] <= b[0] }); // home-made sort algorithm as there are subarrays
 		
@@ -224,7 +224,7 @@ DroneStates {
 		// var nextindex, nexttime, thistime;
 		
 		clock.stop;
-		// counter recalculated to know where in the drone score the clock is (using the refclock)
+		// counter recalculated to know where in the voice score the clock is (using the refclock)
 		[\counterA, counter].postln;
 		counter = scoreArray.collect({ |event| event[0] }).indexOfGreaterThan(refclock.nextTimeOnGrid);
 		//schedtime = schedtime + aschedtime;
@@ -245,7 +245,7 @@ DroneStates {
 			
 			counter = counter + 1;
 			
-			// need to defer the killing of clocks here, or else drones won't fade out
+			// need to defer the killing of clocks here, or else voices won't fade out
 			if(scoreArray[counter].isNil, { {clock.stop; refclock.stop }.defer; nil }, { (scoreArray[counter][0]-lastdur) * speed.reciprocal});
 			//nexttime-thistime;
 		});	
@@ -262,7 +262,7 @@ DroneStates {
 		// STANDALONE
 		#randomseed, scoreArray = (hub.appPath++"/scores/"++name++".drnSC").load;
 		// RUNNING TS IN SC AS CLASSES
-		#randomseed, scoreArray = (Platform.userAppSupportDir++"/threnoscope/scores/"++name++".drnSC").load;
+		#randomseed, scoreArray = (Platform.userAppSupportDir++"/voicescope/scores/"++name++".drnSC").load;
 
 		scoreArray = scoreArray.sort({ | a, b | a[0] <= b[0] }); // home made sort algorithm as there are subarrays
 		
@@ -289,7 +289,7 @@ DroneStates {
 		refclock.stop;
 		if(codescore.isNil.not, {codescore.stopTimeline });
 		playing = false;	
-		// hub.drones.killAll; // we might not want to kill all the drones
+		// hub.voices.killAll; // we might not want to kill all the voices
 	}
 	
 	updateScore { | score | // from realtime manipulations of the graphical code score
@@ -316,13 +316,13 @@ DroneStates {
 			// STANDALONE
 			//#randomseed, scoreArray = (hub.appPath++"/scores/"++name++".drnSC").load;
 			// TS AS CLASSES IN SC
-			#randomseed, scoreArray = (Platform.userAppSupportDir++"/threnoscope/scores/"++name++".drnSC").load;
+			#randomseed, scoreArray = (Platform.userAppSupportDir++"/voicescope/scores/"++name++".drnSC").load;
 			// scoreArray = scoreArray.sort({arg a, b; a[0] <= b[0] }); // home made sort algorithm as there are subarrays
 			scoreArray = scoreArray.collect({|event| event[0] = event[0]/speed });
 		});
 		
 		Post << scoreArray;
-		codescore = DroneCodeScore.new( hub, scale );
+		codescore = VoiceCodeScore.new( hub, scale );
 		codescore.parseScore( scoreArray );
 		hub.interpreter.codescore(true);
 		^codescore;
@@ -343,7 +343,7 @@ DroneStates {
 		tracks.do({arg i;
 			var movementarray;
 			var delta = 0;
-			hub.drones.createDrone(\saw, 2, amp:0.3, name:("midi_"++i).asSymbol);			
+			hub.voices.createDrone(\saw, 2, amp:0.3, name:("midi_"++i).asSymbol);			
 			movementarray = [];
 			file.noteEvents.do({arg event;
 				var time, realtime;
@@ -360,7 +360,7 @@ DroneStates {
 				});
 				// delta = time;
 			});
-			hub.drones.droneArray.last.startMIDI(("midi_"++i).asSymbol, movementarray);
+			hub.voices.voiceArray.last.startMIDI(("midi_"++i).asSymbol, movementarray);
 		})
 	}
 	
@@ -370,7 +370,7 @@ DroneStates {
 		// standalone
 		// states = hub.appPath++"/states/*.drnST".pathMatch;
 		// classes
-		states = Platform.userAppSupportDir++"/threnoscope/states/*.drnST".pathMatch;
+		states = Platform.userAppSupportDir++"/voicescope/states/*.drnST".pathMatch;
 		states.do({arg path; statestring = statestring ++ " | " ++ path.basename.splitext[0] });
 		statestring = statestring ++ " | ";
 		^statestring
@@ -382,7 +382,7 @@ DroneStates {
 		// standalone
 		// scores = hub.appPath++"scores/*.drnSC".pathMatch;
 		// classes
-		scores = Platform.userAppSupportDir++"/threnoscope/scores/*.drnSC".pathMatch;
+		scores = Platform.userAppSupportDir++"/voicescope/scores/*.drnSC".pathMatch;
 		scores.do({arg path; scorestring = scorestring ++ " | " ++ path.basename.splitext[0] });
 		scorestring = scorestring ++ " | ";
 		^scorestring
@@ -419,7 +419,7 @@ DroneStates {
 		// standalone
 		storedGroupsDict.writeArchive(hub.appPath++"/groups/groups.grp");
 		// classes
-		storedGroupsDict.writeArchive(Platform.userAppSupportDir++"/threnoscope/groups/groups.grp");
+		storedGroupsDict.writeArchive(Platform.userAppSupportDir++"/voicescope/groups/groups.grp");
 	
 	}	
 }

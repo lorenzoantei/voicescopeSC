@@ -1,13 +1,13 @@
-TITLE:: DroneChord
-summary:: Groups of drones creating chords.
+TITLE:: VoiceChord
+summary:: Groups of voices creating chords.
 categories:: Live Coding
-related:: Classes/Drone, Classes/DroneSatellites, Classes/ThrenoScope
+related:: Classes/Voice, Classes/VoiceSatellites, Classes/VoiceScope
 
 DESCRIPTION::
-DroneChord-s are chords or whatever groups of drones which sound together.
+VoiceChord-s are chords or whatever groups of voices which sound together.
 Their frequencies are set according to ratios which describe a particular
 type of chord (from chromatic scale). For instance, the ratios for a major chord are [1,5,8], so
-such DroneChord will be created from three drones with frequencies set according
+such VoiceChord will be created from three voices with frequencies set according
 to the already mentioned ratios.
 
 
@@ -18,24 +18,24 @@ METHOD:: new
 ARGUMENT:: hub
 
 ARGUMENT:: name
-Name of the drone chord.
+Name of the voice chord.
 
 ARGUMENT:: scale
-Scale of the drone chord.
+Scale of the voice chord.
 
-returns:: Current DroneChord instance and its parameters.
+returns:: Current VoiceChord instance and its parameters.
 
 
 INSTANCEMETHODS::
 
 METHOD:: env
-Sets an envelope for the drones.
+Sets an envelope for the voices.
 
 ARGUMENT:: envt
 The envelope to set.
 
 METHOD:: freq
-Sets a frequency for the drones.
+Sets a frequency for the voices.
 
 ARGUMENT:: freq
 The frequency to set.
@@ -51,10 +51,10 @@ returns:: True or false.
 
 METHOD:: name
 
-returns:: Name of the drone chord.
+returns:: Name of the voice chord.
 
 METHOD:: amp
-Sets an amplitude for the drones.
+Sets an amplitude for the voices.
 
 ARGUMENT:: amp
 The amplitude to set.
@@ -63,7 +63,7 @@ ARGUMENT:: dur
 Time to set the amplitude.
 
 METHOD:: set
-Sets arguments for the synths of the drones.
+Sets arguments for the synths of the voices.
 
 ARGUMENT::  ... args
 The arguments to set.
@@ -73,7 +73,7 @@ returns:: Current arguments of the synths.
 METHOD:: clearauto
 
 METHOD:: type
-Sets a sound type for the drones.
+Sets a sound type for the voices.
 
 ARGUMENT:: type
 The sound type to set.
@@ -85,7 +85,7 @@ ARGUMENT:: bool
 returns:: True or false.
 
 METHOD:: harmonics
-Sets harmonics for the drones.
+Sets harmonics for the voices.
 
 ARGUMENT:: harmonics
 The number of harmonics to set.
@@ -94,7 +94,7 @@ ARGUMENT:: dur
 Time to set the harmonics.
 
 METHOD:: transpose
-Transposes the drones.
+Transposes the voices.
 
 ARGUMENT:: interval
 Amount of scale degrees to transpose.
@@ -103,7 +103,7 @@ ARGUMENT:: dur
 Time to transpose.
 
 METHOD:: ratio
-Sets frequencies of the drones according to a tuning ratio.
+Sets frequencies of the voices according to a tuning ratio.
 
 ARGUMENT:: ratio
 The ratio to change the frequencies.
@@ -128,7 +128,7 @@ Maximum value to set.
 ARGUMENT:: round
 
 METHOD:: tuning
-Sets a tuning for the drones.
+Sets a tuning for the voices.
 
 ARGUMENT:: argtuning
 The tuning to set.
@@ -137,7 +137,7 @@ ARGUMENT:: dur
 Time to set the tuning.
 
 METHOD:: relOctave
-Changes the octave of the drones in relation to their current frequencies.
+Changes the octave of the voices in relation to their current frequencies.
 
 ARGUMENT:: change
 Amount of octaves to set.
@@ -146,7 +146,7 @@ ARGUMENT:: dur
 Time to set the octaves.
 
 METHOD:: note
-Sets a note to the drones.
+Sets a note to the voices.
 
 ARGUMENT:: note
 The note to set.
@@ -156,10 +156,10 @@ Time to set the note.
 
 ARGUMENT:: harmonic
 
-returns:: The note of the drones (if any).
+returns:: The note of the voices (if any).
 
 METHOD:: octave
-Sets an octave for the drones.
+Sets an octave for the voices.
 
 ARGUMENT:: octave
 The octave to set.
@@ -168,7 +168,7 @@ ARGUMENT:: dur
 Time to set the octave.
 
 METHOD:: resonance
-Sets a resonance to the drones.
+Sets a resonance to the voices.
 
 ARGUMENT:: res
 THe resonance to set.
@@ -204,10 +204,10 @@ Amount of amplitude to change.
 ARGUMENT:: dur
 Time to change the amplitude.
 
-METHOD:: printDroneArray
+METHOD:: printVoiceArray
 
 METHOD:: freeSynths
-Frees the synths of the drones.
+Frees the synths of the voices.
 
 ARGUMENT:: releasetime
 Time to free the synths.
@@ -215,32 +215,32 @@ Time to free the synths.
 returns:: Synths to be freed.
 
 METHOD:: kill
-Kills the current drone chord.
+Kills the current voice chord.
 
 ARGUMENT:: releasetime
 Time to kill the chord.
 
-returns:: Synths of the drone chord to be freed.
+returns:: Synths of the voice chord to be freed.
 
 METHOD:: defineChord
-Creates a chord from drones.
+Creates a chord from voices.
 
 ARGUMENT:: array
-The drones to create a chord from.
+The voices to create a chord from.
 
 returns:: What chord was created.
 
 METHOD:: interval
-Transposes the drones according to the amount of scale degrees.
+Transposes the voices according to the amount of scale degrees.
 
 ARGUMENT:: interval
 The number of scale degrees to transpose.
 
 ARGUMENT:: dur
-Time to transpose the drones.
+Time to transpose the voices.
 
 METHOD:: changeChord
-Changes the chord of the drones.
+Changes the chord of the voices.
 
 ARGUMENT:: chord
 The chord to set.
@@ -252,7 +252,7 @@ ARGUMENT:: transp
 Amount of scale degrees to transpose.
 
 METHOD:: tonic
-Sets a mulitplier of the frequencies of the drones.
+Sets a mulitplier of the frequencies of the voices.
 
 ARGUMENT:: tonic
 The multiplier to set.
@@ -261,7 +261,7 @@ ARGUMENT:: dur
 Time to set the ultiplier.
 
 METHOD:: relFreq
-CHanges the frequencies of the drones in relation to their current frequencies.
+CHanges the frequencies of the voices in relation to their current frequencies.
 
 ARGUMENT:: change
 Amount of frequencies to change.
@@ -270,13 +270,13 @@ ARGUMENT:: dur
 TIme to change the frequencies.
 
 METHOD:: relLength
-Changes the length of the drones in relation to their current length.
+Changes the length of the voices in relation to their current length.
 
 ARGUMENT:: change
 Amount of length to change.
 
 METHOD:: createChord
-Creates a DroneChord.
+Creates a VoiceChord.
 
 ARGUMENT:: type
 Sound type.
@@ -297,26 +297,26 @@ ARGUMENT:: speed
 Speed o frotation.
 
 ARGUMENT:: length
-Length of the drones.
+Length of the voices.
 
 ARGUMENT:: angle
-Angle of the drones.
+Angle of the voices.
 
 ARGUMENT:: degree
-Scale degree of the drones.
+Scale degree of the voices.
 
 ARGUMENT:: ratio
 Tuning ratio to use.
 
 ARGUMENT:: env
-Envelope of the drones when creating and killing them.
+Envelope of the voices when creating and killing them.
 
 ARGUMENT:: octave
 Distance by octaves from the fundamental frequencies.
 
 ARGUMENT:: note
 
-returns:: Current DroneChord instance and its parameters.
+returns:: Current VoiceChord instance and its parameters.
 
 METHOD:: addMIDI
 Adds a MIDI listener.
@@ -328,13 +328,13 @@ ARGUMENT:: dur
 ARGUMENT:: harmonic
 
 METHOD:: angle
-Sets an angle for the drones.
+Sets an angle for the voices.
 
 ARGUMENT:: angle
 The angle in degrees to set.
 
 METHOD:: relRatio
-Sets a tuning ratio in relation to the frequencies of the drones.
+Sets a tuning ratio in relation to the frequencies of the voices.
 
 ARGUMENT:: change
 Amount of ratios to change.
@@ -345,7 +345,7 @@ Time to set the ratio.
 ARGUMENT:: harmonic
 
 METHOD:: relDegree
-Sets a scale degree in relation to the frequencies of the drones.
+Sets a scale degree in relation to the frequencies of the voices.
 
 ARGUMENT:: change
 Amount of degrees to set.
@@ -356,23 +356,23 @@ Time to set the degree.
 ARGUMENT:: harmonic
 
 METHOD:: relSpeed
-Changes the speed of the drones in relation to their current speed.
+Changes the speed of the voices in relation to their current speed.
 
 ARGUMENT:: change
 Amount of speed to change.
 
-METHOD:: dronearray
+METHOD:: voicearray
 
-returns:: Array of drones used in this DroneChord.
+returns:: Array of voices used in this VoiceChord.
 
 METHOD:: scale
-Sets a scale for the drones.
+Sets a scale for the voices.
 
 ARGUMENT:: scale
 The scale to set.
 
 METHOD:: chord
-Sets a chord to the drones.
+Sets a chord to the voices.
 
 ARGUMENT:: chord
 The chord to set.
@@ -381,7 +381,7 @@ ARGUMENT:: dur
 Time to set the chord.
 
 ARGUMENT:: transp
-Amount of scale degrees to transpose the drone chord.
+Amount of scale degrees to transpose the voice chord.
 
 METHOD:: removeMIDI
 Removes MIDI listeners.
@@ -391,13 +391,13 @@ METHOD:: perform
 ARGUMENT:: command
 
 METHOD:: length
-Sets a length to the drones.
+Sets a length to the voices.
 
 ARGUMENT:: length
 The length to set.
 
 METHOD:: degree
-Sets the frequencies of the drones according to the n-th degree of the globally configured scale.
+Sets the frequencies of the voices according to the n-th degree of the globally configured scale.
 
 ARGUMENT:: argdegree
 The degree to set.
@@ -408,27 +408,27 @@ Time to set the degree.
 ARGUMENT:: harmonic
 
 METHOD:: speed
-Sets the speed of rotation for the drones.
+Sets the speed of rotation for the voices.
 
 ARGUMENT:: speed
 The speed to set.
 
-METHOD:: initDroneChord
+METHOD:: initVoiceChord
 Constructor method.
 
 ARGUMENT:: arghub
 (describe argument here)
 
 ARGUMENT:: argname
-Name of the DroneChord.
+Name of the VoiceChord.
 
 ARGUMENT:: argscale
-Scale of the DroneChord.
+Scale of the VoiceChord.
 
-returns:: Current DroneChord instance and its parameters.
+returns:: Current VoiceChord instance and its parameters.
 
 METHOD:: relTonic
-Changes the multiplier of the frequencies in relation to the current frequencies of the drones.
+Changes the multiplier of the frequencies in relation to the current frequencies of the voices.
 
 ARGUMENT:: change
 THe multiplier to set.
@@ -441,17 +441,17 @@ EXAMPLES::
 section::Basic creation of a chord
 code::
 //major chord
-~drones.createChord(\saw, \major)
-~drones.createChord(\saw, [1,5,8])
+~voices.createChord(\saw, \major)
+~voices.createChord(\saw, [1,5,8])
 
 //Try something more interesting:
-~drones.createChord(\pad, \major9sus4, octave: 3)
+~voices.createChord(\pad, \major9sus4, octave: 3)
 ::
 
 section::More possibilities
 code::
-//manipulating particular drones of the group \mychord
-~drones.createChord(\tri, \major, name: \mychord, tonic: 3)
+//manipulating particular voices of the group \mychord
+~voices.createChord(\tri, \major, name: \mychord, tonic: 3)
 ~mychord_1.harmonics=8
 ~mychord_5.degree=2
 ~mychord.changeChord(\sus4)

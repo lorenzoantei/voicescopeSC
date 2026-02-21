@@ -1,5 +1,5 @@
 
-TimelineDrone {
+TimelineVoice {
 	
 	classvar gltopdown, glmiddledown, glbottomdown; // class var since I want to detect only the top one
 	var topdown, middledown, bottomdown; 
@@ -7,7 +7,7 @@ TimelineDrone {
 	var track;
 	var top, bottom, length, left;
 	var color, mousedownoffset, timeoffsets, selevent;
-	var drone, score, name, scoreview;
+	var voice, score, name, scoreview;
 	var scorestring;
 	var scale;
 	var ytrans = 20;
@@ -15,15 +15,15 @@ TimelineDrone {
 	var parent;
 	var >doubleClick;
 	
-	*new { | drone, scale, parent |
-		^super.new.initTimelineDrone( drone, scale, parent );
+	*new { | voice, scale, parent |
+		^super.new.initTimelineVoice( voice, scale, parent );
 	}
 
-	initTimelineDrone { | argdrone, argscale, argparent |
+	initTimelineVoice { | argvoice, argscale, argparent |
 		parent = argparent;
-		drone = argdrone;
-		track = drone[\track];
-		name = drone[\name];
+		voice = argvoice;
+		track = voice[\track];
+		name = voice[\name];
 		scale = argscale;
 		left = ((track)*20)-3;
 		top = 0;// start;
@@ -170,7 +170,7 @@ TimelineDrone {
 	}
 
 	parseScore {
-		score = drone[\dronescore];
+		score = voice[\voicescore];
 		[\parsing___, score].postln;
 		Post << score;
 		[\top1, top].postln;
@@ -200,15 +200,15 @@ TimelineDrone {
 		var string, interpretedstring;
 			"______xxxxxx reparsing score xxx_____".postln;
 			[\name, name, \doubleClick, doubleClick].postln;
-		if(doubleClick, { // double click means the view is open on top of droneview
+		if(doubleClick, { // double click means the view is open on top of voiceview
 			string = parent.scoreview.string; //scoreview.string;
 			string = 	string.replace("]", "],").replace("\n", "");
 			string = "["++string++"]";
 			string = 	string.replace("],]", "]]");
 			string.postln;
 			interpretedstring = try{string.interpret};
-			drone[\dronescore] = if(interpretedstring.isNil.not, { interpretedstring }, {drone[\dronescore]});
-			[\score________111111111, drone[\dronescore]].postln;
+			voice[\voicescore] = if(interpretedstring.isNil.not, { interpretedstring }, {voice[\voicescore]});
+			[\score________111111111, voice[\voicescore]].postln;
 		//	doubleClick = false;
 			this.parseScore;
 		});

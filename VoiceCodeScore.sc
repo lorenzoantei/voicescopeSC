@@ -1,15 +1,15 @@
 
-// TODO - Add system code events to the score, such as ~drones.env_([0, 1]) or ~drones.tuning = \pythagorean
+// TODO - Add system code events to the score, such as ~voices.env_([0, 1]) or ~voices.tuning = \pythagorean
 
-// TODO - Specify which track drone appears on - also reuse tracks that are not used
+// TODO - Specify which track voice appears on - also reuse tracks that are not used
 // TODO - Make this score window appear as a floating window (good for composition)
 
-DroneCodeScore {
+VoiceCodeScore {
 	
 	var hub, controller, mainwin, timelinewin, intRect;
 	var timelinetask, userview, image, length;
 	var <>scoreview;
-	var <>scale, drones, dronelines;
+	var <>scale, voices, voicelines;
 	var leavescoreviewopen = false;
 	var track = 0;
 	var <score;
@@ -17,10 +17,10 @@ DroneCodeScore {
 	//	var randomseed, offsettime, lastoffsettime, score;
 
 	*new { arg hub, scale=30;
-		^super.new.initDroneCodeScore(hub, scale);
+		^super.new.initVoiceCodeScore(hub, scale);
 	}
 
-	initDroneCodeScore{ | ahub, ascale |
+	initVoiceCodeScore{ | ahub, ascale |
 
 		var name = "compscore";
 		//var timeline = 0;
@@ -44,7 +44,7 @@ DroneCodeScore {
 			userview = UserView(timelinewin, Rect(0, 0, hub.screenbounds.width-intRect.left-12, length)).background_(Color.white);
 		});
 		
-		image = this.drawImg; // drawing the background (not the drones)
+		image = this.drawImg; // drawing the background (not the voices)
 		userview.backgroundImage_(image);
 		
 		userview.mouseDownAction_({|view, x, y, modifiers, buttonNumber, clickCount| 
@@ -58,9 +58,9 @@ DroneCodeScore {
 				userview.bounds_(Rect(0, 0, hub.screenbounds.width-intRect.left-12, length));
 				image = this.drawImg;
 				userview.backgroundImage_(image);
-			}, { // if it's not the down button, then it's drones
+			}, { // if it's not the down button, then it's voices
 				this.addTextScore(clickCount);
-				dronelines.copy.do({ |drone, i| drone.mouseDown(dronelines, i, x, y, clickCount); });
+				voicelines.copy.do({ |voice, i| voice.mouseDown(voicelines, i, x, y, clickCount); });
 			});
 			userview.refresh;
 
@@ -70,12 +70,12 @@ DroneCodeScore {
 		});
 		
 		userview.mouseMoveAction_({|view, x, y, modifiers, buttonNumber, clickCount|  
-			dronelines.copy.do({ |drone, i| drone.mouseMove(x, y, modifiers.isShift)});
+			voicelines.copy.do({ |voice, i| voice.mouseMove(x, y, modifiers.isShift)});
 			userview.refresh;		
 		});
 		
 		userview.mouseUpAction_({|view, x, y, modifiers, buttonNumber, clickCount|     
-			dronelines.copy.do({ |drone| drone.mouseUp(dronelines, x, y) });
+			voicelines.copy.do({ |voice| voice.mouseUp(voicelines, x, y) });
 
 			//score = score.sort({arg a, b; a[0] <= b[0] }); // Sort main score so it's ready do be written to file
 			
@@ -88,7 +88,7 @@ DroneCodeScore {
 		});
 
 		userview.drawFunc_({
-			dronelines.do({ | drone | drone.draw });
+			voicelines.do({ | voice | voice.draw });
 			Color.red.set;
 			Pen.line(Point(50, timeline)+0.5, Point(((userview.bounds.width/20).floor * 20), timeline)+0.5);  
 			Pen.stroke;	
@@ -98,9 +98,9 @@ DroneCodeScore {
 	
 	parseScore { | ascore |
 		score = ascore;
-		drones = ();
-		drones.add(\global -> ().add(\track -> 0).add(\name -> \global ).add(\dronescore -> [ [0, {} ] ] )); // the global timeline (w. dummy entry at 0)
-		dronelines = [];
+		voices = ();
+		voices.add(\global -> ().add(\track -> 0).add(\name -> \global ).add(\voicescore -> [ [0, {} ] ] )); // the global timeline (w. dummy entry at 0)
+		voicelines = [];
 		score.do({| event, i | 
 			var cmd, agent, prename, name;
 			"NEW EVENT IN SCORE ------------------------------------------".postln;
@@ -111,37 +111,37 @@ DroneCodeScore {
 				|| cmd.contains("createSatellites") 
 				|| cmd.contains("createChord")
 				|| cmd.contains("createMachine")
-			, { // find a new drone and then its score
+			, { // find a new voice and then its score
 				track = track + 1;
 				prename =  cmd[cmd.find("name:")+6 .. ];
 				name = prename[0 .. prename.find("'")-1 ];
 				[\_________name, name].postln;
-				drones.add(name.asSymbol -> ().add(\track -> track).add(\name -> name.asSymbol ).add(\dronescore -> [ event ] ));
-				"DEV x - drone added".postln;
+				voices.add(name.asSymbol -> ().add(\track -> track).add(\name -> name.asSymbol ).add(\voicescore -> [ event ] ));
+				"DEV x - voice added".postln;
 			}, {
 			//	agent = cmd[1.. cmd.find(".")-1];
 				agent = cmd[1.. cmd.find(".")-1].tr($~,\); //.tr($ ,\); // find agent name, but remove space (if space) and tilde
 				[\agent_________, agent].postln;
-				if(drones[agent.asSymbol].isNil, { // global score changes (not creating drones or manipulating them)
+				if(voices[agent.asSymbol].isNil, { // global score changes (not creating voices or manipulating them)
 					// global commands (such as time change etc.)
 					"FOUND GLOBAL ________".post; event.postln;
-					drones[\global][\dronescore] = drones[\global][\dronescore].add(event);
-				},{ // manipulating drones
-					drones[agent.asSymbol][\dronescore] = drones[agent.asSymbol][\dronescore].add(event);
+					voices[\global][\voicescore] = voices[\global][\voicescore].add(event);
+				},{ // manipulating voices
+					voices[agent.asSymbol][\voicescore] = voices[agent.asSymbol][\voicescore].add(event);
 				});
 				//[\agent, agent].postln;
 			});
 				[\track, track, \event, event].postln;
-//				 "DRONES GLOBAL IS _________________".post; drones[\global].postln;
+//				 "DRONES GLOBAL IS _________________".post; voices[\global].postln;
 		});
 		
-	//	Post << drones; "".postln;
-	//	[\dronesize, drones.size].postln;
+	//	Post << voices; "".postln;
+	//	[\voicesize, voices.size].postln;
 		
-		drones.do({ | drone, i |
-			//dronelines = dronelines.add( TimelineDrone( drones.size+1, event[0]*60*scale, 4000 ) );
-			"CREATING DRONE ---->".postln; drone.postln;
-			dronelines = dronelines.add( TimelineDrone( drone, scale, this ) );
+		voices.do({ | voice, i |
+			//voicelines = voicelines.add( TimelineVoice( voices.size+1, event[0]*60*scale, 4000 ) );
+			"CREATING DRONE ---->".postln; voice.postln;
+			voicelines = voicelines.add( TimelineVoice( voice, scale, this ) );
 		});		
 	}
 		
@@ -155,7 +155,7 @@ DroneCodeScore {
 			scoreview.focus(true);
 			if(clickcount == 2, { 
 				leavescoreviewopen = true;
-				scoreview.keyUpAction_({ dronelines.do({ | drone | drone.reParseScore; }) });
+				scoreview.keyUpAction_({ voicelines.do({ | voice | voice.reParseScore; }) });
 			});
 		});
 	}
@@ -165,14 +165,14 @@ DroneCodeScore {
 		//	"removing scoreview".postln;
 			scoreview.remove;
 			scoreview = nil;
-			dronelines.do({ | drone | drone.doubleClick = false; });
+			voicelines.do({ | voice | voice.doubleClick = false; });
 		});
 	}
 
-	removeTextScore { // removing scoreview from the DroneGUI
+	removeTextScore { // removing scoreview from the VoiceGUI
 		//"removing scoreview from GUI".postln;
 		
-		dronelines.do({ |drone| drone.reParseScore });
+		voicelines.do({ |voice| voice.reParseScore });
 		scoreview.remove;
 		scoreview = nil;
 		leavescoreviewopen = false;
@@ -185,7 +185,7 @@ DroneCodeScore {
 		image.draw({
 			Color.black.alpha_(0.4).set;
 
-			// the drone tracks
+			// the voice tracks
 			((userview.bounds.width/20).floor-3).do({arg i;
 				Pen.line(Point(50+(i*20), 20)+0.5, Point(50+(i*20), length)+0.5);  
 			});
@@ -249,7 +249,7 @@ DroneCodeScore {
 		timelinetask.stop;	
 	}
 	
-	remove { // called from DroneController:removeScore
+	remove { // called from VoiceController:removeScore
 		"REMOVING +_____  code score ________".postln;
 
 		timelinewin.remove;

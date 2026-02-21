@@ -1,14 +1,14 @@
-TITLE:: Drone
-summary:: Provides creation of the drone tones in ThrenoScope.
+TITLE:: Voice
+summary:: Provides creation of the voice tones in VoiceScope.
 categories:: Live Coding
-related:: Classes/ThrenoScope, Classes/DroneChord, Classes/DroneSatellites
+related:: Classes/VoiceScope, Classes/VoiceChord, Classes/VoiceSatellites
 
 DESCRIPTION::
 
 CLASSMETHODS::
 
 METHOD:: new
-Initializes a new Drone instance.
+Initializes a new Voice instance.
 
 ARGUMENT:: hub
 
@@ -19,9 +19,9 @@ ARGUMENT:: scale
 Sets a scale to use.
 
 ARGUMENT:: fundamental
-Fundamental frequency of the drone.
+Fundamental frequency of the voice.
 
-returns:: Name of the current drone and synths for It to use.
+returns:: Name of the current voice and synths for It to use.
 
 
 INSTANCEMETHODS::
@@ -32,10 +32,10 @@ ARGUMENT:: oscfreq
 
 METHOD:: postAuto
 
-returns:: Tasks of the drone.
+returns:: Tasks of the voice.
 
 METHOD:: relRatio
-Sets a ratio of the drone in relation to the current ratio.
+Sets a ratio of the voice in relation to the current ratio.
 
 ARGUMENT:: change
 Ratio to change.
@@ -46,7 +46,7 @@ Time to change the ratio.
 returns:: Current ratio.
 
 METHOD:: harmonics
-Sets a number of harmonics of the drone.
+Sets a number of harmonics of the voice.
 
 ARGUMENT:: argharmonics
 Number of harmonics to set.
@@ -57,7 +57,7 @@ Time to set the harmonics.
 returns:: Current harmonics argument.
 
 METHOD:: saveScale
-Saves a scale to the drone.
+Saves a scale to the voice.
 
 ARGUMENT:: name
 
@@ -70,10 +70,10 @@ ARGUMENT:: synthargs
 
 METHOD:: methods
 
-returns:: Array of methods to use for the drone.
+returns:: Array of methods to use for the voice.
 
 METHOD:: relFreq
-Sets the frequency of the drone in relation to its current frequency.
+Sets the frequency of the voice in relation to its current frequency.
 
 ARGUMENT:: change
 Amount of Hz to change.
@@ -82,7 +82,7 @@ ARGUMENT:: dur
 Time to change the frequency.
 
 METHOD:: tonic
-Sets a multiplier for the fundamental frequency of the drone.
+Sets a multiplier for the fundamental frequency of the voice.
 
 ARGUMENT:: argtonic
 The multiplier to set.
@@ -93,7 +93,7 @@ Time to set the tonic.
 returns:: Current tonic argument.
 
 METHOD:: relAmp
-Changes the amplitude of the drone in relation to the current amplitude value.
+Changes the amplitude of the voice in relation to the current amplitude value.
 
 ARGUMENT:: change
 Amount of amplitude to set.
@@ -102,7 +102,7 @@ ARGUMENT:: dur
 Time to set the amplitude.
 
 METHOD:: addFunc
-Adds function to the drone.
+Adds function to the voice.
 
 ARGUMENT:: name
 
@@ -111,25 +111,25 @@ ARGUMENT:: func
 ARGUMENT:: time
 
 METHOD:: createSynth
-Creates a synth for the drone.
+Creates a synth for the voice.
 
 ARGUMENT:: out
 Which channel to send audio signals to.
 
 METHOD:: speed
-Sets the speed of the movement of the drone.
+Sets the speed of the movement of the voice.
 
 ARGUMENT:: argspeed
 Speed in number to set.
 
-returns:: Speed of movement of the drone within an environment.
+returns:: Speed of movement of the voice within an environment.
 
 METHOD:: state
 
-returns:: All parameters of the drone directly to ThrenoScope terminal.
+returns:: All parameters of the voice directly to VoiceScope terminal.
 
 METHOD:: clearAuto
-Clears all tasks of the drone.
+Clears all tasks of the voice.
 
 METHOD:: ratios
 
@@ -140,7 +140,7 @@ METHOD:: synthMachine
 ARGUMENT:: rotation
 
 METHOD:: tuning
-Sets a tuning for the drone.
+Sets a tuning for the voice.
 
 ARGUMENT:: argtuning
 Tuning to set.
@@ -151,7 +151,7 @@ Time to set the tuning.
 returns:: Current tuning.
 
 METHOD:: rotation
-Sets an angle for the drone. (Better to use than angle_())
+Sets an angle for the voice. (Better to use than angle_())
 
 ARGUMENT:: argrotation
 The angle to set.
@@ -159,51 +159,51 @@ The angle to set.
 returns:: Current angle.
 
 METHOD:: createDrone
-Creates a drone.
+Creates a voice.
 
 ARGUMENT:: argtype
 Sound type to set (\saw,\sine,\tri,\cub,\pulse,\formant,\eliane,
 \noise,\klank,\gendy,\pad,\atom)
 
 ARGUMENT:: argtonic
-Multiplier of the fundamental frequency of a drone.
+Multiplier of the fundamental frequency of a voice.
 
 ARGUMENT:: argharmonics
 Number of harmonics.
 
 ARGUMENT:: argamp
-Amplitude of a drone.
+Amplitude of a voice.
 
 ARGUMENT:: argspeed
-Speed of rotation of a drone.
+Speed of rotation of a voice.
 
 ARGUMENT:: arglength
-Length of the drone.
+Length of the voice.
 
 ARGUMENT:: argangle
-Angle of the drone.
+Angle of the voice.
 
 ARGUMENT:: argdegree
-Sets frequency according to the n-th degree of a scale which is globally set and ascends from the fundamental frequency set by \key in ThrenoScope.
+Sets frequency according to the n-th degree of a scale which is globally set and ascends from the fundamental frequency set by \key in VoiceScope.
 For example, if the fundamental note is A, then the fourth degree of the major scale is tone D.
 
 ARGUMENT:: argratio
 The bigger this arg is, the more halftones is the frequency away from the fundamental frequency.
 
 ARGUMENT:: argenv
-Envelope which happens when creating and killing a drone.
+Envelope which happens when creating and killing a voice.
 
 ARGUMENT:: argoctave
-Raises frequency of a drone octaves higher.
+Raises frequency of a voice octaves higher.
 
 ARGUMENT:: argnote
 
-returns:: Name of Synth object used for the drone and its tuning.
+returns:: Name of Synth object used for the voice and its tuning.
 
-METHOD:: setDroneLook
+METHOD:: setVoiceLook
 
 METHOD:: amp
-Sets an amplitude of a drone.
+Sets an amplitude of a voice.
 
 ARGUMENT:: argamp
 The amplitude to set.
@@ -211,16 +211,16 @@ The amplitude to set.
 ARGUMENT:: dur
 Time to set the amplitude.
 
-returns:: Amplitude of a drone.
+returns:: Amplitude of a voice.
 
 METHOD:: fillColor
-A particular drone is filled with a color according to \argcolor.
+A particular voice is filled with a color according to \argcolor.
 
 ARGUMENT:: argcolor
 Color to use, can be link::Classes/Color:: constructor.
 
 METHOD:: degree
-Sets the frequency of the drone according to the n-th degree of the globally configured scale.
+Sets the frequency of the voice according to the n-th degree of the globally configured scale.
 
 ARGUMENT:: argdegree
 The degree of the scale to set.
@@ -228,10 +228,10 @@ The degree of the scale to set.
 ARGUMENT:: dur
 Time to set the degree.
 
-returns:: Degree of a scale on which frequency of a particular drone is set.
+returns:: Degree of a scale on which frequency of a particular voice is set.
 
 METHOD:: length
-Sets a length for the drone.
+Sets a length for the voice.
 
 ARGUMENT:: arglength
 The length value to set.
@@ -246,11 +246,11 @@ METHOD:: autoTaskDict
 
 METHOD:: params
 
-returns:: All parameters of the drone.
+returns:: All parameters of the voice.
 
 METHOD:: ampMult
 
-returns:: Value of the amplitude of the drone.
+returns:: Value of the amplitude of the voice.
 
 METHOD:: killSynths
 Kills running synths.
@@ -258,7 +258,7 @@ Kills running synths.
 ARGUMENT:: releasetime
 Time to kill the synths.
 
-returns:: Synths of the drone to be freed.
+returns:: Synths of the voice to be freed.
 
 METHOD:: oppositemove
 
@@ -277,10 +277,10 @@ ARGUMENT:: round
 
 METHOD:: getSynths
 
-returns:: Synths used for creation of a particular drone.
+returns:: Synths used for creation of a particular voice.
 
 METHOD:: strokeColor
-Sets a color for the stroke of the GUI element which shows a drone.
+Sets a color for the stroke of the GUI element which shows a voice.
 
 ARGUMENT:: argcolor
 The color to set to the stroke.
@@ -297,34 +297,34 @@ Time to change the tonic argument.
 returns:: Current tonic argument.
 
 METHOD:: auto
-Starts or stops the tasks of the drone.
+Starts or stops the tasks of the voice.
 
 ARGUMENT:: bool
 If the tasks should start or stop.
 
 METHOD:: freq
-Sets the frequency of a drone.
+Sets the frequency of a voice.
 
 ARGUMENT:: argfreq
-Frequency of a drone to set.
+Frequency of a voice to set.
 
 ARGUMENT:: dur
 Time to set the frequency.
 
-returns:: Current frequency of the drone.
+returns:: Current frequency of the voice.
 
 METHOD:: name
-Sets a name for a particular drone.
+Sets a name for a particular voice.
 
 ARGUMENT:: argname
 The name to set.
 
 METHOD:: synthParams
 
-returns:: All params of the synth used for the drone.
+returns:: All params of the synth used for the voice.
 
 METHOD:: relRotation
-Sets an angle for the drone in relation to its current angle.
+Sets an angle for the voice in relation to its current angle.
 
 ARGUMENT:: change
 The angle to change.
@@ -339,12 +339,12 @@ Creates a scale.
 ARGUMENT:: numRatios
 Number of ratios to use for the scale.
 
-METHOD:: getDroneLook
+METHOD:: getVoiceLook
 
-returns:: Inner and outer size, rotation and length of the GUI element which draws the drone.
+returns:: Inner and outer size, rotation and length of the GUI element which draws the voice.
 
 METHOD:: note
-Sets a note for the drone.
+Sets a note for the voice.
 
 ARGUMENT:: note
 The note to set.
@@ -352,10 +352,10 @@ The note to set.
 ARGUMENT:: dur
 Time to set the note.
 
-returns:: Note of a particular drone (if any).
+returns:: Note of a particular voice (if any).
 
 METHOD:: angle
-Sets an angle of the drone.
+Sets an angle of the voice.
 
 ARGUMENT:: argangle
 The angle to set.
@@ -366,7 +366,7 @@ METHOD:: selected
 
 ARGUMENT:: argsel
 
-returns:: The selected drone.
+returns:: The selected voice.
 
 METHOD:: oscamp
 
@@ -387,7 +387,7 @@ Maximum value to set.
 ARGUMENT:: round
 
 METHOD:: relLength
-Changes the length of the drone in relation to its current length.
+Changes the length of the voice in relation to its current length.
 
 ARGUMENT:: change
 Amount of length to change.
@@ -395,18 +395,18 @@ Amount of length to change.
 returns:: Current length value.
 
 METHOD:: removeFunc
-Removes a function from the drone.
+Removes a function from the voice.
 
 ARGUMENT:: name
 
-METHOD:: killDrone
-Frees all tasks and synths of the drone. (Not possible to use directly from ThrenoScope.)
+METHOD:: killVoice
+Frees all tasks and synths of the voice. (Not possible to use directly from VoiceScope.)
 
 ARGUMENT:: releasetime
 Time to free all tasks and synths.
 
 METHOD:: type
-Sets a sound type for a particular drone.
+Sets a sound type for a particular voice.
 
 ARGUMENT:: argtype
 The type of sound to set.
@@ -423,7 +423,7 @@ ARGUMENT:: out
 ARGUMENT:: bool
 
 METHOD:: ratio
-Changes frequency of a drone by ratio.
+Changes frequency of a voice by ratio.
 
 ARGUMENT:: argratio
 The ratio to set.
@@ -434,7 +434,7 @@ Time to set the ratio.
 returns:: Distance from fundamental frequency by number of halftones.
 
 METHOD:: octave
-Sets how many octaves higher the frequency of the drone will become.
+Sets how many octaves higher the frequency of the voice will become.
 
 ARGUMENT:: argoctave
 Octave to set.
@@ -442,10 +442,10 @@ Octave to set.
 ARGUMENT:: dur
 Time to set the octave.
 
-returns:: Octave of the drone (the lowest is 1).
+returns:: Octave of the voice (the lowest is 1).
 
 METHOD:: startAuto
-Called only from DroneController.
+Called only from VoiceController.
 
 ARGUMENT:: method
 
@@ -474,7 +474,7 @@ ARGUMENT:: dur
 Time to change the octave.
 
 METHOD:: chord
-Sets a chord for the drone.
+Sets a chord for the voice.
 
 ARGUMENT:: argchord
 The chord to set.
@@ -506,12 +506,12 @@ ARGUMENT:: transp
 ARGUMENT:: dur
 
 METHOD:: kill
-Kills the drone.
+Kills the voice.
 
 ARGUMENT:: releasetime
-Time to kill the drone.
+Time to kill the voice.
 
-returns:: Current drone.
+returns:: Current voice.
 
 METHOD:: chordnote
 Plays a note from the globally configured chord.
@@ -527,10 +527,10 @@ METHOD:: addToScale
 ARGUMENT:: index
 
 METHOD:: startSynth
-Starts a synth to the particular drone.
+Starts a synth to the particular voice.
 
 METHOD:: scale
-Sets a scale for the drone.
+Sets a scale for the voice.
 
 ARGUMENT:: argscale
 The scale to set.
@@ -538,54 +538,54 @@ The scale to set.
 returns:: Current scale.
 
 METHOD:: initSynthParams
-Sets synth params of the drone.
+Sets synth params of the voice.
 
 ARGUMENT:: argtonic
 Multiplier of the fundamental frequency.
 
 ARGUMENT:: argfreq
-Frequency of the drone.
+Frequency of the voice.
 
 ARGUMENT:: argharmonics
 Harmonics for the frequency.
 
 ARGUMENT:: argamp
-Amplitude of the drone.
+Amplitude of the voice.
 
 ARGUMENT:: argdegree
 A scale degree to use.
 
 ARGUMENT:: argoctave
-How many octaves higher should the frequency of the drone become.
+How many octaves higher should the frequency of the voice become.
 
 ARGUMENT:: argenv
 Envelope attack which runs when creating and envelope release
-when killing drones in an array.
+when killing voices in an array.
 
-returns:: All synth params of the drone in one line.
+returns:: All synth params of the voice in one line.
 
 METHOD:: synth
 
-returns:: All synth params of a drone line by line.
+returns:: All synth params of a voice line by line.
 
-METHOD:: initDrone
+METHOD:: initVoice
 Constructor method.
 
 ARGUMENT:: arghub
 
 ARGUMENT:: argtuning
-Tuning of the drone.
+Tuning of the voice.
 
 ARGUMENT:: argscale
-Scale of the drone.
+Scale of the voice.
 
 ARGUMENT:: argfundamental
-Fundamental frequency of the drone.
+Fundamental frequency of the voice.
 
-returns:: Current Drone instance and its parameters.
+returns:: Current Voice instance and its parameters.
 
 METHOD:: stopParam
-Stops a parameter of the drone synth.
+Stops a parameter of the voice synth.
 
 ARGUMENT:: method
 Method to stop.
@@ -593,7 +593,7 @@ Method to stop.
 METHOD:: draw
 
 METHOD:: resonance
-Sets a resonance to the drone.
+Sets a resonance to the voice.
 
 ARGUMENT:: argres
 The resonance to set.
@@ -604,15 +604,15 @@ Time to set the resonance.
 returns:: Current resonance.
 
 METHOD:: set
-Sets arguments for the drone synth.
+Sets arguments for the voice synth.
 
 ARGUMENT::  ... args
 The arguments to set.
 
-returns:: Current arguments of the drone.
+returns:: Current arguments of the voice.
 
 METHOD:: env
-Sets an envelope of a drone.
+Sets an envelope of a voice.
 
 ARGUMENT:: envt
 The envelope to set.
@@ -622,10 +622,10 @@ returns:: Array of values for envelope.
 METHOD:: update
 
 METHOD:: interval
-Changes frequency of a drone according to ratio.
+Changes frequency of a voice according to ratio.
 
 ARGUMENT:: arginterval
-The number of scale degrees to change the frequency of the drone.
+The number of scale degrees to change the frequency of the voice.
 
 ARGUMENT:: dur
 Time to change the frequency.
@@ -643,7 +643,7 @@ METHOD:: removeMIDI
 Removes a MIDI listener.
 
 METHOD:: relDegree
-Changes the scale degree of the frequency of the drone in relation to the current degree.
+Changes the scale degree of the frequency of the voice in relation to the current degree.
 
 ARGUMENT:: change
 Degree to change.
@@ -652,7 +652,7 @@ ARGUMENT:: dur
 Time to change the degree.
 
 METHOD:: freeSynths
-Immediately stops and frees the synths of a drone.
+Immediately stops and frees the synths of a voice.
 
 ARGUMENT:: releasetime
 Time to free the synths.
@@ -674,7 +674,7 @@ ARGUMENT:: name
 ARGUMENT:: movementarray
 
 METHOD:: transpose
-Transposes the frequency of the drone about a musical interval higher or lower.
+Transposes the frequency of the voice about a musical interval higher or lower.
 
 ARGUMENT:: argtuninginterval
 The musical interval in number to set.
@@ -683,7 +683,7 @@ ARGUMENT:: dur
 Time to set the interval.
 
 METHOD:: relSpeed
-Sets speed of the drone with the relation with the current speed.
+Sets speed of the voice with the relation with the current speed.
 
 ARGUMENT:: change
 How the speed should change.
@@ -692,55 +692,55 @@ How the speed should change.
 EXAMPLES::
 
 IMPORTANT:
-It is not needed to call this class directly, a global variable ~drones is used instead.
+It is not needed to call this class directly, a global variable ~voices is used instead.
 
-section::Basic creation of a drone
+section::Basic creation of a voice
 code::
-~drones.createDrone(\saw, 1)
-~drones.killAll
+~voices.createDrone(\saw, 1)
+~voices.killAll
 
-//although we control everything with the //variable ~drones, we can assign
+//although we control everything with the //variable ~voices, we can assign
 //it to another
-~d = ~drones;
+~d = ~voices;
 ~d.createDrone(\saw, 1)
 ~d.killAll
 
-//killing all drones after three seconds
-~drones.killAll(3);
+//killing all voices after three seconds
+~voices.killAll(3);
 ::
 
-section::Drones with parameters of their synths
+section::Voices with parameters of their synths
 code::
-~drones.createDrone(\saw, harmonics: 3, name: \mydrone)
+~voices.createDrone(\saw, harmonics: 3, name: \myvoice)
 
 //changing some parameters
-~mydrone.harmonics_(8)
-~mydrone.octave_(3)
-~mydrone.type_(\tri) //sound types: \sine, \saw, \tri, \pulse etc.
-~mydrone.kill()
+~myvoice.harmonics_(8)
+~myvoice.octave_(3)
+~myvoice.type_(\tri) //sound types: \sine, \saw, \tri, \pulse etc.
+~myvoice.kill()
 ::
 
 section::Chords, tunings and scales
 code::
 //show available chords, tunings and scales
-~drones.chords
-~drones.tunings
-~drones.scales
+~voices.chords
+~voices.tunings
+~voices.scales
 
 //set chromatic scale
-~drones.scale_(\chromatic)
+~voices.scale_(\chromatic)
 
 //set pythagorean tuning
-~drones.tuning_(\pythagorean)
+~voices.tuning_(\pythagorean)
 ::
 
 section::GUI drawing options
 code::
-~drones.drawHarmonics_(/*true or false*/)
-~drones.drawOctaves_(/*true or false*/)
-~drones.drawScales_(/*true or false*/)
+~voices.drawHarmonics_(/*true or false*/)
+~voices.drawOctaves_(/*true or false*/)
+~voices.drawScales_(/*true or false*/)
 
-//changing color of a drone with rgba
-~drones.createDrone(name: \mydrone)
-~mydrone.fillColor_(Color(0.3,0.1,0.2,0.6))
+//changing color of a voice with rgba
+~voices.createDrone(name: \myvoice)
+~myvoice.fillColor_(Color(0.3,0.1,0.2,0.6))
 ::

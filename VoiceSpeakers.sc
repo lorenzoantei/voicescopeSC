@@ -1,5 +1,5 @@
 
-DroneSpeakers {
+VoiceSpeakers {
 
 	var <>nrChannels;
 	var <>harmonicsColor, <>scaleOctaveColor, <>octaveColor, <>degreeColor, <>speakerColor;
@@ -15,15 +15,15 @@ DroneSpeakers {
 	var <scale, <tuning;
 
 	*new { arg hub, channels, fundamental;
-		^super.new.initDroneSpeakers(hub, channels, fundamental);
+		^super.new.initVoiceSpeakers(hub, channels, fundamental);
 	}
 
-	initDroneSpeakers { |arghub, channels=1, argfundamental|
+	initVoiceSpeakers { |arghub, channels=1, argfundamental|
 		nrChannels = channels;
 		hub = arghub;
 		window = hub.window;
 		sd = window.bounds.height;
-		backgroundColor = hub.threnoscopeColor;
+		backgroundColor = hub.voicescopeColor;
 		fundamental = argfundamental;
 		scale = Scale.minor; // xxx get this from the hub
 		scScale = true; // it's a SuperCollider scale, vs. Scala (different in terms of idea of tuning)
@@ -71,7 +71,7 @@ DroneSpeakers {
 		});
 		^image;
 	}
-// the following methods are used in DroneController
+// the following methods are used in VoiceController
 
 	speakers_ { | bool |
 		drawspeakers = bool.asBoolean; // asBoolean allows for 0 or 1 to save typings
@@ -102,7 +102,7 @@ DroneSpeakers {
 		scale = Scale.newFromKey(argscale.asSymbol);
 		if(scale.isNil, { 
 			scScale = false; // as SC makes a distinction between a scale and tuning, but Scala not.
-			scale = DroneScale.new(argscale) 
+			scale = VoiceScale.new(argscale) 
 		}); // support of the Scala scales
 
 		done = false;

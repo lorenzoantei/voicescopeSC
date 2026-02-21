@@ -1,71 +1,71 @@
 
-DroneMachine {
+VoiceMachine {
 
 	var task;
 	var hub;
 	var type, target, time, rate, range, <name, transtime;
-	var activedrones;
+	var activevoices;
 	var sd;
 	var selecteBeforeMachine;
 	var updateFunc, drawFunc, drawNow;
-	var dronesarray, initialStates;
+	var voicesarray, initialStates;
 	var colarray, locarray;
 	
 	*new { arg hub, type, target, time, rate, transtime, range; 
-		^super.new.initDroneMachine(hub, type, target, time, rate, transtime, range);
+		^super.new.initVoiceMachine(hub, type, target, time, rate, transtime, range);
 	}
 	
-	initDroneMachine {|arghub, argtype, argtarget, argtime, argrate, argtranstime, argrange|
+	initVoiceMachine {|arghub, argtype, argtarget, argtime, argrate, argtranstime, argrange|
 		hub = arghub;
 		type = argtype ? \amp;
-		target = argtarget; // the drone, chord or satellite that is the target for this machine
-		activedrones = [];
+		target = argtarget; // the voice, chord or satellite that is the target for this machine
+		activevoices = [];
 		time = argtime; // the machine's lifetime
 		rate = argrate; // update rate of the machine (hz.reciprocal)
 		range = argrange; // the number of octaves
 		transtime = argtranstime;
 		drawNow = true; // engines can set it to false once in a while 
 		sd = hub.window.bounds.height;
-		selecteBeforeMachine = hub.drones.droneArray[hub.drones.selected].name.asSymbol;
+		selecteBeforeMachine = hub.voices.voiceArray[hub.voices.selected].name.asSymbol;
 
-		"Creating a Drone Machine".postln;
+		"Creating a Voice Machine".postln;
 		
 		if(target != \all, {
-			if(hub.drones.droneDict.includesKey(target), { // if it's one drone that's the target
-				dronesarray = hub.drones.droneDict.at(target).asArray;
+			if(hub.voices.voiceDict.includesKey(target), { // if it's one voice that's the target
+				voicesarray = hub.voices.voiceDict.at(target).asArray;
 			});
-			if(hub.drones.chordDict.includesKey(target), { // if it's a chord that's the target
-				dronesarray = hub.drones.chordDict.at(target).asArray;
+			if(hub.voices.chordDict.includesKey(target), { // if it's a chord that's the target
+				voicesarray = hub.voices.chordDict.at(target).asArray;
 			});
-			if(hub.drones.satellitesDict.includesKey(target), { // if it's a satellite that's the target
-				dronesarray = hub.drones.satellitesDict.at(target).asArray;
+			if(hub.voices.satellitesDict.includesKey(target), { // if it's a satellite that's the target
+				voicesarray = hub.voices.satellitesDict.at(target).asArray;
 			});
-			if(hub.drones.groupDict.includesKey(target), { // if it's a satellite that's the target
-				dronesarray = hub.drones.groupDict.at(target).asArray;
+			if(hub.voices.groupDict.includesKey(target), { // if it's a satellite that's the target
+				voicesarray = hub.voices.groupDict.at(target).asArray;
 			});
-			if(hub.drones.interDict.includesKey(target), { // if it's a satellite that's the target
-				dronesarray = hub.drones.interDict.at(target).asArray;
+			if(hub.voices.interDict.includesKey(target), { // if it's a satellite that's the target
+				voicesarray = hub.voices.interDict.at(target).asArray;
 			});
 		}, {
-			dronesarray = hub.drones.droneArray;
+			voicesarray = hub.voices.voiceArray;
 		});
 
-		// INITIAL STATES -> in order to put drones back into their original state after a machine
+		// INITIAL STATES -> in order to put voices back into their original state after a machine
 		switch(type)
 		{ \chord }{
-			initialStates = dronesarray.collect({arg drone; drone.ratio }); 
+			initialStates = voicesarray.collect({arg voice; voice.ratio }); 
 		}
 		{ \scale }{
-			initialStates = dronesarray.collect({arg drone; drone.degree }); 
+			initialStates = voicesarray.collect({arg voice; voice.degree }); 
 		}
 		{ \amp }{
-			initialStates = dronesarray.collect({arg drone; drone.amp }); 
+			initialStates = voicesarray.collect({arg voice; voice.amp }); 
 		}
 		{ \harmonics }{
-			initialStates = dronesarray.collect({arg drone; drone.harmonics }); 
+			initialStates = voicesarray.collect({arg voice; voice.harmonics }); 
 		};
 	
-	[\dronesarray, dronesarray].postln;
+	[\voicesarray, voicesarray].postln;
 	
 		updateFunc = this.getUpdateFunc(type, target, range, transtime);
 		drawFunc = this.getDrawFunc(type);
@@ -92,12 +92,12 @@ DroneMachine {
 	
 	stop {
 		task.stop();
-		this.update(true); // if machine is killed in the middle of operation, set drones back to default
+		this.update(true); // if machine is killed in the middle of operation, set voices back to default
 	}
 	
 	kill { // from User and from start (above - when task is finished)
 		"Killing machine: ".post; this.name.postln;
-		hub.drones.killMachine(this.name);
+		hub.voices.killMachine(this.name);
 		this.stop();
 	}
 
@@ -107,7 +107,7 @@ DroneMachine {
 	}
 	
 	draw {
-		//[\activedrones, activedrones].postln;
+		//[\activevoices, activevoices].postln;
 		// [\drawNow, drawNow].postln;
 		// if(drawNow, { ^drawFunc });
 		^drawFunc;
@@ -120,19 +120,19 @@ DroneMachine {
 			{\chord} {
 				var ready = true;
 				^{ |last|
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
+				if(activevoices.size < 4, {
 					added = false;
-					activedrones.do({arg item; if(item === drone, { added = true }) }); 
-					if(added == false, { activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item === voice, { added = true }) }); 
+					if(added == false, { activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item === drone });
+					activevoices = activevoices.reject({arg item; item === voice });
 				});	
 				// the logic
 				if(last.not, {
@@ -140,9 +140,9 @@ DroneMachine {
 					{ drawNow = false }.defer(0.3);
 					if(0.5.coin, {
 						if(ready, {
-							{ drone.chordnote_(1+drone.chord.size.rand, transtime) }.defer(0.1);
+							{ voice.chordnote_(1+voice.chord.size.rand, transtime) }.defer(0.1);
 							ready = false;
-							{ ready = true }.defer(transtime); // make sure two commands are not on the same drone (it jumps)
+							{ ready = true }.defer(transtime); // make sure two commands are not on the same voice (it jumps)
 						});
 					})}.value;
 				}, { // the last event puts it back into place
@@ -150,7 +150,7 @@ DroneMachine {
 					{ drawNow = false }.defer(0.3);
 					initialStates.do({ |ratio, i|
 						// only going back after transtime (since the command above might have run it)
-						{ dronesarray[i].ratio_(ratio, transtime) }.defer(transtime); // no competition 
+						{ voicesarray[i].ratio_(ratio, transtime) }.defer(transtime); // no competition 
 					});
 				});
 			}}
@@ -158,57 +158,57 @@ DroneMachine {
 			{\scale} {
 				var ready = true;
 				^{ |last|
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
+				if(activevoices.size < 4, {
 					added = false;
-					activedrones.do({arg item; if(item === drone, { added = true }) }); 
-					if(added == false, { activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item === voice, { added = true }) }); 
+					if(added == false, { activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item === drone });
+					activevoices = activevoices.reject({arg item; item === voice });
 				});	
 				// the logic
 				if(last.not, {
 					{var degree; 
-					degree = range*(1+(drone.scalesize.rand));
+					degree = range*(1+(voice.scalesize.rand));
 					drawNow = true;
 					{drawNow = false}.defer(0.3);
 					if(0.5.coin, {
 						if(ready, {
-							{ drone.degree_(degree, transtime) }.defer(0.1);
+							{ voice.degree_(degree, transtime) }.defer(0.1);
 							ready = false;
-							{ ready = true }.defer(transtime); // make sure two commands are not on the same drone (it jumps)
+							{ ready = true }.defer(transtime); // make sure two commands are not on the same voice (it jumps)
 						});
 					})}.value;
 				}, {
 					drawNow = true;
 					{ drawNow = false }.defer(0.3);
 					initialStates.do({ |degree, i|
-						{ dronesarray[i].degree_(degree, transtime) }.defer(transtime); // back to tonic
+						{ voicesarray[i].degree_(degree, transtime) }.defer(transtime); // back to tonic
 					});
 				});
 			}}
 			{\amp} {
 				var ready = true;
 				^{ |last|
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
+				if(activevoices.size < 4, {
 					added = false;
-					activedrones.do({arg item; if(item === drone, { added = true }) }); 
-					if(added == false, { activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item === voice, { added = true }) }); 
+					if(added == false, { activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item === drone });
+					activevoices = activevoices.reject({arg item; item === voice });
 				});	
 				// the logic
 				if(last.not, {
@@ -219,35 +219,35 @@ DroneMachine {
 					{drawNow = false}.defer(0.3);
 					if(0.5.coin, {
 						if(ready, {
-							{ drone.relAmp_(newamp.clip(0, 2), transtime) }.defer(0.1);
+							{ voice.relAmp_(newamp.clip(0, 2), transtime) }.defer(0.1);
 							ready = false;
-							{ ready = true }.defer(transtime); // make sure two commands are not on the same drone (it jumps)
+							{ ready = true }.defer(transtime); // make sure two commands are not on the same voice (it jumps)
 						});
 					})}.value;
 				}, {
 					drawNow = true;
 					{ drawNow = false }.defer(0.3);
 					initialStates.do({ |amp, i|
-						{ dronesarray[i].amp_(amp, transtime) }.defer(transtime); // back to orignal amp
+						{ voicesarray[i].amp_(amp, transtime) }.defer(transtime); // back to orignal amp
 					});
 				});
 			}}			
 			{\harmonics} {
 				var ready = true;
 				^{ |last|
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
+				if(activevoices.size < 4, {
 					added = false;
-					activedrones.do({arg item; if(item === drone, { added = true }) }); 
-					if(added == false, { activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item === voice, { added = true }) }); 
+					if(added == false, { activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item === drone });
+					activevoices = activevoices.reject({arg item; item === voice });
 				});	
 				// the logic
 				if(last.not, {
@@ -257,57 +257,57 @@ DroneMachine {
 					{drawNow = false}.defer(0.3);
 					if(0.5.coin, {
 						if(ready, {
-							{ drone.harmonics_(newharm.max(drone.harmonics), transtime) }.defer(0.1);
+							{ voice.harmonics_(newharm.max(voice.harmonics), transtime) }.defer(0.1);
 							ready = false;
-							{ ready = true }.defer(transtime); // make sure two commands are not on the same drone (it jumps)
+							{ ready = true }.defer(transtime); // make sure two commands are not on the same voice (it jumps)
 						});
 					})}.value;
 				}, {
 					drawNow = true;
 					{ drawNow = false }.defer(0.3);
 					initialStates.do({ |harm, i|
-						{ dronesarray[i].harmonics_(harm, transtime)}.defer(transtime); // back to orignal amp
+						{ voicesarray[i].harmonics_(harm, transtime)}.defer(transtime); // back to orignal amp
 					});
 				});
 			}}			
 			// not ready yet
 			
 			{\create} {^{ |last|
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
 					"target is : ".post; target.postln;
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
-				//	"Machine added drone:  -->>>-- ".post; drone.name.postln;
+				if(activevoices.size < 4, {
+				//	"Machine added voice:  -->>>-- ".post; voice.name.postln;
 					added = false;
-					activedrones.do({arg item; if(item.name == drone.name, {added = true}) }); 
-					if(added == false, {activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item.name == voice.name, {added = true}) }); 
+					if(added == false, {activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item.name == drone.name });
-				//	"Machine removed drone:  --<<<-- ".post; drone.name.postln;
+					activevoices = activevoices.reject({arg item; item.name == voice.name });
+				//	"Machine removed voice:  --<<<-- ".post; voice.name.postln;
 				});	
 			}}
 			{\neutral} {^{
-				var drone, added;
-				//hub.drones.select(hub.drones.droneDict.choose.name.asSymbol); // select drones
+				var voice, added;
+				//hub.voices.select(hub.voices.voiceDict.choose.name.asSymbol); // select voices
 				if(target == \all, {
-					drone = hub.drones.droneDict.choose;
+					voice = hub.voices.voiceDict.choose;
 				},{
 					"target is : ".post; target.postln;
-					drone = dronesarray.choose;
+					voice = voicesarray.choose;
 				});		
-				if(activedrones.size < 4, {
-				//	"Machine added drone:  -->>>-- ".post; drone.name.postln;
+				if(activevoices.size < 4, {
+				//	"Machine added voice:  -->>>-- ".post; voice.name.postln;
 					added = false;
-					activedrones.do({arg item; if(item.name == drone.name, {added = true}) }); 
-					if(added == false, {activedrones = activedrones.add(drone) });
+					activevoices.do({arg item; if(item.name == voice.name, {added = true}) }); 
+					if(added == false, {activevoices = activevoices.add(voice) });
 				}, {
-					activedrones = activedrones.reject({arg item; item.name == drone.name });
-				//	"Machine removed drone:  --<<<-- ".post; drone.name.postln;
+					activevoices = activevoices.reject({arg item; item.name == voice.name });
+				//	"Machine removed voice:  --<<<-- ".post; voice.name.postln;
 				});	
 			}};
 	}
@@ -321,20 +321,20 @@ DroneMachine {
 				^{
 				// the machine function (the lines)
 				if(drawNow, {
-					activedrones.do({ arg drone;
+					activevoices.do({ arg voice;
 						Pen.use {
 							Pen.strokeColor = Color.red(0.2, rrand(0.7, 1));
 //					 		Pen.fillColor = Color.red( 0.8, rrand(0.7, 1) );
 					 		if(0.5.coin, {
-								Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		}, {
-								Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		});	 		
 					 		Pen.stroke;
 					 		Pen.fill;
@@ -375,20 +375,20 @@ DroneMachine {
 				locarray = {[(2pi).rand, (2pi).rand]}!4;
 				^{
 				if(drawNow, {
-					activedrones.do({ arg drone;
+					activevoices.do({ arg voice;
 						Pen.use {
 							Pen.strokeColor = Color.green(0.3, rrand(0.7, 1));
 //					 		Pen.fillColor = Color.green( 0.4, rrand(0.7, 1) );
 					 		if(0.5.coin, {
-								Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		}, {
-								Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		});	 		
 					 		Pen.stroke;
 					 		Pen.fill;
@@ -429,20 +429,20 @@ DroneMachine {
 				locarray = {[(2pi).rand, (2pi).rand]}!4;
 				^{
 				if(drawNow, {
-					activedrones.do({ arg drone;
+					activevoices.do({ arg voice;
 						Pen.use {
 							Pen.strokeColor = Color.red(0.3, rrand(0.7, 1));
 					 		//Pen.fillColor = Color.red( 0.4, rrand(0.7, 1) );
 					 		if(0.5.coin, {
-								Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		}, {
-								Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		});	 		
 					 		Pen.stroke;
 					 		Pen.fill;
@@ -501,20 +501,20 @@ DroneMachine {
 			{\harmonics} {
 				^{
 				if(drawNow, {
-					activedrones.do({ arg drone;
+					activevoices.do({ arg voice;
 						Pen.use {
 							Pen.strokeColor = Color.green( 0.2, rrand(0.7, 1));
 					 	//	Pen.fillColor = Color.green( 0.2, rrand(0.7, 1) );
 					 		if(0.5.coin, {
-								Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+						 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		}, {
-								Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-						 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+								Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+					 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+						 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 					 		});	 		
 					 		Pen.stroke;
 					 		Pen.fill;
@@ -537,25 +537,25 @@ DroneMachine {
 			}
 			{\create} {
 				^{
-				activedrones.do({ arg drone;
+				activevoices.do({ arg voice;
 					Pen.use {
 						
 						Pen.strokeColor = Color.green(0.3, rrand(0.7, 1));
 				 		Pen.fillColor = Color.green( 0.3, rrand(0.7, 1) );
 				 		
 				 		if(0.5.coin, {
-							Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
+							Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
 				 			Pen.stroke;
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		}, {
-							Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-				 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
+							Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+				 			Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
 				 			Pen.stroke;
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		});	 		
 //				 		Pen.stroke;
@@ -588,38 +588,38 @@ DroneMachine {
 				var points;
 				points = Array.fill(8, { Point(40.rand2, 40.rand2) });
 				^{
-				var droneB = activedrones.choose;
-				activedrones.do({ arg drone;
+				var voiceB = activevoices.choose;
+				activevoices.do({ arg voice;
 					Pen.use {
 						
 						Pen.strokeColor = Color.green(0.3, rrand(0.7, 1));
 				 		Pen.fillColor = Color.green( 0.3, rrand(0.7, 1) );
 				 		
 				 		if(0.5.coin, {
-							Pen.rotate(drone.getDroneLook[2], (sd/2)+0.5, sd/2 );
-					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
+							Pen.rotate(voice.getVoiceLook[2], (sd/2)+0.5, sd/2 );
+					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
 							Pen.stroke;
 							Pen.strokeColor = Color.blue(0.3, rrand(0.7, 1));
-						Pen.line(Point((sd/2)+0.5+(drone.getDroneLook[1]), (sd/2)), Point((sd/2)+0.5+(droneB.getDroneLook[1]), sd/2));
+						Pen.line(Point((sd/2)+0.5+(voice.getVoiceLook[1]), (sd/2)), Point((sd/2)+0.5+(voiceB.getVoiceLook[1]), sd/2));
 				 			Pen.stroke;
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		Pen.fillColor = Color.blue( 0.3, rrand(0.7, 1) );
-					 		Pen.addOval( Rect( (sd/2)+0.5+(droneB.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect( (sd/2)+0.5+(voiceB.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		}, {
-							Pen.rotate(drone.getDroneLook[2]+drone.getDroneLook[3], (sd/2)+0.5, sd/2 );
-					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(drone.getDroneLook[1]), sd/2));
+							Pen.rotate(voice.getVoiceLook[2]+voice.getVoiceLook[3], (sd/2)+0.5, sd/2 );
+					 		Pen.line(Point((sd/2)+0.5, sd/2), Point((sd/2)+0.5+(voice.getVoiceLook[1]), sd/2));
 							Pen.stroke;
 							Pen.strokeColor = Color.blue(0.3, rrand(0.7, 1));
-						Pen.line(Point((sd/2)+0.5+(drone.getDroneLook[1]), (sd/2)), Point((sd/2)+0.5+(droneB.getDroneLook[1]), sd/2));
+						Pen.line(Point((sd/2)+0.5+(voice.getVoiceLook[1]), (sd/2)), Point((sd/2)+0.5+(voiceB.getVoiceLook[1]), sd/2));
 				 			Pen.stroke;
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[0])-4, (sd/2)-4, 8, 8) );
-					 		Pen.addOval( Rect((sd/2)+0.5+(drone.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[0])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect((sd/2)+0.5+(voice.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		Pen.fillColor = Color.blue( 0.3, rrand(0.7, 1) );
-					 		Pen.addOval( Rect( (sd/2)+0.5+(droneB.getDroneLook[1])-4, (sd/2)-4, 8, 8) );
+					 		Pen.addOval( Rect( (sd/2)+0.5+(voiceB.getVoiceLook[1])-4, (sd/2)-4, 8, 8) );
 				 			Pen.fill;
 				 		 });	 		
 				 		//Pen.stroke;
