@@ -92,7 +92,7 @@ VoiceController {
 //				[\selectedName, selectedName].postln;
 
 
-				if((hub.post || (hub.mode == \displayFS)) && selvoice.isNil.not, {
+				if(selvoice.isNil.not, {
 					hub.postVoiceState(selectedName, selected);
 
 //					Document.listener.string = ""; // clear post window
@@ -196,9 +196,7 @@ VoiceController {
 							voiceArray[selected].selected = true;
 						});
 
-						if(hub.post, {
-
-							hub.postVoiceState(selectedName, selected);
+						hub.postVoiceState(selectedName, selected);
 
 //							Document.listener.string = ""; // clear post window
 //							string = "~"++selectedName++"\n"++
@@ -213,8 +211,6 @@ VoiceController {
 //							Document.listener.string = string; // add info
 //
 //							hub.interpreter.postview.string_(string);
-
-						});
 
 					}, { // increase amplitude
 						if(selectedName.contains("chd_"), {
@@ -302,8 +298,7 @@ VoiceController {
 							selectedName = voiceArray[selected].name.asString;
 							voiceArray[selected].selected = true;
 						});
-						if(hub.post, {
-							hub.postVoiceState(selectedName, selected);
+						hub.postVoiceState(selectedName, selected);
 
 //							Document.listener.string = ""; // clear post window
 //							string = "~"++selectedName++"\n"++
@@ -316,8 +311,6 @@ VoiceController {
 //							"~"++selectedName++".octave = "++voiceArray[selected].octave++"\n";
 //							Document.listener.string = string; // add info
 //							hub.interpreter.postview.string_(string);
-						});
-
 					}, {
 						// decrease amplitude
 						if(selectedName.contains("chd_"), {

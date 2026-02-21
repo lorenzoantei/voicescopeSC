@@ -136,10 +136,13 @@ VoiceHub {
 		"~"++selectedName++".env = "++voices.voiceArray[selected].env++"\n"++
 		"~"++selectedName++".octave = "++voices.voiceArray[selected].octave++"\n"
 		"~"++selectedName++".note = "++voices.voiceArray[selected].note++"\n";
+
+		// Always post to SuperCollider Post Window
+		string.postln;
+
+		// Post to internal interpreter view if available
 		if (interpreter.isNil.not and: {post}) {
 			{interpreter.postview.string_(string)}.defer;
-		} {
-			string.postln;
 		};
 	}
 }
